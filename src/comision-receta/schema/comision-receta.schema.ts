@@ -6,7 +6,7 @@ export class ComisionReceta {
     nombre:string
 
     @Prop()
-    monto:string
+    monto:number
 
     @Prop({type:Types.ObjectId, ref:'CombinacionReceta'})
     combinacionReceta:Types.ObjectId

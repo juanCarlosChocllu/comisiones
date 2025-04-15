@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateComisionRecetaDto } from './dto/create-comision-receta.dto';
 import { UpdateComisionRecetaDto } from './dto/update-comision-receta.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { ComisionReceta } from './schema/comision-receta.schema';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class ComisionRecetaService {
-  create(createComisionRecetaDto: CreateComisionRecetaDto) {
-    return 'This action adds a new comisionReceta';
+  constructor(@InjectModel(ComisionReceta.name) private readonly comisionReceta:Model<ComisionReceta>){}
+  async create(createComisionRecetaDto: CreateComisionRecetaDto) {
+    createComisionRecetaDto.combinacionReceta= new Types.ObjectId(createComisionRecetaDto.combinacionReceta)
+    await this.comisionReceta.create(createComisionRecetaDto)
+    return {status:HttpStatus.CREATED}
   }
 
   findAll() {
