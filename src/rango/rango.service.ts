@@ -17,6 +17,11 @@ export class RangoService {
         }
         return rango
       }
+
+      async verificarRango (nombre:string) {
+        const rango = await this.rango.findOne({nombre:nombre.toUpperCase()})
+        return rango
+      }
   create(createRangoDto: CreateRangoDto) {
     return 'This action adds a new rango';
   }

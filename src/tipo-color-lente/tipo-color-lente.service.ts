@@ -15,6 +15,10 @@ export class TipoColorLenteService {
       }
       return tipoColorLente
     }
+    async verificarTipoColorLente (nombre:string) {
+      const tipoColorLente = await this.tipoColorLente.findOne({nombre:nombre.toUpperCase()})
+      return tipoColorLente
+    }
   findAll() {
     return `This action returns all tipoColorLente`;
   }

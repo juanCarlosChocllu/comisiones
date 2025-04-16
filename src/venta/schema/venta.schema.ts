@@ -18,6 +18,12 @@ export class Venta {
      @Prop()
     comisiona:boolean
 
+    @Prop()
+    tieneReceta:boolean
+
+    @Prop()
+    tieneProductos:boolean
+
     @Prop({type:Types.ObjectId, ref:'Sucursal'})
     sucursal:Types.ObjectId
 }   

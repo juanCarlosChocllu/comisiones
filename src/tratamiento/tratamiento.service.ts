@@ -18,6 +18,10 @@ export class TratamientoService {
     return tratamiento
   }
 
+  async verificarTratamiento (nombre:string) {
+    const tratamiento = await this.tratamiento.findOne({nombre:nombre.toUpperCase()})
+    return tratamiento
+  }
   findAll() {
     return `This action returns all tratamiento`;
   }

@@ -16,6 +16,10 @@ export class MarcaLenteService {
       }
       return marcaLente
     }
+    async verificarMarcaLente (nombre:string) {
+      const marcaLente = await this.marcaLente.findOne({nombre:nombre.toUpperCase()})
+      return marcaLente
+    }
   create(createMarcaLenteDto: CreateMarcaLenteDto) {
     return 'This action adds a new marcaLente';
   }

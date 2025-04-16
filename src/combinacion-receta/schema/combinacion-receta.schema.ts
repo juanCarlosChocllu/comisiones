@@ -25,6 +25,9 @@ export class CombinacionReceta {
     @Prop({type:Types.ObjectId, ref:'Tratamiento'})
     tratamiento:Types.ObjectId
 
+    @Prop({type:Types.ObjectId, ref:'TipoColorLente'})
+    tipoColorLente:Types.ObjectId
+    
      @Prop({ type: Date, default: Date.now() })
     fecha: Date;
         

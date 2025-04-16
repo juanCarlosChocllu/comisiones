@@ -32,8 +32,9 @@ export class AsesorService {
   async guardarAsesor(nombre:string){
     const asesor = await this.asesor.findOne({nombre:nombre.toUpperCase()})
     if(!asesor){
-      await this.asesor.create({nombre:nombre.toUpperCase()})
+      return  await this.asesor.create({nombre:nombre.toUpperCase()})
     }
+    return asesor
    }
    
 }

@@ -11,13 +11,14 @@ import { TipoLenteModule } from 'src/tipo-lente/tipo-lente.module';
 import { MaterialModule } from 'src/material/material.module';
 import { ColorLenteModule } from 'src/color-lente/color-lente.module';
 import { AsesorModule } from 'src/asesor/asesor.module';
+import { CombinacionRecetaModule } from 'src/combinacion-receta/combinacion-receta.module';
 
 @Module({
   imports:[HttpModule,
      TratamientoModule,
      MarcaLenteModule, RangoModule, 
     TipoColorLenteModule, TipoLenteModule,
-    MaterialModule, ColorLenteModule, AsesorModule
+    MaterialModule, ColorLenteModule, AsesorModule, CombinacionRecetaModule
   ],
   controllers: [ProvidersController],
   providers: [ProvidersService],

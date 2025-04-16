@@ -15,6 +15,11 @@ export class TipoLenteService {
      }
      return tipoLente
    }
+
+   async verificarTipoLente (nombre:string) {
+    const tipoLente = await this.tipoLente.findOne({nombre:nombre.toUpperCase()})
+    return tipoLente
+  }
   findAll() {
     return `This action returns all tipoLente`;
   }

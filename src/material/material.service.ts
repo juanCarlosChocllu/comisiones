@@ -20,6 +20,11 @@ export class MaterialService {
     return material
   }
 
+  async verificarMaterial (nombre:string) {
+    const material = await this.material.findOne({nombre:nombre.toUpperCase()})
+    return material
+  }
+
   findAll() {
     return `This action returns all material`;
   }

@@ -99,6 +99,28 @@ export class CombinacionRecetaService {
       cortar(tipoColorLente),
     ].join('-');
   }
+
+
+  async  verificarCombinacion( tratamiento: Types.ObjectId,
+    material: Types.ObjectId,
+    marca: Types.ObjectId,
+    colorLente: Types.ObjectId,
+    //rango:  Types.ObjectId,
+    tipoLente:  Types.ObjectId,
+    tipoColorLente:  Types.ObjectId){
+      
+    const combinacion = await this.combinacionReceta.findOne({
+      material:new Types.ObjectId(material),
+      marcaLente:new Types.ObjectId(marca),
+      colorLente:new Types.ObjectId(colorLente),
+      tipoLente:new Types.ObjectId(tipoLente),
+      tipoColorLente:new Types.ObjectId(tipoColorLente),
+      //rango:new Types.ObjectId(rango),
+      tratamiento:new Types.ObjectId(tratamiento)
+    })
+    return combinacion
+  }
+
   findAll() {
     return `This action returns all combinacionReceta`;
   }
