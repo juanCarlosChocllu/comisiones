@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { VentaService } from './venta.service';
+import { VentaService } from './services/venta.service';
 import { CreateVentaDto } from './dto/create-venta.dto';
 import { UpdateVentaDto } from './dto/update-venta.dto';
 
@@ -14,7 +14,7 @@ export class VentaController {
 
   @Get()
   findAll() {
-    return this.ventaService.findAll();
+    return this.ventaService.listarVentas();
   }
 
   @Get(':id')

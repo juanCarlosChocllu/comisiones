@@ -6,6 +6,7 @@ import { Precio } from './schema/precio.schema';
 import { Model, Types } from 'mongoose';
 import { DetallePrecio } from './schema/detallePrecio.schema';
 import { productoE } from 'src/providers/enum/productos';
+import { tipoProductoPrecio } from './enum/tipoProductoPrecio';
 
 @Injectable()
 export class PreciosService {
@@ -41,8 +42,8 @@ export class PreciosService {
       return precio
    }
 
-   async  guardarDetallePrecio(tipo:productoE,producto:Types.ObjectId, precio:Types.ObjectId ){
-      if(tipo === productoE.lente) {
+   async  guardarDetallePrecio(tipo:tipoProductoPrecio,producto:Types.ObjectId, precio:Types.ObjectId ){
+      if(tipo === tipoProductoPrecio.lente) {
          await this.detallePrecio.create({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo })
       }else {
         await this.detallePrecio.create({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:'PRODUCTO' })

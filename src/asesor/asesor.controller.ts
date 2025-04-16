@@ -12,23 +12,6 @@ export class AsesorController {
     return this.asesorService.create(createAsesorDto);
   }
 
-  @Get()
-  findAll() {
-    return this.asesorService.findAll();
-  }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.asesorService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAsesorDto: UpdateAsesorDto) {
-    return this.asesorService.update(+id, updateAsesorDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.asesorService.remove(+id);
-  }
+  
 }

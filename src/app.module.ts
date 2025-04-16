@@ -17,6 +17,10 @@ import { ProvidersModule } from './providers/providers.module';
 import { ComisionRecetaModule } from './comision-receta/comision-receta.module';
 import { ComisionProductoModule } from './comision-producto/comision-producto.module';
 import { CombinacionRecetaModule } from './combinacion-receta/combinacion-receta.module';
+import { ProductoModule } from './producto/producto.module';
+import { MarcaModule } from './marca/marca.module';
+import { TipoMonturaModule } from './tipo-montura/tipo-montura.module';
+import { ColorModule } from './color/color.module';
 
 @Module({
   imports: [
@@ -40,6 +44,10 @@ import { CombinacionRecetaModule } from './combinacion-receta/combinacion-receta
     ComisionRecetaModule,
     ComisionProductoModule,
     CombinacionRecetaModule,
+    ProductoModule,
+    MarcaModule,
+    TipoMonturaModule,
+    ColorModule,
   ],
   controllers: [],
   providers: [],

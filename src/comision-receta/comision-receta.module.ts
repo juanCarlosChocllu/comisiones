@@ -15,5 +15,6 @@ import { ComisionReceta, comisionRecetaSchema } from './schema/comision-receta.s
     ],
   controllers: [ComisionRecetaController],
   providers: [ComisionRecetaService],
+  exports: [ComisionRecetaService]
 })
 export class ComisionRecetaModule {}

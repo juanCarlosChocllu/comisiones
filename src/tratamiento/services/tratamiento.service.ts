@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTratamientoDto } from './dto/create-tratamiento.dto';
-import { UpdateTratamientoDto } from './dto/update-tratamiento.dto';
-import { Tratamiento } from './schema/tratamiento.schema';
+
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Tratamiento } from '../schema/tratamiento.schema';
+import { UpdateTratamientoDto } from '../dto/update-tratamiento.dto';
 
 @Injectable()
 export class TratamientoService {

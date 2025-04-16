@@ -1,4 +1,4 @@
-interface VentaI {
+interface VentaApiI {
     fecha: string;
     idVenta: string;
     apertura_tkt: number;

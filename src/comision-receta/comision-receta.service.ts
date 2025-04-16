@@ -14,6 +14,10 @@ export class ComisionRecetaService {
     return {status:HttpStatus.CREATED}
   }
 
+  listarComisionReceta(combinacionReceta:Types.ObjectId){
+    return this.comisionReceta.find({combinacionReceta:combinacionReceta})
+  }
+
   findAll() {
     return `This action returns all comisionReceta`;
   }

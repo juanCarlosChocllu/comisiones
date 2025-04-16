@@ -4,7 +4,7 @@ import { UpdateCombinacionRecetaDto } from './dto/update-combinacion-receta.dto'
 import { InjectModel } from '@nestjs/mongoose';
 import { CombinacionReceta } from './schema/combinacion-receta.schema';
 import { Model, Types } from 'mongoose';
-import { TratamientoService } from 'src/tratamiento/tratamiento.service';
+
 import { MaterialService } from 'src/material/material.service';
 import { ColorLenteService } from 'src/color-lente/color-lente.service';
 import { MarcaLenteService } from 'src/marca-lente/marca-lente.service';
@@ -14,6 +14,9 @@ import { TipoLenteService } from 'src/tipo-lente/tipo-lente.service';
 import { TipoColorLenteService } from 'src/tipo-color-lente/tipo-color-lente.service';
 import { PreciosService } from 'src/precios/precios.service';
 import { productoE } from 'src/providers/enum/productos';
+import { TratamientoService } from 'src/tratamiento/services/tratamiento.service';
+import { flag } from 'src/core/enum/flag';
+import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
 
 @Injectable()
 export class CombinacionRecetaService {
@@ -35,7 +38,7 @@ export class CombinacionRecetaService {
         data.tratamiento,
       );
       const material = await this.materialService.guardarMaterial(
-        data.marcaLente,
+        data.material,
       );
       const marca = await this.marcaLenteService.guardarMarcaLente(
         data.marcaLente,
@@ -73,7 +76,7 @@ export class CombinacionRecetaService {
      const combinacionLente = await this.combinacionReceta.create(combinacion);
       const precios =  await this.preciosService.guardarPrecioReceta(data.tipoPrecio, data.monto)
       if(precios){
-        await this.preciosService.guardarDetallePrecio(productoE.lente, combinacionLente._id, precios._id)
+        await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.lente, combinacionLente._id, precios._id)
         
       }
 
@@ -101,21 +104,24 @@ export class CombinacionRecetaService {
   }
 
 
-  async  verificarCombinacion( tratamiento: Types.ObjectId,
+  async  verificarCombinacion( 
+    tratamiento: Types.ObjectId,
     material: Types.ObjectId,
     marca: Types.ObjectId,
     colorLente: Types.ObjectId,
-    //rango:  Types.ObjectId,
+   // rango:  Types.ObjectId,
     tipoLente:  Types.ObjectId,
     tipoColorLente:  Types.ObjectId){
       
-    const combinacion = await this.combinacionReceta.findOne({
-      material:new Types.ObjectId(material),
-      marcaLente:new Types.ObjectId(marca),
-      colorLente:new Types.ObjectId(colorLente),
-      tipoLente:new Types.ObjectId(tipoLente),
-      tipoColorLente:new Types.ObjectId(tipoColorLente),
-      //rango:new Types.ObjectId(rango),
+
+      
+    const combinacion = await this.combinacionReceta.exists({
+      material:material,
+      marcaLente:marca,
+      colorLente:colorLente,
+      tipoLente:tipoLente,
+      tipoColorLente:tipoColorLente,
+     // rango:new Types.ObjectId(rango),
       tratamiento:new Types.ObjectId(tratamiento)
     })
     return combinacion
@@ -136,4 +142,107 @@ export class CombinacionRecetaService {
   remove(id: number) {
     return `This action removes a #${id} combinacionReceta`;
   }
+
+   async listarComninacionPorVenta (combinacionReceta:Types.ObjectId){
+    const combinaciones = await this.combinacionReceta.aggregate([
+      {
+      $match:{
+        flag:flag.nuevo,
+        _id:new  Types.ObjectId(combinacionReceta)
+      },   
+      },
+      {
+        $lookup:{
+          from:'Material',
+          foreignField:'_id', 
+          localField:'material',
+          as:'material'
+        }
+      },
+      {
+        $unwind:{path:'$material', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'TipoLente',
+          foreignField:'_id', 
+          localField:'tipoLente',
+          as:'tipoLente'
+        }
+      },
+      {
+        $unwind:{path:'$tipoLente', preserveNullAndEmptyArrays:false}
+      },
+
+      {
+        $lookup:{
+          from:'Rango',
+          foreignField:'_id', 
+          localField:'rango',
+          as:'rango'
+        }
+      },
+      {
+        $unwind:{path:'$rango', preserveNullAndEmptyArrays:false}
+      },
+
+      {
+        $lookup:{
+          from:'ColorLente',
+          foreignField:'_id', 
+          localField:'colorLente',
+          as:'colorLente'
+        }
+      },
+      {
+        $unwind:{path:'$colorLente', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'MarcaLente',
+          foreignField:'_id', 
+          localField:'marcaLente',
+          as:'marcaLente'
+        }
+      },
+      {
+        $unwind:{path:'$marcaLente', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'Tratamiento',
+          foreignField:'_id', 
+          localField:'tratamiento',
+          as:'tratamiento'
+        }
+      },
+      {
+        $unwind:{path:'$tratamiento', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'TipoColorLente',
+          foreignField:'_id', 
+          localField:'tipoColorLente',
+          as:'tipoColorLente'
+        }
+      },
+      {
+        $unwind:{path:'$tipoColorLente', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $project:{
+          material:'$material.nombre', 
+          tipoLente:'$tipoLente.nombre',
+          rango:'$rango.nombre', 
+          colorLente:'$colorLente.nombre',
+          marcaLente:'$marcaLente.nombre',
+          tratamiento:'$tratamiento.nombre',
+          tipoColorLente:'$tipoColorLente.nombre'
+        }
+      }
+  ])
+    return combinaciones[0]
+    
+   }
 }

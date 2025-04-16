@@ -2,23 +2,27 @@ import { PartialType } from '@nestjs/mapped-types';
 import { Types } from 'mongoose';
 
 export interface VentaI {
-  id_venta: string;
+  id_venta?: string;
 
-  montoTotal: number;
+  montoTotal?: number;
 
-  asesor: Types.ObjectId;
+  asesor?: Types.ObjectId;
 
-  descuento: number;
+  descuento?: number;
 
-  comisiona: boolean;
+  comisiona?: boolean;
 
-  sucursal: Types.ObjectId;
+  sucursal?: Types.ObjectId;
 
-  tieneReceta: boolean;
+  tieneReceta?: boolean;
 
-  tieneProductos: boolean;
+  tieneProductos?: boolean;
 
+  fechaVenta?:Date,
+
+  fechaFinalizacion?:Date
+
+  flag?:string
   
 }
 
-export type VentaGuardar = Partial<VentaI>;

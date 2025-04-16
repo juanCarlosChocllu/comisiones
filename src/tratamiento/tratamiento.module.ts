@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { TratamientoService } from './tratamiento.service';
+
 import { TratamientoController } from './tratamiento.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Tratamiento, tratamientoSchema } from './schema/tratamiento.schema';
+import { TratamientoService } from './services/tratamiento.service';
 
 @Module({
   imports:[

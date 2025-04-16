@@ -12,13 +12,15 @@ import { MaterialModule } from 'src/material/material.module';
 import { ColorLenteModule } from 'src/color-lente/color-lente.module';
 import { AsesorModule } from 'src/asesor/asesor.module';
 import { CombinacionRecetaModule } from 'src/combinacion-receta/combinacion-receta.module';
+import { SucursalModule } from 'src/sucursal/sucursal.module';
+import { VentaModule } from 'src/venta/venta.module';
 
 @Module({
   imports:[HttpModule,
      TratamientoModule,
      MarcaLenteModule, RangoModule, 
     TipoColorLenteModule, TipoLenteModule,
-    MaterialModule, ColorLenteModule, AsesorModule, CombinacionRecetaModule
+    MaterialModule, ColorLenteModule, AsesorModule, CombinacionRecetaModule, SucursalModule, VentaModule
   ],
   controllers: [ProvidersController],
   providers: [ProvidersService],

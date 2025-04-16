@@ -8,5 +8,6 @@ import { Sucursal, sucursaSchema } from './schema/sucursal.schema';
   imports:[MongooseModule.forFeature([{name:Sucursal.name, schema:sucursaSchema}])],
   controllers: [SucursalController],
   providers: [SucursalService],
+  exports:[SucursalService]
 })
 export class SucursalModule {}
