@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsEmpty, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class dataProductoDto {
@@ -27,10 +27,10 @@ export class dataProductoDto {
   @IsNotEmpty()
   codigoQR: string;
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   descripcion: string;
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   tamano: string;
 
   @IsNotEmpty()
