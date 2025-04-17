@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 export interface DataProductoI {
+   codigoMia:string
     tipoProducto: string;
     marca: Types.ObjectId;       
     color: Types.ObjectId;        

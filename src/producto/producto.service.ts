@@ -30,23 +30,30 @@ export class ProductoService {
     for (const data of createProductoDto.data) {
       const color = await this.colorService.guardarColor(data.color)
       const marca = await this.marcaService.guardarMarca(data.marca)
+
       const dataProducto:DataProductoI ={
+        codigoMia:data.codigoMia,
         tipoProducto:data.tipoProducto,
         marca:marca._id,
         color:color._id,
         serie:data.serie,
         categoria:data.categoria,
         codigoQR:data.codigoQR,
-        estuchePropio:data.estuchePropio
+        estuchePropio:data.estuchePropio,
+      
       }
       if(data.tipoProducto == productoE.montura){ 
          const tipoMontura = await this.tipoMonturaService.guardarTipoMontura(data.tipoMontura) 
         dataProducto.tipoMontura = tipoMontura._id
       }
-      
       const producto = await this.prodcuto.create(dataProducto)
-      const precio = await this.preciosService.guardarPrecioReceta(data.tipoPrecio, data.precio)
+    for (const p of data.precios) {
+ 
+      const precio = await this.preciosService.guardarPrecioReceta(p.tipoPrecio, p.precio)
       await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.producto, producto._id, precio._id)
+      
+    }  
+    
     }
     return {status:HttpStatus.CREATED}
   }

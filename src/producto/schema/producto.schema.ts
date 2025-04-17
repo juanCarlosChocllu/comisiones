@@ -3,6 +3,10 @@ import { Types } from "mongoose"
 
 @Schema({collection:'Producto'})
 export class Producto {
+
+    @Prop()
+    codigoMia:string
+
     @Prop()
     tipoProducto:string
     @Prop()

@@ -4,6 +4,9 @@ import { Types } from 'mongoose';
 export class dataProductoDto {
   @IsString()
   @IsNotEmpty()
+  codigoMia: string;
+  @IsString()
+  @IsNotEmpty()
   tipoProducto: string;
   @IsString()
   @IsNotEmpty()
@@ -33,11 +36,11 @@ export class dataProductoDto {
   @IsNotEmpty()
   @IsBoolean()
   estuchePropio: boolean;
+  precios: [
+    {
+      tipoPrecio: string;
 
-  @IsString()
-  @IsNotEmpty()
-  tipoPrecio: string;
-  @IsNotEmpty()
-  @IsNumber()
-  precio: number;
+      precio: number;
+    },
+  ];
 }
