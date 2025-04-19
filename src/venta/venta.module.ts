@@ -8,6 +8,7 @@ import { AsesorModule } from 'src/asesor/asesor.module';
 import { CombinacionRecetaModule } from 'src/combinacion-receta/combinacion-receta.module';
 import { ComisionReceta } from 'src/comision-receta/schema/comision-receta.schema';
 import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module';
+import { ProductoModule } from 'src/producto/producto.module';
 
 @Module({
     imports:[
@@ -21,7 +22,8 @@ import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module
       ]),
       AsesorModule,
       CombinacionRecetaModule,
-      ComisionRecetaModule
+      ComisionRecetaModule,
+      ProductoModule
     ],
   controllers: [VentaController],
   providers: [VentaService, DetalleVentaService],

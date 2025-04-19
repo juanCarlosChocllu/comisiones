@@ -109,7 +109,7 @@ export class CombinacionRecetaService {
     material: Types.ObjectId,
     marca: Types.ObjectId,
     colorLente: Types.ObjectId,
-   // rango:  Types.ObjectId,
+    rango:  Types.ObjectId,
     tipoLente:  Types.ObjectId,
     tipoColorLente:  Types.ObjectId){
       
@@ -121,14 +121,125 @@ export class CombinacionRecetaService {
       colorLente:colorLente,
       tipoLente:tipoLente,
       tipoColorLente:tipoColorLente,
-     // rango:new Types.ObjectId(rango),
+      rango:new Types.ObjectId(rango),
       tratamiento:new Types.ObjectId(tratamiento)
     })
     return combinacion
   }
 
-  findAll() {
-    return `This action returns all combinacionReceta`;
+  async listar() {
+    const combinaciones = await this.combinacionReceta.aggregate([
+      {
+      $match:{
+        flag:flag.nuevo,
+      
+      },   
+      },
+      {
+        $lookup:{
+          from:'Material',
+          foreignField:'_id', 
+          localField:'material',
+          as:'material'
+        }
+      },
+      {
+        $unwind:{path:'$material', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'TipoLente',
+          foreignField:'_id', 
+          localField:'tipoLente',
+          as:'tipoLente'
+        }
+      },
+      {
+        $unwind:{path:'$tipoLente', preserveNullAndEmptyArrays:false}
+      },
+
+      {
+        $lookup:{
+          from:'Rango',
+          foreignField:'_id', 
+          localField:'rango',
+          as:'rango'
+        }
+      },
+      {
+        $unwind:{path:'$rango', preserveNullAndEmptyArrays:false}
+      },
+
+      {
+        $lookup:{
+          from:'ColorLente',
+          foreignField:'_id', 
+          localField:'colorLente',
+          as:'colorLente'
+        }
+      },
+      {
+        $unwind:{path:'$colorLente', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'MarcaLente',
+          foreignField:'_id', 
+          localField:'marcaLente',
+          as:'marcaLente'
+        }
+      },
+      {
+        $unwind:{path:'$marcaLente', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'Tratamiento',
+          foreignField:'_id', 
+          localField:'tratamiento',
+          as:'tratamiento'
+        }
+      },
+      {
+        $unwind:{path:'$tratamiento', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'TipoColorLente',
+          foreignField:'_id', 
+          localField:'tipoColorLente',
+          as:'tipoColorLente'
+        }
+      },
+      {
+        $unwind:{path:'$tipoColorLente', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $lookup:{
+          from:'ComisionReceta',
+          foreignField:'combinacionReceta',
+          localField:'_id',
+          as:'comisionReceta'
+        }
+      },
+
+     
+      {
+        $project:{
+          codigo:1,
+          material:'$material.nombre', 
+          tipoLente:'$tipoLente.nombre',
+          rango:'$rango.nombre', 
+          colorLente:'$colorLente.nombre',
+          marcaLente:'$marcaLente.nombre',
+          tratamiento:'$tratamiento.nombre',
+          tipoColorLente:'$tipoColorLente.nombre',
+          comisionReceta:1
+        
+        }
+      }
+  ])
+  return combinaciones
   }
 
   findOne(id: number) {

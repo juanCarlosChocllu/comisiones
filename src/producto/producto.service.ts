@@ -5,10 +5,9 @@ import { ColorService } from 'src/color/color.service';
 import { MarcaService } from 'src/marca/marca.service';
 import { TipoMonturaService } from 'src/tipo-montura/tipo-montura.service';
 import { PreciosService } from 'src/precios/precios.service';
-import { console } from 'inspector';
 import { InjectModel } from '@nestjs/mongoose';
 import { Producto } from './schema/producto.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
 import { productoE } from 'src/providers/enum/productos';
 import { DataProductoI } from './interface/dataProducto';
@@ -48,7 +47,6 @@ export class ProductoService {
       }
       const producto = await this.prodcuto.create(dataProducto)
     for (const p of data.precios) {
- 
       const precio = await this.preciosService.guardarPrecioReceta(p.tipoPrecio, p.precio)
       await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.producto, producto._id, precio._id)
       
@@ -57,6 +55,80 @@ export class ProductoService {
     }
     return {status:HttpStatus.CREATED}
   }
+
+
+  async verificarProducto (marca:string ,tipoProducto:string) {
+    
+    const producto = await this.prodcuto.aggregate([
+      {
+        $match:{
+          tipoProducto:tipoProducto,
+         
+        }
+      },
+      {
+        $lookup:{
+          from:'Marca',
+          foreignField:'_id',
+          localField:'marca',
+          as:'marca'
+        }
+      },
+      {
+        $unwind:{path:'$marca', preserveNullAndEmptyArrays:false}
+      },
+
+      {
+        $match:{
+          'marca.nombre':marca
+        }
+      },
+      {
+        $project:{
+          tipoProducto:1,
+          marca:'$marca.nombre'
+        }
+      }
+    ])
+    
+      return producto[0]
+
+  }
+
+
+
+  async verificarProductoventa (producto:Types.ObjectId) {
+    
+    const productos = await this.prodcuto.aggregate([
+      {
+        $match:{
+          _id:producto,
+         
+        }
+      },
+      {
+        $lookup:{
+          from:'Marca',
+          foreignField:'_id',
+          localField:'marca',
+          as:'marca'
+        }
+      },
+      {
+        $unwind:{path:'$marca', preserveNullAndEmptyArrays:false}
+      },
+      {
+        $project:{
+          tipoProducto:1,
+          marca:'$marca.nombre'
+        }
+      }
+    ])
+    
+      return productos[0]
+
+  }
+
 
   findAll() {
     return `This action returns all producto`;

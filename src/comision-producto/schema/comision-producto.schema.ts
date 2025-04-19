@@ -9,7 +9,7 @@ export class ComisionProducto {
   @Prop()
   monto: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'PerecioReceta' })
-  precioReceta: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Producto' })
+  producto: Types.ObjectId;
 }
 export const comisionProductoSchema = SchemaFactory.createForClass(ComisionProducto)

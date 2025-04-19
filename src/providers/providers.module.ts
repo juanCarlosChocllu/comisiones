@@ -14,13 +14,31 @@ import { AsesorModule } from 'src/asesor/asesor.module';
 import { CombinacionRecetaModule } from 'src/combinacion-receta/combinacion-receta.module';
 import { SucursalModule } from 'src/sucursal/sucursal.module';
 import { VentaModule } from 'src/venta/venta.module';
+import { ColorModule } from 'src/color/color.module';
+import { MarcaModule } from 'src/marca/marca.module';
+import { TipoMonturaModule } from 'src/tipo-montura/tipo-montura.module';
+import { ProductoModule } from 'src/producto/producto.module';
+import { TipoVentaModule } from 'src/tipo-venta/tipo-venta.module';
 
 @Module({
-  imports:[HttpModule,
-     TratamientoModule,
-     MarcaLenteModule, RangoModule, 
-    TipoColorLenteModule, TipoLenteModule,
-    MaterialModule, ColorLenteModule, AsesorModule, CombinacionRecetaModule, SucursalModule, VentaModule
+  imports: [
+    HttpModule,
+    TratamientoModule,
+    MarcaLenteModule,
+    RangoModule,
+    TipoColorLenteModule,
+    TipoLenteModule,
+    MaterialModule,
+    ColorLenteModule,
+    AsesorModule,
+    CombinacionRecetaModule,
+    SucursalModule,
+    VentaModule,
+    ColorModule,
+    MarcaModule,
+    TipoMonturaModule,
+    ProductoModule,
+    TipoVentaModule
   ],
   controllers: [ProvidersController],
   providers: [ProvidersService],

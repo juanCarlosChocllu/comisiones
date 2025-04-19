@@ -21,6 +21,7 @@ import { ProductoModule } from './producto/producto.module';
 import { MarcaModule } from './marca/marca.module';
 import { TipoMonturaModule } from './tipo-montura/tipo-montura.module';
 import { ColorModule } from './color/color.module';
+import { TipoVentaModule } from './tipo-venta/tipo-venta.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ColorModule } from './color/color.module';
     MarcaModule,
     TipoMonturaModule,
     ColorModule,
+    TipoVentaModule,
   ],
   controllers: [],
   providers: [],

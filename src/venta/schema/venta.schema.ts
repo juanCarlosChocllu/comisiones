@@ -23,29 +23,46 @@ export class Venta {
   tieneReceta: boolean;
 
   @Prop()
-  tieneProductos: boolean;
+  tieneProducto: boolean;
 
-     @Prop({ type: Types.ObjectId, ref: 'Sucursal' })
+  @Prop({ type: Types.ObjectId, ref: 'Sucursal' })
   sucursal: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'TipoVenta' })
+  tipoVenta: Types.ObjectId;
+
+  @Prop()
+  tipo:string
+
+  @Prop()
+  tipo2:string
+
+  @Prop()
+  nombrePromosion:string
+
+  @Prop()
+  tipoDescuento:string
+
+  @Prop()
+  descuentoPromosion:Number
+
+  @Prop()
+  descuentoPromosion2:number
 
   @Prop()
   fechaVenta: Date;
-         
+
   @Prop()
   fechaFinalizacion: Date;
 
-   @Prop({ type: Date, default: Date.now() })
-    fecha: Date;
-         
-    @Prop()
-    flag: string;
-  
+  @Prop({ type: Date, default: Date.now() })
+  fecha: Date;
 
+  @Prop()
+  flag: string;
 }
 
 export const ventaSchema = SchemaFactory.createForClass(Venta);
-
 
 @Schema({ collection: 'DetalleVenta' })
 export class DetalleVenta {

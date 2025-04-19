@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateComisionProductoDto } from './dto/create-comision-producto.dto';
 import { UpdateComisionProductoDto } from './dto/update-comision-producto.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { ComisionProducto } from './schema/comision-producto.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class ComisionProductoService {
-  create(createComisionProductoDto: CreateComisionProductoDto) {
-    return 'This action adds a new comisionProducto';
+  constructor(@InjectModel(ComisionProducto.name) private readonly  comisionProducto:Model<ComisionProducto>){}
+   async create(createComisionProductoDto: CreateComisionProductoDto) {
+    await this.comisionProducto.create(createComisionProductoDto)
+    return  {status:HttpStatus.CREATED};
   }
 
   findAll() {

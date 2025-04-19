@@ -24,6 +24,11 @@ import { VentaService } from 'src/venta/services/venta.service';
 import { TratamientoService } from 'src/tratamiento/services/tratamiento.service';
 import { DetalleVentaService } from 'src/venta/services/detallleVenta.service';
 import { detalleVentaI } from 'src/venta/interface/detalleVenta';
+import { ColorService } from 'src/color/color.service';
+import { MarcaService } from 'src/marca/marca.service';
+import { TipoMonturaService } from 'src/tipo-montura/tipo-montura.service';
+import { ProductoService } from 'src/producto/producto.service';
+import { TipoVentaService } from 'src/tipo-venta/tipo-venta.service';
 
 @Injectable()
 export class ProvidersService {
@@ -41,6 +46,12 @@ export class ProvidersService {
     private readonly sucursalService: SucursalService,
     private readonly ventaService: VentaService,
     private readonly detalleVentaService: DetalleVentaService,
+    private readonly colorService: ColorService,
+    private readonly marcaService: MarcaService,
+    private readonly tipoMonturaService:TipoMonturaService,
+    private readonly productoService:ProductoService,
+    private readonly tipoVentaService:TipoVentaService,
+
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -58,6 +69,7 @@ export class ProvidersService {
         ),
       );
   
+   
       
       await this.guardardataVenta(ventas.data);
     } catch (error) {
@@ -78,6 +90,8 @@ export class ProvidersService {
           data.nombre_vendedor,
           sucursal._id
         );
+        const tipoVenta = await this.tipoVentaService.guardarTipoVenta(data.tipoVenta)
+
         ventaGuardar={
           asesor:asesor._id,
           comisiona:data.comisiona,
@@ -85,6 +99,13 @@ export class ProvidersService {
           id_venta:data.idVenta,
           montoTotal:data.monto_total,
           sucursal:sucursal._id,
+          tipoVenta:tipoVenta._id,
+          descuentoPromosion:data.descuentoPromosion,
+          descuentoPromosion2:data.descuentoPromosion2,
+          nombrePromosion:data.nombrePromosion,
+          tipo:data.tipo,
+          tipo2:data.tipo2,
+          tipoDescuento:data.tipoDescuento,
           flag:data.flag,
           fechaVenta:new Date(data.fecha),
           ...(data.fecha_finalizacion) && {fechaFinalizacion:new Date(data.fecha_finalizacion)}
@@ -113,9 +134,9 @@ export class ProvidersService {
           const tratamiento = await this.tratamientoService.guardarTratamiento(
             data.atributo6,
           );
-
-          // const rango = await this.rangoService.guardarRangoLente(data.atributo7);
-    
+          
+          const rango = await this.rangoService.guardarRangoLente(data.atributo7);
+          
           
           if (
             !!coloLente &&
@@ -123,6 +144,7 @@ export class ProvidersService {
             !!material &&
             !!tipoColorLente &&
             !!marca &&
+            !!rango&&
             !!tratamiento
             ) {
             const recetaCombinacion =
@@ -131,9 +153,12 @@ export class ProvidersService {
                 material._id,
                 marca._id,
                 coloLente._id,
+                rango._id,
                 tipoLente._id,
                 tipoColorLente._id,
               );
+           
+              
         
               if(recetaCombinacion && venta){
                 const detalle:detalleVentaI={
@@ -151,6 +176,26 @@ export class ProvidersService {
 
           
         } else {
+    
+          
+        const producto =   await this.productoService.verificarProducto(data.atributo1, data.rubro)
+        
+        console.log(producto);
+        
+        if(producto){
+          const detalle:detalleVentaI={
+            cantidad:1,
+            producto:producto._id,
+            importe:data.importe, 
+            rubro:data.rubro,
+            venta:venta._id,
+        }
+          const p = await this.ventaService.tieneProducto(venta._id, true)
+          console.log(p);
+          
+          await this.detalleVentaService.guardarDetalleVenta(detalle)
+        }
+          
           // console.log(data);
         }
        

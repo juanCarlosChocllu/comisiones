@@ -18,11 +18,23 @@ export interface VentaI {
 
   tieneProductos?: boolean;
 
-  fechaVenta?:Date,
+  fechaVenta?: Date;
 
-  fechaFinalizacion?:Date
+  tipoVenta?: Types.ObjectId;
 
-  flag?:string
-  
+  fechaFinalizacion?: Date;
+
+  flag?: string;
+
+  tipo?: string;
+
+  tipo2?: string;
+
+  nombrePromosion?: string;
+
+  tipoDescuento?: string;
+
+  descuentoPromosion?: Number;
+
+  descuentoPromosion2?: string;
 }
-

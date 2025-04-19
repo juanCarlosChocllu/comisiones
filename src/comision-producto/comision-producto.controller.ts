@@ -3,7 +3,7 @@ import { ComisionProductoService } from './comision-producto.service';
 import { CreateComisionProductoDto } from './dto/create-comision-producto.dto';
 import { UpdateComisionProductoDto } from './dto/update-comision-producto.dto';
 
-@Controller('comision-producto')
+@Controller('comision/producto')
 export class ComisionProductoController {
   constructor(private readonly comisionProductoService: ComisionProductoService) {}
 

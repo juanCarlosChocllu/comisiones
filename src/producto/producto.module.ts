@@ -14,5 +14,6 @@ import { PreciosModule } from 'src/precios/precios.module';
     imports:[MongooseModule.forFeature([{name:Producto.name, schema:productoSchema}]), ColorModule, MarcaModule, TipoMonturaModule, PreciosModule],
   controllers: [ProductoController],
   providers: [ProductoService],
+  exports: [ProductoService]
 })
 export class ProductoModule {}

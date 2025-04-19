@@ -16,7 +16,7 @@ export class CombinacionRecetaController {
 
   @Get()
   findAll() {
-    return this.combinacionRecetaService.findAll();
+    return this.combinacionRecetaService.listar();
   }
 
   @Get(':id')
