@@ -1,6 +1,6 @@
-import { IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { IsBoolean, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsString } from "class-validator"
 import { Types } from "mongoose"
-import { tipoComisionE } from "src/core/enum/tipoComision"
+
 
 export class CreateComisionRecetaDto {
         @IsString()
@@ -16,6 +16,6 @@ export class CreateComisionRecetaDto {
         combinacionReceta:Types.ObjectId
 
         @IsNotEmpty()
-        @IsEnum(tipoComisionE)
-        tipoComision:string
+        @IsBoolean()
+        base:string
 }

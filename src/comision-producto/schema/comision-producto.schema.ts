@@ -10,7 +10,7 @@ export class ComisionProducto {
   monto: number;
 
   @Prop()
-  tipoComision:string
+  base:boolean
   
   @Prop({ type: Types.ObjectId, ref: 'Producto' })
   producto: Types.ObjectId;

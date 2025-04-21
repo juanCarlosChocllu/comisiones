@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { CreateVentaDto } from '../dto/create-venta.dto';
 import { UpdateVentaDto } from '../dto/update-venta.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Venta } from '../schema/venta.schema';
+import {  Venta } from '../schema/venta.schema';
 import { Model, Types } from 'mongoose';
-import { RegistroVentas, VentaI } from '../interface/venta';
+import { RegistroVentas, VentaAsesor, VentaI } from '../interface/venta';
 import { AsesorService } from 'src/asesor/asesor.service';
 import { DetalleVentaService } from './detallleVenta.service';
 import { CombinacionReceta } from 'src/combinacion-receta/schema/combinacion-receta.schema';
@@ -15,7 +15,8 @@ import { ComisionRecetaService } from 'src/comision-receta/comision-receta.servi
 import { ProductoService } from 'src/producto/producto.service';
 import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
 import { MetasProductoVipService } from 'src/metas-producto-vip/metas-producto-vip.service';
-
+import {DetalleVenta} from './../interface/venta'
+import { lstat } from 'fs';
 @Injectable()
 export class VentaService {
   constructor(
@@ -34,7 +35,7 @@ export class VentaService {
 
   async listarVentas() {
     const asesores = await this.asesorService.listarAsesor();
-    const data: any[] = [];
+    const data: RegistroVentas[] = [];
   
     for (const asesor of asesores) {
       const metas = await this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal)
@@ -43,6 +44,9 @@ export class VentaService {
         metaProductosVip:metas,
         sucursal: asesor.sucursalNombre,
         asesor: asesor.nombre,
+        gafaVip:0,
+        monturaVip:0,
+        lenteDeContacto:0,
         ventas: [],
     
       };
@@ -52,7 +56,7 @@ export class VentaService {
       for (const venta of ventas) {
         const detalles = await this.detalleVentaService.listarDetalleVenta(venta._id);
   
-        const ventaData = {
+        const ventaData:VentaAsesor = {
           idVenta: venta.id_venta,
      
           descuento:venta.descuento,
@@ -78,7 +82,7 @@ export class VentaService {
               combinacion._id,
             );
   
-            const ventaCombinacion = {
+            const ventaCombinacion:DetalleVenta = {
               combinacion: {
                 id: combinacion._id,
                 material: combinacion.material,
@@ -94,13 +98,14 @@ export class VentaService {
                 id: com._id,
                 nombre: com.nombre,
                 monto: com.monto,
+                base:com.base
               })),
             };
   
             ventaData.detalle.push(ventaCombinacion);
           } else {
             const producto = await this.productoService.verificarProductoventa(detalle.producto);
-  
+            
             const comisiones = await this.comisionProductoService.listarComosionPorProducto(
               producto._id,
             );
@@ -117,24 +122,52 @@ export class VentaService {
                 id: com._id,
                 nombre: com.nombre,
                 monto: com.monto,
+                base:com.base
               })),
             };
-  
+     
             ventaData.detalle.push(ventaProducto);
           }
         }
-  
+     
         ventaAsesor.ventas.push(ventaData);
 
       }
-      
-
+        const {gafaVip,monturavip,lenteDeContacto}= this.monturasYgafasVip(ventaAsesor)
+        ventaAsesor.gafaVip = gafaVip
+        ventaAsesor.monturaVip = monturavip
+        ventaAsesor.lenteDeContacto = lenteDeContacto
       data.push(ventaAsesor);
     }
   
     return data;
   }
-  
+
+  private monturasYgafasVip (venta:RegistroVentas) {
+    let monturavip:number = 0
+    let gafaVip:number=0
+    let lenteDeContacto:number=0
+    
+    for (const vent of venta.ventas) {
+       for (const  detalle of vent.detalle) {
+          if(detalle.producto && detalle.producto.tipo == productoE.montura && detalle.importe >= 700)  {
+              monturavip ++
+          }
+
+          if(detalle.producto && detalle.producto.tipo == productoE.gafa && detalle.importe >= 700)  {
+            gafaVip ++
+        }
+        if(detalle.producto && detalle.producto.tipo == productoE.lenteDeContacto && detalle.importe >= 700)  {
+          lenteDeContacto ++
+      }
+          
+       }
+        
+    }
+
+    return {monturavip, gafaVip,lenteDeContacto}
+    
+  }
 
 
 

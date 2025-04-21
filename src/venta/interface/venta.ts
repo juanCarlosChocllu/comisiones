@@ -49,10 +49,11 @@ interface MetaProductosVip {
 
 }
 
-interface Comision {
-  id: string;
+export interface Comision {
+  id: Types.ObjectId;
   nombre: string;
   monto: number;
+  base:boolean
 }
 
 interface Combinacion {
@@ -67,20 +68,20 @@ interface Combinacion {
 }
 
 interface Producto {
-  id: string;
+  id: Types.ObjectId;
   tipo: string;
   marca: string;
   categoria: string;
 }
 
-interface DetalleVenta {
+export interface DetalleVenta {
   producto?: Producto;
   combinacion?: Combinacion;
   importe: number;
   comisiones: Comision[];
 }
 
-interface Venta {
+export interface VentaAsesor {
   idVenta: string;
   descuento: number;
   montoTotal: number;
@@ -98,5 +99,8 @@ export interface RegistroVentas {
   metaProductosVip: MetaProductosVip;
   sucursal: string;
   asesor: string;
-  ventas: Venta[];
+  monturaVip:number,
+  gafaVip:number,
+  lenteDeContacto:number
+  ventas: VentaAsesor[];
 }

@@ -15,11 +15,7 @@ export class AsesorService {
 
   async listarAsesor() {
     const asesor:ScursalAsesorI[] = await this.asesor.aggregate([
-      {
-        $match:{
-          nombre:'JORGE LUIS BERRIOS BARRERO'
-        }
-      },
+     
       {
         $lookup:{
           from:'Sucursal',

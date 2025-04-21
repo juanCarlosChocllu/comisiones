@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEnum,
   IsMongoId,
   IsNotEmpty,
@@ -7,7 +8,6 @@ import {
   Min,
 } from 'class-validator';
 import { Types } from 'mongoose';
-import { tipoComisionE } from 'src/core/enum/tipoComision';
 
 export class CreateComisionProductoDto {
   @IsString()
@@ -23,7 +23,7 @@ export class CreateComisionProductoDto {
   @IsNotEmpty()
   producto: Types.ObjectId;
 
-  @IsEnum(tipoComisionE)
-  @IsNotEmpty()
-  tipoComision: string;
+    @IsNotEmpty()
+        @IsBoolean()
+        base:string
 }

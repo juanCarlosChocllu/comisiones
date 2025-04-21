@@ -12,7 +12,7 @@ export class ComisionReceta {
     combinacionReceta:Types.ObjectId
 
     @Prop()
-    tipoComision:string
+    base:boolean
 }
 
 export const  comisionRecetaSchema = SchemaFactory.createForClass(ComisionReceta) 
