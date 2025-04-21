@@ -38,16 +38,16 @@ export class Venta {
   tipo2:string
 
   @Prop()
-  nombrePromosion:string
+  nombrePromocion:string
 
   @Prop()
   tipoDescuento:string
 
   @Prop()
-  descuentoPromosion:number
+  descuentoPromocion:number
 
   @Prop()
-  descuentoPromosion2:number
+  descuentoPromocion2:number
 
   @Prop()
   precio:string

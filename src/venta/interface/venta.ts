@@ -87,10 +87,10 @@ interface Venta {
   comisiona: boolean;
   tipo: string;
   tipo2: string;
-  nombrePromosion: string;
+  nombrePromocion: string;
   tipoDescuento: string | null;
-  descuentoPromosion: number;
-  descuentoPromosion2: number;
+  descuentoPromocion: number;
+  descuentoPromocion2: number;
   detalle: DetalleVenta[];
 }
 

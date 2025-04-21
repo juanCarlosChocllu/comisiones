@@ -60,10 +60,10 @@ export class VentaService {
           comisiona:venta.comisiona,
           tipo:venta.tipo,
           tipo2:venta.tipo2,
-          nombrePromosion:venta.nombrePromosion,
+          nombrePromocion:venta.nombrePromocion,
           tipoDescuento:venta.tipoDescuento,
-          descuentoPromosion:venta.descuentoPromosion,
-          descuentoPromosion2:venta.descuentoPromosion2,
+          descuentoPromocion:venta.descuentoPromocion,
+          descuentoPromocion2:venta.descuentoPromocion2,
           
           detalle: [],
         };
