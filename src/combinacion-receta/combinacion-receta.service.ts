@@ -17,6 +17,7 @@ import { productoE } from 'src/providers/enum/productos';
 import { TratamientoService } from 'src/tratamiento/services/tratamiento.service';
 import { flag } from 'src/core/enum/flag';
 import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
+import { log } from 'node:console';
 
 @Injectable()
 export class CombinacionRecetaService {
@@ -75,12 +76,22 @@ export class CombinacionRecetaService {
         tratamiento: tratamiento._id,
         tipoColorLente: tipoColorLente._id,
       };
-       const combinacionLente = await this.combinacionReceta.create(combinacion);
+      const combinacionL = await this.combinacionReceta.findOne(combinacion)
+      if(combinacionL){
+        const precios =  await this.preciosService.guardarPrecioReceta(data.tipoPrecio, data.monto)
+        if(precios){
+          await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.lente, combinacionL._id, precios._id)
+          
+        }
+      }else{
+           const combinacionLente = await this.combinacionReceta.create(combinacion);
       const precios =  await this.preciosService.guardarPrecioReceta(data.tipoPrecio, data.monto)
       if(precios){
         await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.lente, combinacionLente._id, precios._id)
         
       }
+      }
+    
 
     }
   }
@@ -241,11 +252,17 @@ export class CombinacionRecetaService {
         }
       }
   ])
+  const dataCombinacion:any[]=[]
   for (const data of combinaciones) {
-    await this.preciosService.detallePrecioCombinacion(data._id)
+   const detalle =  await this.preciosService.detallePrecioCombinacion(data._id)
+     data.precios = detalle
+    dataCombinacion.push(data)
+      
       
   }
-  return combinaciones
+console.log(dataCombinacion);
+
+  return dataCombinacion
   }
 
   findOne(id: number) {

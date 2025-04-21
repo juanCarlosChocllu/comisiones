@@ -53,7 +53,13 @@ export class PreciosService {
 
    async detallePrecioCombinacion (combinacion:Types.ObjectId){
     const detalle = await this.detallePrecio.find({combinacionReceta:combinacion})
-    console.log(detalle);
+    const dataPrecio:Precio[]=[]
+    for (const data of detalle) {
+        const precio = await this.precio.findOne({_id:data.precio})
+        dataPrecio.push(precio)
+        
+    }
+    return dataPrecio
     
    }
 }
