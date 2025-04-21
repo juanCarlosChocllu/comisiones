@@ -18,10 +18,10 @@ export class dataProductoDto {
   @IsNotEmpty()
   color: string;
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   tipoMontura: string;
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   categoria: string;
   @IsString()
   @IsNotEmpty()

@@ -44,10 +44,13 @@ export class Venta {
   tipoDescuento:string
 
   @Prop()
-  descuentoPromosion:Number
+  descuentoPromosion:number
 
   @Prop()
   descuentoPromosion2:number
+
+  @Prop()
+  precio:string
 
   @Prop()
   fechaVenta: Date;

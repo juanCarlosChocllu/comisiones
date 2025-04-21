@@ -11,6 +11,7 @@ import { Model, Types } from 'mongoose';
 import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
 import { productoE } from 'src/providers/enum/productos';
 import { DataProductoI } from './interface/dataProducto';
+import { verificarProductoI } from './interface/verificaProducto';
 
 @Injectable()
 export class ProductoService {
@@ -97,9 +98,9 @@ export class ProductoService {
 
 
 
-  async verificarProductoventa (producto:Types.ObjectId) {
+  async verificarProductoventa (producto:Types.ObjectId):Promise<verificarProductoI> {
     
-    const productos = await this.prodcuto.aggregate([
+    const productos:verificarProductoI[] = await this.prodcuto.aggregate([
       {
         $match:{
           _id:producto,
@@ -120,7 +121,8 @@ export class ProductoService {
       {
         $project:{
           tipoProducto:1,
-          marca:'$marca.nombre'
+          marca:'$marca.nombre',
+          categoria:1
         }
       }
     ])

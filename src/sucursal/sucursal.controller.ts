@@ -12,7 +12,14 @@ export class SucursalController {
     return this.sucursalService.create(createSucursalDto);
   }
 
-  @Get()
+  @Post('empresa/guardar')
+  guradar() {
+    return this.sucursalService.guardarEmpresaYsusSucursales();
+  }
+
+  
+
+  @Get()  
   findAll() {
     return this.sucursalService.findAll();
   }

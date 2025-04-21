@@ -14,5 +14,6 @@ import { ComisionProducto, comisionProductoSchema } from './schema/comision-prod
     ],
   controllers: [ComisionProductoController],
   providers: [ComisionProductoService],
+  exports: [ComisionProductoService],
 })
 export class ComisionProductoModule {}

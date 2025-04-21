@@ -10,6 +10,9 @@ export class ComisionReceta {
 
     @Prop({type:Types.ObjectId, ref:'CombinacionReceta'})
     combinacionReceta:Types.ObjectId
+
+    @Prop()
+    tipoComision:string
 }
 
 export const  comisionRecetaSchema = SchemaFactory.createForClass(ComisionReceta) 

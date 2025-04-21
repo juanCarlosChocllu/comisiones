@@ -107,6 +107,7 @@ export class ProvidersService {
           tipo2:data.tipo2,
           tipoDescuento:data.tipoDescuento,
           flag:data.flag,
+          precio:data.precio,
           fechaVenta:new Date(data.fecha),
           ...(data.fecha_finalizacion) && {fechaFinalizacion:new Date(data.fecha_finalizacion)}
         }
@@ -157,8 +158,7 @@ export class ProvidersService {
                 tipoLente._id,
                 tipoColorLente._id,
               );
-           
-              
+                  
         
               if(recetaCombinacion && venta){
                 const detalle:detalleVentaI={
@@ -180,8 +180,7 @@ export class ProvidersService {
           
         const producto =   await this.productoService.verificarProducto(data.atributo1, data.rubro)
         
-        console.log(producto);
-        
+      
         if(producto){
           const detalle:detalleVentaI={
             cantidad:1,
@@ -191,12 +190,12 @@ export class ProvidersService {
             venta:venta._id,
         }
           const p = await this.ventaService.tieneProducto(venta._id, true)
-          console.log(p);
+       
           
           await this.detalleVentaService.guardarDetalleVenta(detalle)
         }
           
-          // console.log(data);
+        
         }
        
 

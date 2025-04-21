@@ -7,8 +7,11 @@ export class ComisionProducto {
   nombre: string;
 
   @Prop()
-  monto: string;
+  monto: number;
 
+  @Prop()
+  tipoComision:string
+  
   @Prop({ type: Types.ObjectId, ref: 'Producto' })
   producto: Types.ObjectId;
 }

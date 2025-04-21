@@ -4,7 +4,7 @@ import { UpdateVentaDto } from '../dto/update-venta.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Venta } from '../schema/venta.schema';
 import { Model, Types } from 'mongoose';
-import { VentaI } from '../interface/venta';
+import { RegistroVentas, VentaI } from '../interface/venta';
 import { AsesorService } from 'src/asesor/asesor.service';
 import { DetalleVentaService } from './detallleVenta.service';
 import { CombinacionReceta } from 'src/combinacion-receta/schema/combinacion-receta.schema';
@@ -13,6 +13,8 @@ import { productoE } from 'src/providers/enum/productos';
 import { ComisionReceta } from 'src/comision-receta/schema/comision-receta.schema';
 import { ComisionRecetaService } from 'src/comision-receta/comision-receta.service';
 import { ProductoService } from 'src/producto/producto.service';
+import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
+import { MetasProductoVipService } from 'src/metas-producto-vip/metas-producto-vip.service';
 
 @Injectable()
 export class VentaService {
@@ -23,6 +25,8 @@ export class VentaService {
     private combinacionRecetaService: CombinacionRecetaService,
     private comisionRecetaService: ComisionRecetaService,
     private productoService: ProductoService,
+    private comisionProductoService: ComisionProductoService,
+    private metasProductoVipService: MetasProductoVipService,
   ) {}
   create(createVentaDto: CreateVentaDto) {
     return 'This action adds a new venta';
@@ -31,60 +35,108 @@ export class VentaService {
   async listarVentas() {
     const asesores = await this.asesorService.listarAsesor();
     const data: any[] = [];
+  
     for (const asesor of asesores) {
-      const ventaAsesor = {
+      const metas = await this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal)
+   
+      const ventaAsesor:RegistroVentas = {
+        metaProductosVip:metas,
         sucursal: asesor.sucursalNombre,
         asesor: asesor.nombre,
         ventas: [],
+    
       };
+    
       const ventas = await this.venta.find({ asesor: asesor._id });
-
+  
       for (const venta of ventas) {
-        const detalles = await this.detalleVentaService.listarDetalleVenta(
-          venta._id,
-        );
+        const detalles = await this.detalleVentaService.listarDetalleVenta(venta._id);
+  
         const ventaData = {
           idVenta: venta.id_venta,
-          lente: [],
-          prodcutos: [],
+     
+          descuento:venta.descuento,
+          montoTotal:venta.montoTotal,
+          comisiona:venta.comisiona,
+          tipo:venta.tipo,
+          tipo2:venta.tipo2,
+          nombrePromosion:venta.nombrePromosion,
+          tipoDescuento:venta.tipoDescuento,
+          descuentoPromosion:venta.descuentoPromosion,
+          descuentoPromosion2:venta.descuentoPromosion2,
+          
+          detalle: [],
         };
+  
         for (const detalle of detalles) {
           if (detalle.rubro === productoE.lente) {
-            const combinacion =
-              await this.combinacionRecetaService.listarComninacionPorVenta(
-                detalle.combinacionReceta,
-              );
-            const comision =
-              await this.comisionRecetaService.listarComisionReceta(
-                combinacion._id,
-              );
-            const ventaCombiancion = {
-              combinacion,
+            const combinacion = await this.combinacionRecetaService.listarComninacionPorVenta(
+              detalle.combinacionReceta,
+            );
+  
+            const comisiones = await this.comisionRecetaService.listarComisionReceta(
+              combinacion._id,
+            );
+  
+            const ventaCombinacion = {
+              combinacion: {
+                id: combinacion._id,
+                material: combinacion.material,
+                tipoLente: combinacion.tipoLente,
+                rango: combinacion.rango,
+                colorLente: combinacion.colorLente,
+                marcaLente: combinacion.marcaLente,
+                tratamiento: combinacion.tratamiento,
+                tipoColorLente: combinacion.tipoColorLente,
+              },
               importe: detalle.importe,
-              comision: comision,
+              comisiones: comisiones.map((com) => ({
+                id: com._id,
+                nombre: com.nombre,
+                monto: com.monto,
+              })),
             };
-
-            ventaData.lente.push(ventaCombiancion);
+  
+            ventaData.detalle.push(ventaCombinacion);
           } else {
-            console.log(detalle._id);
-            
-            const productos = await this.productoService.verificarProductoventa(detalle._id)
-            console.log(productos);
-            
+            const producto = await this.productoService.verificarProductoventa(detalle.producto);
+  
+            const comisiones = await this.comisionProductoService.listarComosionPorProducto(
+              producto._id,
+            );
+  
             const ventaProducto = {
-              productos,
+              producto: {
+                id: producto._id,
+                tipo: producto.tipoProducto,
+                marca: producto.marca,
+                categoria:producto.categoria
+              },
               importe: detalle.importe,
-              //comision: comision,
+              comisiones: comisiones.map((com) => ({
+                id: com._id,
+                nombre: com.nombre,
+                monto: com.monto,
+              })),
             };
-            ventaData.prodcutos.push(ventaProducto);
+  
+            ventaData.detalle.push(ventaProducto);
           }
         }
+  
         ventaAsesor.ventas.push(ventaData);
+
       }
+      
+
       data.push(ventaAsesor);
     }
+  
     return data;
   }
+  
+
+
 
   findOne(id: number) {
     return `This action returns a #${id} venta`;

@@ -11,6 +11,10 @@ export class Sucursal {
 
   @Prop({ type: Types.ObjectId, ref: 'Empresa' })
   empresa: Types.ObjectId;
+
+  
+  @Prop({ type: Types.ObjectId, ref: 'Zona' })
+  zona: Types.ObjectId;
   
   @Prop({ type: Date, default: Date.now() })
   fecha: Date;

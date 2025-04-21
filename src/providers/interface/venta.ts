@@ -40,4 +40,5 @@ interface VentaApiI {
   descuentoPromosion: Number;
 
   descuentoPromosion2: string;
+  precio:string
 }

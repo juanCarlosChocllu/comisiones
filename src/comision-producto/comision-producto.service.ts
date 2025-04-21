@@ -3,12 +3,13 @@ import { CreateComisionProductoDto } from './dto/create-comision-producto.dto';
 import { UpdateComisionProductoDto } from './dto/update-comision-producto.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { ComisionProducto } from './schema/comision-producto.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class ComisionProductoService {
   constructor(@InjectModel(ComisionProducto.name) private readonly  comisionProducto:Model<ComisionProducto>){}
    async create(createComisionProductoDto: CreateComisionProductoDto) {
+    createComisionProductoDto.producto = new Types.ObjectId(createComisionProductoDto.producto)
     await this.comisionProducto.create(createComisionProductoDto)
     return  {status:HttpStatus.CREATED};
   }
@@ -27,5 +28,11 @@ export class ComisionProductoService {
 
   remove(id: number) {
     return `This action removes a #${id} comisionProducto`;
+  }
+
+
+  async listarComosionPorProducto(producto:Types.ObjectId){
+    const comision = await this.comisionProducto.find({producto:new Types.ObjectId(producto)})    
+    return comision
   }
 }

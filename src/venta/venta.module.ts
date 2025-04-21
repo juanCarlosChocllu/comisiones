@@ -9,6 +9,8 @@ import { CombinacionRecetaModule } from 'src/combinacion-receta/combinacion-rece
 import { ComisionReceta } from 'src/comision-receta/schema/comision-receta.schema';
 import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module';
 import { ProductoModule } from 'src/producto/producto.module';
+import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
+import { MetasProductoVipModule } from 'src/metas-producto-vip/metas-producto-vip.module';
 
 @Module({
     imports:[
@@ -23,7 +25,9 @@ import { ProductoModule } from 'src/producto/producto.module';
       AsesorModule,
       CombinacionRecetaModule,
       ComisionRecetaModule,
-      ProductoModule
+      ProductoModule,
+      ComisionProductoModule,
+      MetasProductoVipModule
     ],
   controllers: [VentaController],
   providers: [VentaService, DetalleVentaService],

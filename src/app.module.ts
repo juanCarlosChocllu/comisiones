@@ -22,6 +22,9 @@ import { MarcaModule } from './marca/marca.module';
 import { TipoMonturaModule } from './tipo-montura/tipo-montura.module';
 import { ColorModule } from './color/color.module';
 import { TipoVentaModule } from './tipo-venta/tipo-venta.module';
+import { ZonaModule } from './zona/zona.module';
+import { MetasProductoVipModule } from './metas-producto-vip/metas-producto-vip.module';
+
 
 @Module({
   imports: [
@@ -50,6 +53,8 @@ import { TipoVentaModule } from './tipo-venta/tipo-venta.module';
     TipoMonturaModule,
     ColorModule,
     TipoVentaModule,
+    ZonaModule,
+    MetasProductoVipModule,
   ],
   controllers: [],
   providers: [],

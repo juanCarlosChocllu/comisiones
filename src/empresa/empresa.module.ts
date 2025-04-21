@@ -10,5 +10,6 @@ import { Empresa, empresaSchema } from './schema/empresa.schema';
   }])],
   controllers: [EmpresaController],
   providers: [EmpresaService],
+  exports: [EmpresaService],
 })
 export class EmpresaModule {}

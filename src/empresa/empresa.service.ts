@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Empresa } from './schema/empresa.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class EmpresaService {
+  constructor(@InjectModel(Empresa.name) private readonly empresa:Model<Empresa>){}
   create(createEmpresaDto: CreateEmpresaDto) {
     return 'This action adds a new empresa';
   }
@@ -23,4 +27,17 @@ export class EmpresaService {
   remove(id: number) {
     return `This action removes a #${id} empresa`;
   }
+  async guardarEmpresa(nombre:string){
+    const empresa = await this.empresa.findOne({
+      nombre: nombre,
+    });
+    if (!empresa) {
+     return  await this.empresa.create({nombre:nombre});
+    }
+    return empresa
+    
+  }
+
+
+
 }
