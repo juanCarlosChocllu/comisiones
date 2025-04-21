@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { PreciosService } from './precios.service';
+import { PreciosService } from './service/precios.service';
 import { PreciosController } from './precios.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Precio, PrecioSchema } from './schema/precio.schema';
 import { DetallePrecio, DetallePrecioSchema } from './schema/detallePrecio.schema';
+
 
 @Module({
    imports:[

@@ -7,7 +7,7 @@ import { ColorModule } from 'src/color/color.module';
 import { MarcaModule } from 'src/marca/marca.module';
 import { TipoMontura } from 'src/tipo-montura/schema/tipo-montura.schema';
 import { TipoMonturaModule } from 'src/tipo-montura/tipo-montura.module';
-import { PreciosService } from 'src/precios/precios.service';
+import { PreciosService } from 'src/precios/service/precios.service';
 import { PreciosModule } from 'src/precios/precios.module';
 
 @Module({

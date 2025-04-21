@@ -12,7 +12,7 @@ import { RangoService } from 'src/rango/rango.service';
 import { combinacionReceta } from './intercafe/combinacionReceta';
 import { TipoLenteService } from 'src/tipo-lente/tipo-lente.service';
 import { TipoColorLenteService } from 'src/tipo-color-lente/tipo-color-lente.service';
-import { PreciosService } from 'src/precios/precios.service';
+import { PreciosService } from 'src/precios/service/precios.service';
 import { productoE } from 'src/providers/enum/productos';
 import { TratamientoService } from 'src/tratamiento/services/tratamiento.service';
 import { flag } from 'src/core/enum/flag';
@@ -33,6 +33,8 @@ export class CombinacionRecetaService {
     private readonly preciosService: PreciosService
   ) {}
   async create(createCombinacionRecetaDto: CreateCombinacionRecetaDto) {
+    console.log(createCombinacionRecetaDto);
+    
     for (const data of createCombinacionRecetaDto.data) {
       const tratamiento = await this.tratamientoService.guardarTratamiento(
         data.tratamiento,
@@ -73,7 +75,7 @@ export class CombinacionRecetaService {
         tratamiento: tratamiento._id,
         tipoColorLente: tipoColorLente._id,
       };
-     const combinacionLente = await this.combinacionReceta.create(combinacion);
+       const combinacionLente = await this.combinacionReceta.create(combinacion);
       const precios =  await this.preciosService.guardarPrecioReceta(data.tipoPrecio, data.monto)
       if(precios){
         await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.lente, combinacionLente._id, precios._id)
@@ -223,7 +225,7 @@ export class CombinacionRecetaService {
         }
       },
 
-     
+      
       {
         $project:{
           codigo:1,
@@ -235,10 +237,14 @@ export class CombinacionRecetaService {
           tratamiento:'$tratamiento.nombre',
           tipoColorLente:'$tipoColorLente.nombre',
           comisionReceta:1
-        
+          
         }
       }
   ])
+  for (const data of combinaciones) {
+    await this.preciosService.detallePrecioCombinacion(data._id)
+      
+  }
   return combinaciones
   }
 

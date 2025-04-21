@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePrecioDto } from './dto/create-precio.dto';
-import { UpdatePrecioDto } from './dto/update-precio.dto';
+import { CreatePrecioDto } from '../dto/create-precio.dto';
+import { UpdatePrecioDto } from '../dto/update-precio.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Precio } from './schema/precio.schema';
+import { Precio } from '../schema/precio.schema';
 import { Model, Types } from 'mongoose';
-import { DetallePrecio } from './schema/detallePrecio.schema';
+import { DetallePrecio } from '../schema/detallePrecio.schema';
 import { productoE } from 'src/providers/enum/productos';
-import { tipoProductoPrecio } from './enum/tipoProductoPrecio';
+import { tipoProductoPrecio } from '../enum/tipoProductoPrecio';
 
 @Injectable()
 export class PreciosService {
@@ -49,5 +49,11 @@ export class PreciosService {
         await this.detallePrecio.create({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:'PRODUCTO' })
       }
 
+   }
+
+   async detallePrecioCombinacion (combinacion:Types.ObjectId){
+    const detalle = await this.detallePrecio.find({combinacionReceta:combinacion})
+    console.log(detalle);
+    
    }
 }

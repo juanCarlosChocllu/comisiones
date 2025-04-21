@@ -4,7 +4,7 @@ import { UpdateProductoDto } from './dto/update-producto.dto';
 import { ColorService } from 'src/color/color.service';
 import { MarcaService } from 'src/marca/marca.service';
 import { TipoMonturaService } from 'src/tipo-montura/tipo-montura.service';
-import { PreciosService } from 'src/precios/precios.service';
+import { PreciosService } from 'src/precios/service/precios.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Producto } from './schema/producto.schema';
 import { Model, Types } from 'mongoose';

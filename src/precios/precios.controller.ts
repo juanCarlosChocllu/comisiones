@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { PreciosService } from './precios.service';
+import { PreciosService } from './service/precios.service';
 import { CreatePrecioDto } from './dto/create-precio.dto';
 import { UpdatePrecioDto } from './dto/update-precio.dto';
 
