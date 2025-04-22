@@ -99,6 +99,8 @@ export interface RegistroVentas {
   metaProductosVip: MetaProductosVip;
   sucursal: string;
   asesor: string;
+  totalDescuento:number
+  montoTotal:number
   monturaVip:number,
   gafaVip:number,
   lenteDeContacto:number

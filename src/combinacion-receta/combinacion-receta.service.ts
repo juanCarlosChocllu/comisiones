@@ -277,7 +277,7 @@ console.log(dataCombinacion);
     return `This action removes a #${id} combinacionReceta`;
   }
 
-   async listarComninacionPorVenta (combinacionReceta:Types.ObjectId){
+   async listarCombinacionPorVenta (combinacionReceta:Types.ObjectId){
     const combinaciones = await this.combinacionReceta.aggregate([
       {
       $match:{
