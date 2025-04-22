@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CombinacionRecetaService } from './combinacion-receta.service';
 import { CreateCombinacionRecetaDto } from './dto/create-combinacion-receta.dto';
 import { UpdateCombinacionRecetaDto } from './dto/update-combinacion-receta.dto';
+import { PaginadorDto } from 'src/core/dto/paginadorDto';
 
 @Controller('combinacion/receta')
 export class CombinacionRecetaController {
@@ -15,8 +16,8 @@ export class CombinacionRecetaController {
   }
 
   @Get()
-  findAll() {
-    return this.combinacionRecetaService.listar();
+  findAll(@Query () paginadorDto:PaginadorDto) {
+    return this.combinacionRecetaService.listar(paginadorDto);
   }
 
   @Get(':id')

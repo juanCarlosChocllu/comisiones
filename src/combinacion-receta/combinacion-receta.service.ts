@@ -18,6 +18,7 @@ import { TratamientoService } from 'src/tratamiento/services/tratamiento.service
 import { flag } from 'src/core/enum/flag';
 import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
 import { log } from 'node:console';
+import { PaginadorDto } from 'src/core/dto/paginadorDto';
 
 @Injectable()
 export class CombinacionRecetaService {
@@ -140,7 +141,8 @@ export class CombinacionRecetaService {
     return combinacion
   }
 
-  async listar() {
+  async listar(paginadorDto:PaginadorDto) {
+
     const combinaciones = await this.combinacionReceta.aggregate([
       {
       $match:{
@@ -250,19 +252,40 @@ export class CombinacionRecetaService {
           comisionReceta:1
           
         }
+      },
+      {
+        $facet:{
+          data:[
+            {
+              $skip: (paginadorDto.pagina -1) * paginadorDto.limite
+            },
+            {
+              $limit:paginadorDto.limite
+            }
+          ],
+          countDocuments:[
+            {
+              $count:'total'
+            }
+
+          ]
+        }
       }
   ])
+ 
   const dataCombinacion:any[]=[]
-  for (const data of combinaciones) {
+  for (const data of combinaciones[0].data) {
    const detalle =  await this.preciosService.detallePrecioCombinacion(data._id)
      data.precios = detalle
     dataCombinacion.push(data)
       
       
   }
-console.log(dataCombinacion);
 
-  return dataCombinacion
+ const countDocuments = combinaciones[0].countDocuments[0] ?  combinaciones[0].countDocuments[0].total  :1
+
+ const paginas = Math.ceil((countDocuments / paginadorDto.limite))  
+  return {data:dataCombinacion, paginas}
   }
 
   findOne(id: number) {
