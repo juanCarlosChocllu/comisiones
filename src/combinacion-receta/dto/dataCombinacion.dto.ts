@@ -45,4 +45,8 @@ export class DataCombiancionDto{
             @IsNotEmpty()
             tipoPrecio:string
 
+
+            @IsString()
+            @IsNotEmpty()
+            codigoMia:string
 }

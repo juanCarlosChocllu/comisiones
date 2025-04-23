@@ -7,6 +7,10 @@ export class CombinacionReceta {
     @Prop()
     codigo:string
 
+    @Prop()
+    codigoMia:string
+    
+
     @Prop({type:Types.ObjectId, ref:'Material'})
     material:Types.ObjectId
 

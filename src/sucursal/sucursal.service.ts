@@ -81,4 +81,9 @@ export class SucursalService {
     return { status: HttpStatus.CREATED };
   }
   
+
+ async  listarSucucrsalPorEmpresa(id:Types.ObjectId){
+    const empresa = await this.sucursal.find({empresa:new Types.ObjectId(id)})
+    return empresa
+  }
 }

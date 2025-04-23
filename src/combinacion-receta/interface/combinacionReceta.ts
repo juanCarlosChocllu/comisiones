@@ -2,7 +2,7 @@ import { Types } from "mongoose"
 
 export interface combinacionReceta {
         codigo:string
-
+        codigoMia:string
         material:Types.ObjectId
     
    

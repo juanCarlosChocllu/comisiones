@@ -9,7 +9,7 @@ import { MaterialService } from 'src/material/material.service';
 import { ColorLenteService } from 'src/color-lente/color-lente.service';
 import { MarcaLenteService } from 'src/marca-lente/marca-lente.service';
 import { RangoService } from 'src/rango/rango.service';
-import { combinacionReceta } from './intercafe/combinacionReceta';
+import { combinacionReceta } from './interface/combinacionReceta';
 import { TipoLenteService } from 'src/tipo-lente/tipo-lente.service';
 import { TipoColorLenteService } from 'src/tipo-color-lente/tipo-color-lente.service';
 import { PreciosService } from 'src/precios/service/precios.service';
@@ -68,6 +68,7 @@ export class CombinacionRecetaService {
         tipoColorLente.nombre,
       );
       const combinacion: combinacionReceta = {
+        codigoMia:data.codigoMia,
         codigo: codigo,
         colorLente: coloLente._id,
         marcaLente: marca._id,

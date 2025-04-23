@@ -32,3 +32,4 @@ export class Producto {
 }
 
 export const  productoSchema = SchemaFactory.createForClass(Producto)
+productoSchema.index({codigoMia:1})

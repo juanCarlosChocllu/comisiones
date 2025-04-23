@@ -15,7 +15,7 @@ import { TipoColorLente } from 'src/tipo-color-lente/schema/tipoColorLente.schem
 import { TipoLenteService } from 'src/tipo-lente/tipo-lente.service';
 import { productoE } from '../enum/productos';
 import { AsesorService } from 'src/asesor/asesor.service';
-import { combinacionReceta } from 'src/combinacion-receta/intercafe/combinacionReceta';
+import { combinacionReceta } from 'src/combinacion-receta/interface/combinacionReceta';
 import { CombinacionRecetaService } from 'src/combinacion-receta/combinacion-receta.service';
 import { VentaI } from 'src/venta/interface/venta';
 import { Types } from 'mongoose';

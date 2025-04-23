@@ -7,13 +7,16 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class EmpresaService {
-  constructor(@InjectModel(Empresa.name) private readonly empresa:Model<Empresa>){}
+  constructor(
+    @InjectModel(Empresa.name) private readonly empresa: Model<Empresa>,
+  ) {}
   create(createEmpresaDto: CreateEmpresaDto) {
     return 'This action adds a new empresa';
   }
 
-  findAll() {
-    return `This action returns all empresa`;
+  async listar() {
+    const empresa = await this.empresa.find();
+    return empresa;
   }
 
   findOne(id: number) {
@@ -27,17 +30,13 @@ export class EmpresaService {
   remove(id: number) {
     return `This action removes a #${id} empresa`;
   }
-  async guardarEmpresa(nombre:string){
+  async guardarEmpresa(nombre: string) {
     const empresa = await this.empresa.findOne({
       nombre: nombre,
     });
     if (!empresa) {
-     return  await this.empresa.create({nombre:nombre});
+      return await this.empresa.create({ nombre: nombre });
     }
-    return empresa
-    
+    return empresa;
   }
-
-
-
 }

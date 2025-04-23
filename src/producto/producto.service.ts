@@ -26,6 +26,8 @@ export class ProductoService {
   ) {}
   async create(createProductoDto: CreateProductoDto) {
     for (const data of createProductoDto.data) {
+   
+
       const color = await this.colorService.guardarColor(data.color);
       const marca = await this.marcaService.guardarMarca(data.marca);
 
@@ -92,7 +94,8 @@ export class ProductoService {
         },
       },
     ]);
-
+    console.log(producto);
+    
     return producto[0];
   }
 

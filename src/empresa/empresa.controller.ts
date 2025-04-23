@@ -13,8 +13,8 @@ export class EmpresaController {
   }
 
   @Get()
-  findAll() {
-    return this.empresaService.findAll();
+  listar() {
+    return this.empresaService.listar();
   }
 
   @Get(':id')

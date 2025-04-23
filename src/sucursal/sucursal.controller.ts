@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { SucursalService } from './sucursal.service';
 import { CreateSucursalDto } from './dto/create-sucursal.dto';
 import { UpdateSucursalDto } from './dto/update-sucursal.dto';
+import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
+import { Types } from 'mongoose';
 
 @Controller('sucursal')
 export class SucursalController {
@@ -19,9 +21,9 @@ export class SucursalController {
 
   
 
-  @Get()  
-  findAll() {
-    return this.sucursalService.findAll();
+  @Get('empresa/:id')  
+  listarSucucrsalPorEmpresa(@Param('id', ValidateIdPipe) empresa:Types.ObjectId) {
+    return this.sucursalService.listarSucucrsalPorEmpresa(empresa);
   }
 
   @Get(':id')
