@@ -14,11 +14,9 @@ class MetaData {
     
      @IsNumber()
      @IsNotEmpty()
-      montura:number
+     monturaMasGafa:number
   
-      @IsNumber()
-      @IsNotEmpty()
-      gafa:number
+
   
       @IsNumber()
       @IsNotEmpty()

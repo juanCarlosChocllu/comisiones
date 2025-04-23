@@ -29,7 +29,7 @@ import { MetasProductoVipModule } from './metas-producto-vip/metas-producto-vip.
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb://kanna:kanna@localhost:27017/comision?authSource=admin',
+      'mongodb://kanna:kanna@localhost:27017/comision?authSource=admin'
     ),
     EmpresaModule,
     SucursalModule,

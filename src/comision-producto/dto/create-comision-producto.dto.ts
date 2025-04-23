@@ -1,4 +1,7 @@
+import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
+  IsArray,
   IsBoolean,
   IsEnum,
   IsMongoId,
@@ -6,10 +9,19 @@ import {
   IsNumber,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class CreateComisionProductoDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @Type(()=>DataComisionProducto)
+  @ValidateNested()
+  data:DataComisionProducto[]
+}
+
+class DataComisionProducto {
   @IsString()
   @IsString()
   nombre: string;

@@ -48,6 +48,7 @@ export class VentaService {
         metaProductosVip: metas,
         sucursal: asesor.sucursalNombre,
         asesor: asesor.nombre,
+        empresa: asesor.empresa,
         gafaVip: 0,
         monturaVip: 0,
         lenteDeContacto: 0,
@@ -112,35 +113,50 @@ export class VentaService {
 
             ventaData.detalle.push(ventaCombinacion);
           } else {
-            const producto = await this.productoService.verificarProductoventa(
-              detalle.producto,
-            );
+            if (
+              detalle.rubro === productoE.montura ||
+              detalle.rubro === productoE.lenteDeContacto ||
+              detalle.rubro === productoE.gafa
+            ) {
+              const producto =
+                await this.productoService.verificarProductoventa(
+                  detalle.producto,
+                );
+              console.log(detalle.rubro);
+              const comisiones =
+                await this.comisionProductoService.listarComosionPorProducto(
+                  producto._id,
+                );
 
-            const comisiones =
-              await this.comisionProductoService.listarComosionPorProducto(
-                producto._id,
-              );
+              const ventaProducto = {
+                producto: {
+                  id: producto._id,
+                  tipo: producto.tipoProducto,
+                  marca: producto.marca,
+                  categoria: producto.categoria,
+                },
+                importe: detalle.importe,
+                comisiones: comisiones.map((com) => ({
+                  id: com._id,
+                  nombre: com.nombre,
+                  monto: com.monto,
+                  base: com.base,
+                })),
+              };
 
-            const ventaProducto = {
-              producto: {
-                id: producto._id,
-                tipo: producto.tipoProducto,
-                marca: producto.marca,
-                categoria: producto.categoria,
-              },
-              importe: detalle.importe,
-              comisiones: comisiones.map((com) => ({
-                id: com._id,
-                nombre: com.nombre,
-                monto: com.monto,
-                base: com.base,
-              })),
-            };
-
-            ventaData.detalle.push(ventaProducto);
+              ventaData.detalle.push(ventaProducto);
+            }else {
+              const servicios = {
+                servicios: {
+                  id: detalle._id,
+                  tipo: detalle.rubro,     
+                },
+                importe: detalle.importe
+            }
+            ventaData.detalle.push(servicios);
+            }
           }
         }
-
         ventaAsesor.ventas.push(ventaData);
       }
       const { gafaVip, monturavip, lenteDeContacto } =
@@ -197,7 +213,6 @@ export class VentaService {
           }
         }
 
-
         if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
           if (venta.sucursal == 'SUCRE  CENTRAL') {
             if (
@@ -224,8 +239,10 @@ export class VentaService {
           }
         }
 
-
-        if (detalle.producto && detalle.producto.tipo == productoE.lenteDeContacto) {
+        if (
+          detalle.producto &&
+          detalle.producto.tipo == productoE.lenteDeContacto
+        ) {
           if (venta.sucursal == 'SUCRE  CENTRAL') {
             if (
               detalle.producto.marca == 'PRADA' ||
@@ -250,8 +267,6 @@ export class VentaService {
             lenteDeContacto++;
           }
         }
-
-
       }
     }
 

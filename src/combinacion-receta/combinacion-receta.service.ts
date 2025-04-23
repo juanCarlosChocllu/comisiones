@@ -273,19 +273,10 @@ export class CombinacionRecetaService {
       }
   ])
  
-  const dataCombinacion:any[]=[]
-  for (const data of combinaciones[0].data) {
-   const detalle =  await this.preciosService.detallePrecioCombinacion(data._id)
-     data.precios = detalle
-    dataCombinacion.push(data)
-      
-      
-  }
 
  const countDocuments = combinaciones[0].countDocuments[0] ?  combinaciones[0].countDocuments[0].total  :1
-
  const paginas = Math.ceil((countDocuments / paginadorDto.limite))  
-  return {data:dataCombinacion, paginas}
+  return {data:combinaciones[0].data, paginas}
   }
 
   findOne(id: number) {

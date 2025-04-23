@@ -3,6 +3,9 @@ import { PreciosService } from './service/precios.service';
 import { CreatePrecioDto } from './dto/create-precio.dto';
 import { UpdatePrecioDto } from './dto/update-precio.dto';
 
+import { Types } from 'mongoose';
+import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
+
 @Controller('precios')
 export class PreciosController {
   constructor(private readonly preciosService: PreciosService) {}
@@ -16,6 +19,17 @@ export class PreciosController {
   findAll() {
     return this.preciosService.findAll();
   }
+  
+  @Get('combinacion/:id')
+  listarTiposDePrecioCombinacion(@Param('id', ValidateIdPipe) id:Types.ObjectId ) {
+    return this.preciosService.listarTiposDePrecioCombinacion(id);
+  }
+
+  @Get('producto/:id')
+  listarTiposDePrecioProducto(@Param('id', ValidateIdPipe) id:Types.ObjectId ) {
+    return this.preciosService.listarTiposDePrecioProducto(id);
+  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {

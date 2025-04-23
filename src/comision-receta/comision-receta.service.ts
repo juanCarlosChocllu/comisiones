@@ -9,8 +9,10 @@ import { Model, Types } from 'mongoose';
 export class ComisionRecetaService {
   constructor(@InjectModel(ComisionReceta.name) private readonly comisionReceta:Model<ComisionReceta>){}
   async create(createComisionRecetaDto: CreateComisionRecetaDto) {
-    createComisionRecetaDto.combinacionReceta= new Types.ObjectId(createComisionRecetaDto.combinacionReceta)
-    await this.comisionReceta.create(createComisionRecetaDto)
+    for (const data of createComisionRecetaDto.data) {
+      data.combinacionReceta= new Types.ObjectId(data.combinacionReceta)
+      await this.comisionReceta.create(data)
+    }
     return {status:HttpStatus.CREATED}
   }
 

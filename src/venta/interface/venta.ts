@@ -42,8 +42,7 @@ export interface VentaI {
 }
 interface MetaProductosVip {
   _id: Types.ObjectId;
-  montura: number;
-  gafa: number;
+  monturaMasGafa: number;
   lenteDeContacto: number;
   sucursal: Types.ObjectId;
 
@@ -74,11 +73,19 @@ interface Producto {
   categoria: string;
 }
 
+interface ServiciosI {
+  id: Types.ObjectId;
+  tipo: string;
+
+}
+
 export interface DetalleVenta {
   producto?: Producto;
   combinacion?: Combinacion;
   importe: number;
-  comisiones: Comision[];
+  comisiones?: Comision[];
+  servicios?:ServiciosI
+
 }
 
 export interface VentaAsesor {
@@ -98,6 +105,7 @@ export interface VentaAsesor {
 export interface RegistroVentas {
   metaProductosVip: MetaProductosVip;
   sucursal: string;
+  empresa:string
   asesor: string;
   totalDescuento:number
   montoTotal:number

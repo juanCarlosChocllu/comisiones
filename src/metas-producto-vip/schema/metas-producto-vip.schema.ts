@@ -4,10 +4,7 @@ import { Types } from "mongoose"
 @Schema({collection:'MetasProductoVip'})
 export class MetasProductoVip {
     @Prop({default:0})
-    montura:number
-
-    @Prop({default:0})
-    gafa:number
+    monturaMasGafa:number
 
     @Prop({default:0})
     lenteDeContacto:number

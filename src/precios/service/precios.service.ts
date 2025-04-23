@@ -7,6 +7,8 @@ import { Model, Types } from 'mongoose';
 import { DetallePrecio } from '../schema/detallePrecio.schema';
 import { productoE } from 'src/providers/enum/productos';
 import { tipoProductoPrecio } from '../enum/tipoProductoPrecio';
+import { Type } from 'class-transformer';
+import { preciosI } from '../interface/precios';
 
 @Injectable()
 export class PreciosService {
@@ -57,9 +59,30 @@ export class PreciosService {
     for (const data of detalle) {
         const precio = await this.precio.findOne({_id:data.precio})
         dataPrecio.push(precio)
-        
     }
     return dataPrecio
     
    }
+
+  async listarTiposDePrecioCombinacion(id:Types.ObjectId){
+      const precios:preciosI[] =[]
+      const detalle = await this.detallePrecio.find({combinacionReceta:new Types.ObjectId(id),tipo:tipoProductoPrecio.lente})
+      for (const data of detalle) {
+       const precio=   await this.precio.find({_id:data.precio})
+       precios.push(...precio)
+      }
+      return precios
+       
+    }
+    async listarTiposDePrecioProducto(id:Types.ObjectId){
+      const precios:preciosI[] =[]
+      const detalle = await this.detallePrecio.find({producto:new Types.ObjectId(id),tipo:tipoProductoPrecio.producto})
+      for (const data of detalle) {
+       const precio=   await this.precio.find({_id:data.precio})
+       precios.push(...precio)
+      }
+      return precios
+       
+    
+    }
 }

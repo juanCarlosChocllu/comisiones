@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { DescargarProviderDto } from '../dto/create-provider.dto';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, iif } from 'rxjs';
 
 import { MaterialService } from 'src/material/material.service';
 import { ColorLenteService } from 'src/color-lente/color-lente.service';
@@ -48,10 +48,9 @@ export class ProvidersService {
     private readonly detalleVentaService: DetalleVentaService,
     private readonly colorService: ColorService,
     private readonly marcaService: MarcaService,
-    private readonly tipoMonturaService:TipoMonturaService,
-    private readonly productoService:ProductoService,
-    private readonly tipoVentaService:TipoVentaService,
-
+    private readonly tipoMonturaService: TipoMonturaService,
+    private readonly productoService: ProductoService,
+    private readonly tipoVentaService: TipoVentaService,
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -61,16 +60,14 @@ export class ProvidersService {
         token:
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NzIyYTEyMTU5ZmZmMzAzYWY3ODkxNjYiLCJ1c2VybmFtZSI6Imthbm5hMiIsImlhdCI6MTczMzE0NTM0NCwiZXhwIjoxNzMzMTYzMzQ0fQ.p1wF-qQ_xLOjQ85vMFfxXCJBYEHgOqCcjmZ3YpU5Y2g',
       };
-      
+
       const ventas = await firstValueFrom(
         this.httpService.post<VentaApiI[]>(
           'https://comercial.opticentro.com.bo/api/ventas',
           data,
         ),
       );
-  
-   
-      
+
       await this.guardardataVenta(ventas.data);
     } catch (error) {
       console.log(error);
@@ -80,7 +77,6 @@ export class ProvidersService {
   private async guardardataVenta(ventas: VentaApiI[]) {
     let ventaGuardar: VentaI = {};
     for (const data of ventas) {
-      
       const sucursal = await this.sucursalService.buscarSucursalPorNombre(
         data.local,
       );
@@ -88,30 +84,34 @@ export class ProvidersService {
       if (sucursal) {
         const asesor = await this.asesorService.guardarAsesor(
           data.nombre_vendedor,
-          sucursal._id
+          sucursal._id,
         );
-        const tipoVenta = await this.tipoVentaService.guardarTipoVenta(data.tipoVenta)
+        const tipoVenta = await this.tipoVentaService.guardarTipoVenta(
+          data.tipoVenta,
+        );
 
-        ventaGuardar={
-          asesor:asesor._id,
-          comisiona:data.comisiona,
-          descuento:data.descuentoFicha,
-          id_venta:data.idVenta,
-          montoTotal:data.monto_total,
-          sucursal:sucursal._id,
-          tipoVenta:tipoVenta._id,
-          descuentoPromosion:data.descuentoPromosion,
-          descuentoPromosion2:data.descuentoPromosion2,
-          nombrePromosion:data.nombrePromosion,
-          tipo:data.tipo,
-          tipo2:data.tipo2,
-          tipoDescuento:data.tipoDescuento,
-          flag:data.flag,
-          precio:data.precio,
-          fechaVenta:new Date(data.fecha),
-          ...(data.fecha_finalizacion) && {fechaFinalizacion:new Date(data.fecha_finalizacion)}
-        }
-        const venta = await this.ventaService.guardarVenta(ventaGuardar)
+        ventaGuardar = {
+          asesor: asesor._id,
+          comisiona: data.comisiona,
+          descuento: data.descuentoFicha,
+          id_venta: data.idVenta,
+          montoTotal: data.monto_total,
+          sucursal: sucursal._id,
+          tipoVenta: tipoVenta._id,
+          descuentoPromosion: data.descuentoPromosion,
+          descuentoPromosion2: data.descuentoPromosion2,
+          nombrePromosion: data.nombrePromosion,
+          tipo: data.tipo,
+          tipo2: data.tipo2,
+          tipoDescuento: data.tipoDescuento,
+          flag: data.flag,
+          precio: data.precio,
+          fechaVenta: new Date(data.fecha),
+          ...(data.fecha_finalizacion && {
+            fechaFinalizacion: new Date(data.fecha_finalizacion),
+          }),
+        };
+        const venta = await this.ventaService.guardarVenta(ventaGuardar);
         if (data.rubro === productoE.lente) {
           const coloLente = await this.colorLenteService.verificarColorLente(
             data.atributo1,
@@ -135,19 +135,20 @@ export class ProvidersService {
           const tratamiento = await this.tratamientoService.guardarTratamiento(
             data.atributo6,
           );
-          
-          const rango = await this.rangoService.guardarRangoLente(data.atributo7);
-          
-          
+
+          const rango = await this.rangoService.guardarRangoLente(
+            data.atributo7,
+          );
+
           if (
             !!coloLente &&
             !!tipoLente &&
             !!material &&
             !!tipoColorLente &&
             !!marca &&
-            !!rango&&
+            !!rango &&
             !!tratamiento
-            ) {
+          ) {
             const recetaCombinacion =
               await this.combinacionRecetaService.verificarCombinacion(
                 tratamiento._id,
@@ -158,51 +159,49 @@ export class ProvidersService {
                 tipoLente._id,
                 tipoColorLente._id,
               );
-                  
-        
-              if(recetaCombinacion && venta){
-                const detalle:detalleVentaI={
-                  cantidad:1,
-                  combinacionReceta:recetaCombinacion._id,
-                  importe:data.importe, 
-                  rubro:data.rubro,
-                  venta:venta._id,
-              }
-                await this.ventaService.tieneReceta(venta._id, true)
-                await this.detalleVentaService.guardarDetalleVenta(detalle)
-              }
-                    
+
+            if (recetaCombinacion && venta) {
+              const detalle: detalleVentaI = {
+                cantidad: 1,
+                combinacionReceta: recetaCombinacion._id,
+                importe: data.importe,
+                rubro: data.rubro,
+                venta: venta._id,
+              };
+              await this.ventaService.tieneReceta(venta._id, true);
+              await this.detalleVentaService.guardarDetalleVenta(detalle);
+            }
           }
+        } else if (data.rubro == productoE.gafa || data.rubro == productoE.lenteDeContacto || data.rubro == productoE.montura) {
+          const producto = await this.productoService.verificarProducto(
+            data.atributo1,
+            data.rubro,
+          );
 
+          if (producto) {
+            const detalle: detalleVentaI = {
+              cantidad: 1,
+              producto: producto._id,
+              importe: data.importe,
+              rubro: data.rubro,
+              venta: venta._id,
+            };
+            await this.ventaService.tieneProducto(venta._id, true);
+            await this.detalleVentaService.guardarDetalleVenta(detalle);
+          }
+        }else {
+            const detalle: detalleVentaI = {
+              cantidad: 1,
+              importe: data.importe,
+              rubro: data.rubro,
+              venta: venta._id,
+            };
+            await this.detalleVentaService.guardarDetalleVenta(detalle);
           
-        } else {
-    
-          
-        const producto =   await this.productoService.verificarProducto(data.atributo1, data.rubro)
-        
-      
-        if(producto){
-          const detalle:detalleVentaI={
-            cantidad:1,
-            producto:producto._id,
-            importe:data.importe, 
-            rubro:data.rubro,
-            venta:venta._id,
         }
-          const p = await this.ventaService.tieneProducto(venta._id, true)
-       
-          
-          await this.detalleVentaService.guardarDetalleVenta(detalle)
-        }
-          
-        
-        }
-       
-
-    
       }
     }
-    return {status:HttpStatus.CREATED}
+    return { status: HttpStatus.CREATED };
   }
 
   findAll() {

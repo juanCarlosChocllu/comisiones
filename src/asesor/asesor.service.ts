@@ -27,11 +27,24 @@ export class AsesorService {
       {
         $unwind:{path:'$sucursal', preserveNullAndEmptyArrays:false}
       },
+
+      {
+        $lookup:{
+          from:'Empresa',
+          foreignField:'_id',
+          localField:'sucursal.empresa',
+          as:'empresa'
+        }
+      },
+      {
+        $unwind:{path:'$empresa', preserveNullAndEmptyArrays:false}
+      },
       {
         $project:{
           nombre:1,
           sucursalNombre:'$sucursal.nombre',
           idSucursal:'$sucursal._id',
+          empresa:'$empresa.nombre'
       
         }
       }
