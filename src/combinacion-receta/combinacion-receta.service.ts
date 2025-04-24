@@ -9,7 +9,7 @@ import { MaterialService } from 'src/material/material.service';
 import { ColorLenteService } from 'src/color-lente/color-lente.service';
 import { MarcaLenteService } from 'src/marca-lente/marca-lente.service';
 import { RangoService } from 'src/rango/rango.service';
-import { combinacionReceta } from './interface/combinacionReceta';
+import { combinacionReceta, GuardarComisionRecetaI } from './interface/combinacionReceta';
 import { TipoLenteService } from 'src/tipo-lente/tipo-lente.service';
 import { TipoColorLenteService } from 'src/tipo-color-lente/tipo-color-lente.service';
 import { PreciosService } from 'src/precios/service/precios.service';
@@ -19,6 +19,7 @@ import { flag } from 'src/core/enum/flag';
 import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
 import { log } from 'node:console';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
+import { ComisionRecetaService } from 'src/comision-receta/comision-receta.service';
 
 @Injectable()
 export class CombinacionRecetaService {
@@ -32,11 +33,11 @@ export class CombinacionRecetaService {
     private readonly rangoService: RangoService,
     private readonly tipoLenteService: TipoLenteService,
     private readonly tipoColorLenteService: TipoColorLenteService,
-    private readonly preciosService: PreciosService
+    private readonly preciosService: PreciosService,
+    private readonly comisionRecetaService: ComisionRecetaService
   ) {}
   async create(createCombinacionRecetaDto: CreateCombinacionRecetaDto) {
-    console.log(createCombinacionRecetaDto);
-    
+
     for (const data of createCombinacionRecetaDto.data) {
       const tratamiento = await this.tratamientoService.guardarTratamiento(
         data.tratamiento,
@@ -68,7 +69,7 @@ export class CombinacionRecetaService {
         tipoColorLente.nombre,
       );
       const combinacion: combinacionReceta = {
-        codigoMia:data.codigoMia,
+       // codigoMia:data.codigoMia,
         codigo: codigo,
         colorLente: coloLente._id,
         marcaLente: marca._id,
@@ -80,14 +81,14 @@ export class CombinacionRecetaService {
       };
       const combinacionL = await this.combinacionReceta.findOne(combinacion)
       if(combinacionL){
-        const precios =  await this.preciosService.guardarPrecioReceta(data.tipoPrecio, data.monto)
+        const precios =  await this.preciosService.guardarPrecioReceta(data.tipoPrecio)
         if(precios){
           await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.lente, combinacionL._id, precios._id)
           
         }
       }else{
            const combinacionLente = await this.combinacionReceta.create(combinacion);
-      const precios =  await this.preciosService.guardarPrecioReceta(data.tipoPrecio, data.monto)
+      const precios =  await this.preciosService.guardarPrecioReceta(data.tipoPrecio)
       if(precios){
         await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.lente, combinacionLente._id, precios._id)
         
@@ -394,4 +395,67 @@ export class CombinacionRecetaService {
     return combinaciones[0]
     
    }
+
+
+   async guardarComisionrecetaCombinacion(data:GuardarComisionRecetaI){
+    const tratamiento = await this.tratamientoService.guardarTratamiento(
+      data.tratamiento,
+    );
+    const material = await this.materialService.guardarMaterial(
+      data.material,
+    );
+    const marca = await this.marcaLenteService.guardarMarcaLente(
+      data.marcaLente,
+    );
+    const coloLente = await this.colorLenteService.guardarColorLente(
+      data.colorLente,
+    );
+    const rango = await this.rangoService.guardarRangoLente(data.rango);
+
+    const tipoLente = await this.tipoLenteService.guardarTipoLente(
+      data.tipoLente,
+    );
+    const tipoColorLente =
+      await this.tipoColorLenteService.guardarTipoColorLente(
+        data.tipoColorLente,
+      );
+      const combinacion: combinacionReceta = {
+        // codigoMia:data.codigoMia,
+      
+         colorLente: coloLente._id,
+         marcaLente: marca._id,
+         material: material._id,
+         rango: rango._id,
+         tipoLente: tipoLente._id,
+         tratamiento: tratamiento._id,
+         tipoColorLente: tipoColorLente._id,
+       };
+      const combinacionL = await this.combinacionReceta.findOne(combinacion)
+       if(combinacionL){
+          const precios = await  this.preciosService.detallePrecioCombinacion(combinacionL._id)
+          for (const precio of precios) {
+         
+            if(precio.nombre === data.precio){
+              let contador:number = 0
+                for (const com of data.comisiones) {
+                    contador ++ 
+                    const nombre = `Comision ${contador}`
+                   
+                    await this.comisionRecetaService.guardarComisionReceta(combinacionL._id,com.monto.result, com.comision,nombre, data.precio)
+                    
+                    
+                }
+                
+            } 
+            
+          }
+          
+       }else {
+        console.log(data);
+        
+       }
+       
+   }
+
+   
 }

@@ -2,6 +2,10 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Types } from "mongoose"
 @Schema({ collection: 'ComisionReceta' })
 export class ComisionReceta {
+
+    @Prop()
+    precio:string
+
     @Prop()
     nombre:string
 
@@ -10,6 +14,12 @@ export class ComisionReceta {
 
     @Prop({type:Types.ObjectId, ref:'CombinacionReceta'})
     combinacionReceta:Types.ObjectId
+
+    @Prop()
+    diferencia:number
+
+    @Prop()
+    comision:number
 
     @Prop()
     base:boolean

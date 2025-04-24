@@ -4,9 +4,6 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 export class Precio {
     @Prop()
     nombre:string
-
-    @Prop()
-    monto:number
 }
 
 export const PrecioSchema = SchemaFactory.createForClass(Precio)

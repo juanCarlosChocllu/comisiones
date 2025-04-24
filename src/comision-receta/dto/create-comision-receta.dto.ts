@@ -20,11 +20,21 @@ export class DataComisionRecetaDto {
         @IsNotEmpty()
         monto:number
 
+        @IsNumber()
+        @IsNotEmpty()
+        diferencia:number
+
+        @IsNumber()
+        @IsNotEmpty()
+        comision:number
+
         @IsNotEmpty()
         @IsMongoId()
-        combinacionReceta:Types.ObjectId
+        precio:Types.ObjectId
 
         @IsNotEmpty()
         @IsBoolean()
         base:string
 }
+
+

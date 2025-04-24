@@ -10,7 +10,7 @@ export class ComisionProductoService {
   constructor(@InjectModel(ComisionProducto.name) private readonly  comisionProducto:Model<ComisionProducto>){}
    async create(createComisionProductoDto: CreateComisionProductoDto) {
     for (const data of createComisionProductoDto.data) {
-      data.producto = new Types.ObjectId(data.producto)
+      data.precio = new Types.ObjectId(data.precio)
       await this.comisionProducto.create(data)
     }
     return  {status:HttpStatus.CREATED};

@@ -23,19 +23,26 @@ export class CreateComisionProductoDto {
 
 class DataComisionProducto {
   @IsString()
-  @IsString()
-  nombre: string;
-
   @IsNotEmpty()
+  nombre:string
+
   @IsNumber()
-  @Min(0)
-  monto: string;
-
-  @IsMongoId()
   @IsNotEmpty()
-  producto: Types.ObjectId;
+  monto:number
 
-    @IsNotEmpty()
-        @IsBoolean()
-        base:string
+  @IsNumber()
+  @IsNotEmpty()
+  diferencia:number
+
+  @IsNumber()
+  @IsNotEmpty()
+  comision:number
+
+  @IsNotEmpty()
+  @IsMongoId()
+  precio:Types.ObjectId
+
+  @IsNotEmpty()
+  @IsBoolean()
+  base:string
 }

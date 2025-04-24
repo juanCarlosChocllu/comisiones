@@ -4,15 +4,21 @@ import { Types } from 'mongoose';
 @Schema({ collection: 'ComisionProducto' })
 export class ComisionProducto {
   @Prop()
-  nombre: string;
+    nombre:string
 
-  @Prop()
-  monto: number;
+    @Prop()
+    monto:number
 
-  @Prop()
-  base:boolean
-  
-  @Prop({ type: Types.ObjectId, ref: 'Producto' })
-  producto: Types.ObjectId;
+    @Prop({type:Types.ObjectId, ref:'Precio'})
+    precio:Types.ObjectId
+
+    @Prop()
+    diferencia:number
+
+    @Prop()
+    comision:number
+
+    @Prop()
+    base:boolean
 }
 export const comisionProductoSchema = SchemaFactory.createForClass(ComisionProducto)

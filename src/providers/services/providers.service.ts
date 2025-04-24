@@ -15,7 +15,7 @@ import { TipoColorLente } from 'src/tipo-color-lente/schema/tipoColorLente.schem
 import { TipoLenteService } from 'src/tipo-lente/tipo-lente.service';
 import { productoE } from '../enum/productos';
 import { AsesorService } from 'src/asesor/asesor.service';
-import { combinacionReceta } from 'src/combinacion-receta/interface/combinacionReceta';
+import { combinacionReceta, comisionesI, GuardarComisionRecetaI } from 'src/combinacion-receta/interface/combinacionReceta';
 import { CombinacionRecetaService } from 'src/combinacion-receta/combinacion-receta.service';
 import { VentaI } from 'src/venta/interface/venta';
 import { Types } from 'mongoose';
@@ -29,7 +29,7 @@ import { MarcaService } from 'src/marca/marca.service';
 import { TipoMonturaService } from 'src/tipo-montura/tipo-montura.service';
 import { ProductoService } from 'src/producto/producto.service';
 import { TipoVentaService } from 'src/tipo-venta/tipo-venta.service';
-
+import * as ExcelJS from 'exceljs';
 @Injectable()
 export class ProvidersService {
   constructor(
@@ -204,15 +204,58 @@ export class ProvidersService {
     return { status: HttpStatus.CREATED };
   }
 
-  findAll() {
-    return `This action returns all providers`;
-  }
+  
+  async guardarComisiones(){
+    const workbook = new ExcelJS.stream.xlsx.WorkbookReader('./upload/archivo.xlsx', {
+      entries:'emit'
+    });
+    let contador = 0;
+    for await (const hojas of workbook) {
+      for await (const hoja of hojas) {
+          contador++;
+          if (contador === 1) continue;
+    
+          const tipoLente = hoja.getCell(1).value
+          const meterial = hoja.getCell(2).value
+          const tratamiento = hoja.getCell(3).value
+          const marca= hoja.getCell(4).value
+          const  tipoColor = hoja.getCell(5).value
+          const  rangos = hoja.getCell(6).value
+          const  colorLente = hoja.getCell(7).value
+          const  precio = hoja.getCell(8).value
+          const comisiones:comisionesI[] = [
+              {
+           
+                comision:Number(hoja.getCell(9).value),
+                monto:hoja.getCell(10).value,
+                
+              },
+              {
+                
+                comision:Number(hoja.getCell(12).value),
+                monto:hoja.getCell(13).value
+              }
+          ]
+          const data:GuardarComisionRecetaI ={
+            colorLente:String(colorLente).toUpperCase(),
+            comisiones:comisiones,
+            marcaLente:String(marca).toUpperCase(),
+            material:String(meterial).toUpperCase(),
+            rango:String(rangos).toUpperCase(),
+            tipoColorLente:String(tipoColor).toUpperCase(),
+            tipoLente:String(tipoLente).toUpperCase(),
+            tratamiento:String(tratamiento).toUpperCase(),
+            precio:String(precio).toUpperCase()
 
-  findOne(id: number) {
-    return `This action returns a #${id} provider`;
-  }
 
-  remove(id: number) {
-    return `This action removes a #${id} provider`;
+          }
+          await this.combinacionRecetaService.guardarComisionrecetaCombinacion(data)
+      }
+
+     
+      
+      break
+    }
+    
   }
 }

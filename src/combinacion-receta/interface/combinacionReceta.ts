@@ -1,8 +1,8 @@
 import { Types } from "mongoose"
 
 export interface combinacionReceta {
-        codigo:string
-        codigoMia:string
+        codigo?:string
+        codigoMia?:string
         material:Types.ObjectId
     
    
@@ -21,4 +21,22 @@ export interface combinacionReceta {
         tratamiento:Types.ObjectId
 
         tipoColorLente:Types.ObjectId
+}
+
+export interface GuardarComisionRecetaI {
+        material:string, 
+        tipoLente:string,
+        rango:string, 
+        colorLente:string,
+        marcaLente:string,
+        tratamiento:string,
+        tipoColorLente:string
+        comisiones:comisionesI[]
+        precio:string
+}
+
+export interface  comisionesI {
+  
+        monto:any
+        comision:number
 }

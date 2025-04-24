@@ -14,6 +14,8 @@ import { TipoLenteModule } from 'src/tipo-lente/tipo-lente.module';
 import { MaterialModule } from 'src/material/material.module';
 import { ColorLenteModule } from 'src/color-lente/color-lente.module';
 import { PreciosModule } from 'src/precios/precios.module';
+import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
+import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module';
 
 
 @Module({
@@ -32,6 +34,7 @@ import { PreciosModule } from 'src/precios/precios.module';
     MaterialModule,
     ColorLenteModule,
     PreciosModule,
+    ComisionRecetaModule
   ],
   controllers: [CombinacionRecetaController],
   providers: [CombinacionRecetaService],

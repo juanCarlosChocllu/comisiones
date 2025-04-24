@@ -50,8 +50,7 @@ export class ProductoService {
       const producto = await this.prodcuto.create(dataProducto);
       for (const p of data.precios) {
         const precio = await this.preciosService.guardarPrecioReceta(
-          p.tipoPrecio,
-          p.precio,
+          p.tipoPrecio
         );
         await this.preciosService.guardarDetallePrecio(
           tipoProductoPrecio.producto,

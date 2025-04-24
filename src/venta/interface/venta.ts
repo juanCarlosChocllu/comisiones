@@ -52,7 +52,7 @@ export interface Comision {
   id: Types.ObjectId;
   nombre: string;
   monto: number;
-  base:boolean
+  precio:string
 }
 
 interface Combinacion {

@@ -17,6 +17,7 @@ import { ComisionProductoService } from 'src/comision-producto/comision-producto
 import { MetasProductoVipService } from 'src/metas-producto-vip/metas-producto-vip.service';
 import { DetalleVenta } from './../interface/venta';
 import { lstat } from 'fs';
+import { PreciosService } from 'src/precios/service/precios.service';
 @Injectable()
 export class VentaService {
   constructor(
@@ -28,6 +29,7 @@ export class VentaService {
     private productoService: ProductoService,
     private comisionProductoService: ComisionProductoService,
     private metasProductoVipService: MetasProductoVipService,
+    private preciosService: PreciosService,
   ) {}
   create(createVentaDto: CreateVentaDto) {
     return 'This action adds a new venta';
@@ -85,10 +87,12 @@ export class VentaService {
               await this.combinacionRecetaService.listarCombinacionPorVenta(
                 detalle.combinacionReceta,
               );
-
+            
+             
             const comisiones =
               await this.comisionRecetaService.listarComisionReceta(
-                combinacion._id,
+                venta.precio,
+                combinacion._id
               );
 
             const ventaCombinacion: DetalleVenta = {
@@ -107,7 +111,7 @@ export class VentaService {
                 id: com._id,
                 nombre: com.nombre,
                 monto: com.monto,
-                base: com.base,
+                precio: com.precio,
               })),
             };
 
@@ -122,7 +126,7 @@ export class VentaService {
                 await this.productoService.verificarProductoventa(
                   detalle.producto,
                 );
-              console.log(detalle.rubro);
+            
               const comisiones =
                 await this.comisionProductoService.listarComosionPorProducto(
                   producto._id,
@@ -140,7 +144,7 @@ export class VentaService {
                   id: com._id,
                   nombre: com.nombre,
                   monto: com.monto,
-                  base: com.base,
+                  precio: 'falta',
                 })),
               };
 

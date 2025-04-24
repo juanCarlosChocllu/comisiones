@@ -36,10 +36,10 @@ export class PreciosService {
     return `This action removes a #${id} precio`;
   }
 
-   async guardarPrecioReceta(nombre:string, monto:number){
-      const precio = await this.precio.findOne({nombre:nombre.toUpperCase() , monto:monto})
+   async guardarPrecioReceta(nombre:string){
+      const precio = await this.precio.findOne({nombre:nombre.toUpperCase()})
       if(!precio) {
-        return await this.precio.create({nombre:nombre.toUpperCase() , monto:monto})
+        return await this.precio.create({nombre:nombre.toUpperCase()})
       }
       return precio
    }
@@ -55,7 +55,7 @@ export class PreciosService {
 
    async detallePrecioCombinacion (combinacion:Types.ObjectId){
     const detalle = await this.detallePrecio.find({combinacionReceta:combinacion})
-    const dataPrecio:Precio[]=[]
+    const dataPrecio:preciosI[]=[]
     for (const data of detalle) {
         const precio = await this.precio.findOne({_id:data.precio})
         dataPrecio.push(precio)
@@ -84,5 +84,12 @@ export class PreciosService {
       return precios
        
     
+    }
+
+
+    async buscarPrecioPorNombre(nombre:string){
+      const precio = await this.precio.findOne({nombre:nombre.toUpperCase()})
+    
+      return precio
     }
 }

@@ -12,20 +12,10 @@ export class ProvidersController {
     return this.providersService.descargarVentasMia(descargarProviderDto);
   }
 
-  @Get()
-  findAll() {
-    return this.providersService.findAll();
+  @Post('excel/comisiones')
+  guardarComisiones(){
+    return this.providersService.guardarComisiones()
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.providersService.findOne(+id);
-  }
-
-
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.providersService.remove(+id);
-  }
+ 
 }

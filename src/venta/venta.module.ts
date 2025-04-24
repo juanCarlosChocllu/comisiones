@@ -11,6 +11,7 @@ import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module
 import { ProductoModule } from 'src/producto/producto.module';
 import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
 import { MetasProductoVipModule } from 'src/metas-producto-vip/metas-producto-vip.module';
+import { PreciosModule } from 'src/precios/precios.module';
 
 @Module({
     imports:[
@@ -27,7 +28,8 @@ import { MetasProductoVipModule } from 'src/metas-producto-vip/metas-producto-vi
       ComisionRecetaModule,
       ProductoModule,
       ComisionProductoModule,
-      MetasProductoVipModule
+      MetasProductoVipModule,
+      PreciosModule
     ],
   controllers: [VentaController],
   providers: [VentaService, DetalleVentaService],
