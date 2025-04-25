@@ -307,12 +307,12 @@ export class ProvidersService {
             }
            
             await this.productoService.guardaProductoComisiones(data)
-       
+          
           }
           break
       }
     
-      
+      return {status:HttpStatus.OK}
 
   }
   
