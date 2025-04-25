@@ -287,8 +287,8 @@ export class ProvidersService {
               },
               {
                 
-                comision:hoja.getCell(13).value,
-                monto:hoja.getCell(14).value
+                comision:hoja.getCell(14).value,
+                monto:hoja.getCell(15).value
               }
           ]
             
