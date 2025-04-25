@@ -59,7 +59,7 @@ export class VentaService {
         ventas: [],
       };
 
-      const ventas = await this.venta.find({ asesor: asesor._id });
+      const ventas = await this.venta.find({ asesor: asesor._id , flag:'FINALIZADO'});
       for (const venta of ventas) {
         const detalles = await this.detalleVentaService.listarDetalleVenta(
           venta._id,
@@ -129,7 +129,7 @@ export class VentaService {
             
               const comisiones =
                 await this.comisionProductoService.listarComosionPorProducto(
-                  producto._id,
+                  producto._id, venta.precio
                 );
 
               const ventaProducto = {
@@ -144,7 +144,7 @@ export class VentaService {
                   id: com._id,
                   nombre: com.nombre,
                   monto: com.monto,
-                  precio: 'falta',
+                  precio: com.precio,
                 })),
               };
 

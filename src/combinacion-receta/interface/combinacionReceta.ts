@@ -38,5 +38,5 @@ export interface GuardarComisionRecetaI {
 export interface  comisionesI {
   
         monto:any
-        comision:number
+        comision:any
 }

@@ -3,18 +3,23 @@ import { ProvidersService } from '../services/providers.service';
 import { DescargarProviderDto } from '../dto/create-provider.dto';
 
 
-@Controller('provider/mia/venta')
+@Controller('provider')
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
 
-  @Post()
+  @Post('mia/venta')
   descargarVentas(@Body() descargarProviderDto: DescargarProviderDto) {
     return this.providersService.descargarVentasMia(descargarProviderDto);
   }
 
-  @Post('excel/comisiones')
-  guardarComisiones(){
-    return this.providersService.guardarComisiones()
+  @Post('excel/combinaciones/comisiones')
+  guardarComisionesReceta(){
+    return this.providersService.guardarComisionesReceta()
+  }
+
+  @Post('excel/producto/comisiones')
+  guardarComisionesProducto(){
+    return this.providersService.guardarComisionesProducto()
   }
 
  

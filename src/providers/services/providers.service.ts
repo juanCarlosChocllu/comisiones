@@ -30,6 +30,7 @@ import { TipoMonturaService } from 'src/tipo-montura/tipo-montura.service';
 import { ProductoService } from 'src/producto/producto.service';
 import { TipoVentaService } from 'src/tipo-venta/tipo-venta.service';
 import * as ExcelJS from 'exceljs';
+import { DataProductoI, productosExcelI } from 'src/producto/interface/dataProducto';
 @Injectable()
 export class ProvidersService {
   constructor(
@@ -174,10 +175,9 @@ export class ProvidersService {
           }
         } else if (data.rubro == productoE.gafa || data.rubro == productoE.lenteDeContacto || data.rubro == productoE.montura) {
           const producto = await this.productoService.verificarProducto(
-            data.atributo1,
-            data.rubro,
+            data.codProducto
           );
-
+        
           if (producto) {
             const detalle: detalleVentaI = {
               cantidad: 1,
@@ -205,10 +205,9 @@ export class ProvidersService {
   }
 
   
-  async guardarComisiones(){
-    const workbook = new ExcelJS.stream.xlsx.WorkbookReader('./upload/archivo.xlsx', {
-      entries:'emit'
-    });
+  async guardarComisionesReceta(){
+    
+    const workbook= this.hojaDeTrabajo('./upload/archivo.xlsx')
     let contador = 0;
     for await (const hojas of workbook) {
       for await (const hoja of hojas) {
@@ -237,15 +236,15 @@ export class ProvidersService {
               }
           ]
           const data:GuardarComisionRecetaI ={
-            colorLente:String(colorLente).toUpperCase(),
+            colorLente:String(colorLente).toUpperCase().trim(),
             comisiones:comisiones,
-            marcaLente:String(marca).toUpperCase(),
-            material:String(meterial).toUpperCase(),
-            rango:String(rangos).toUpperCase(),
-            tipoColorLente:String(tipoColor).toUpperCase(),
-            tipoLente:String(tipoLente).toUpperCase(),
-            tratamiento:String(tratamiento).toUpperCase(),
-            precio:String(precio).toUpperCase()
+            marcaLente:String(marca).toUpperCase().trim(),
+            material:String(meterial).toUpperCase().trim(),
+            rango:String(rangos).toUpperCase().trim(),
+            tipoColorLente:String(tipoColor).toUpperCase().trim(),
+            tipoLente:String(tipoLente).toUpperCase().trim(),
+            tratamiento:String(tratamiento).toUpperCase().trim(),
+            precio:String(precio).toUpperCase().trim()
 
 
           }
@@ -258,4 +257,113 @@ export class ProvidersService {
     }
     
   }
+
+   async guardarComisionesProducto(){
+      const workbook = this.hojaDeTrabajo('./upload/3.xlsx')
+      let contador:number=0
+      for await (const hojas of workbook) {
+        
+          for await (const hoja of hojas) {
+            contador ++
+            if(contador == 1) {
+              continue
+            }
+            const codigoMia = hoja.getCell(1).value
+            const codigoQr = hoja.getCell(2).value
+            const producto = hoja.getCell(3).value
+            const marca = hoja.getCell(4).value
+            const color = hoja.getCell(5).value
+            const serie = hoja.getCell(6).value
+            const genero = hoja.getCell(7).value
+            const tipoMontura = hoja.getCell(8).value
+            const categoria = hoja.getCell(9).value
+            const precio = hoja.getCell(10).value
+            
+            
+            const comisiones:comisionesI[] = [
+              {
+                comision:hoja.getCell(12).value,
+                monto:hoja.getCell(13).value,
+              },
+              {
+                
+                comision:hoja.getCell(13).value,
+                monto:hoja.getCell(14).value
+              }
+          ]
+            
+            const data:productosExcelI = {
+              codigoMia:String(codigoMia),
+              categoria:String(categoria),
+              color:String(color),
+              marca:String(marca),
+              serie:String(serie),
+              comisiones:comisiones,
+              codigoQR:String(codigoQr),
+              tipoProducto:String(producto),
+              precio:String(precio),
+              tipoMontura:String(tipoMontura),
+            
+            }
+           
+            await this.productoService.guardaProductoComisiones(data)
+       
+          }
+          break
+      }
+    
+      
+
+  }
+  
+  
+  async guardarComisionesProducto1(){
+    const workbook = this.hojaDeTrabajo('./upload/2.xlsx')
+    let contador:number=0
+    for await (const hojas of workbook) {
+      
+        for await (const hoja of hojas) {
+          contador ++
+          if(contador == 1) {
+            continue
+          }
+          const codigoMia = hoja.getCell(1).value
+          const codigoQr = hoja.getCell(2).value
+          const producto = hoja.getCell(3).value
+          const marca = hoja.getCell(4).value
+          const color = hoja.getCell(5).value
+          const serie = hoja.getCell(6).value
+          const genero = hoja.getCell(7).value
+          const tipoMontura = hoja.getCell(8).value
+          const categoria = hoja.getCell(9).value
+          const precio = hoja.getCell(10).value
+        
+          
+          const data:productosExcelI = {
+            codigoMia:String(codigoMia),
+            categoria:String(categoria),
+            color:String(color),
+            marca:String(marca),
+            serie:String(serie),
+           
+            codigoQR:String(codigoQr),
+            tipoProducto:String(producto),
+            precio:String(precio),
+            tipoMontura:String(tipoMontura)
+          }
+          await this.productoService.guardaProductoExcel(data)
+        
+        }
+    }
+    
+
+}
+
+
+  private hojaDeTrabajo(ruta:string) {
+    const workbook = new ExcelJS.stream.xlsx.WorkbookReader(ruta, {
+      entries:'emit'
+    });
+    return workbook
+  } 
 }

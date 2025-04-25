@@ -45,16 +45,38 @@ export class PreciosService {
    }
 
    async  guardarDetallePrecio(tipo:tipoProductoPrecio,producto:Types.ObjectId, precio:Types.ObjectId ){
+    
+    
       if(tipo === tipoProductoPrecio.lente) {
-         await this.detallePrecio.create({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo })
+          const detalle = await this.detallePrecio.findOne({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo })
+        console.log(detalle);
+        
+          if(!detalle) {
+            await this.detallePrecio.create({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo })
+          }
       }else {
-        await this.detallePrecio.create({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:'PRODUCTO' })
+        const detalle= await this.detallePrecio.findOne({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipoProductoPrecio.producto })
+        if(!detalle) {
+          await this.detallePrecio.create({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipoProductoPrecio.producto })
+        }
       }
 
    }
+  
 
    async detallePrecioCombinacion (combinacion:Types.ObjectId){
-    const detalle = await this.detallePrecio.find({combinacionReceta:combinacion})
+    const detalle = await this.detallePrecio.find({combinacionReceta:combinacion, tipo:tipoProductoPrecio.lente})
+    const dataPrecio:preciosI[]=[]
+    for (const data of detalle) {
+        const precio = await this.precio.findOne({_id:data.precio})
+        dataPrecio.push(precio)
+    }
+    return dataPrecio
+    
+   }
+
+   async detallePrecioProducto (producto:Types.ObjectId){
+    const detalle = await this.detallePrecio.find({producto:producto, tipo:tipoProductoPrecio.producto})
     const dataPrecio:preciosI[]=[]
     for (const data of detalle) {
         const precio = await this.precio.findOne({_id:data.precio})

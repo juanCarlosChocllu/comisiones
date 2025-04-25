@@ -33,14 +33,8 @@ export function dataEmpresa() {
         //'ZONA OPTICA': ['ZONA OPTICA 1'],
         'OPTILAB': ['OPTILAB', 'OPTILAB TARIJA','OPTILAB PARAGUAY'],
   
-       //'MINISO': ['MINISO', 'MINISO LA PAZ'],
-       'OPTISERVICE S.R.L': ['OFEROPTICA'],
-        'VISUALHEALT': [
-          'CONSULTORIO LA PAZ',
-          'CONSULTORIO SANTA CRUZ',
-          'CONSULTORIO CAMARGO',
-          'CONSULTORIO LA PAZ  2',
-        ],
+       
+       
       },
     };
     return data;

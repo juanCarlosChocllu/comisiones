@@ -9,11 +9,21 @@ import { TipoMontura } from 'src/tipo-montura/schema/tipo-montura.schema';
 import { TipoMonturaModule } from 'src/tipo-montura/tipo-montura.module';
 import { PreciosService } from 'src/precios/service/precios.service';
 import { PreciosModule } from 'src/precios/precios.module';
+import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
 
 @Module({
-    imports:[MongooseModule.forFeature([{name:Producto.name, schema:productoSchema}]), ColorModule, MarcaModule, TipoMonturaModule, PreciosModule],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Producto.name, schema: productoSchema },
+    ]),
+    ColorModule,
+    MarcaModule,
+    TipoMonturaModule,
+    PreciosModule,
+    ComisionProductoModule
+  ],
   controllers: [ProductoController],
   providers: [ProductoService],
-  exports: [ProductoService]
+  exports: [ProductoService],
 })
 export class ProductoModule {}

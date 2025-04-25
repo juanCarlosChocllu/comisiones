@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Types } from "mongoose"
+import { flag } from "src/core/enum/flag"
 
 @Schema({collection:'Producto'})
 export class Producto {
@@ -29,6 +30,11 @@ export class Producto {
    
     @Prop()
     estuchePropio:boolean
+    @Prop({type:Date, default:()=> Date.now()})
+    fecha:Date
+
+    @Prop({type:String, default:flag.nuevo})
+    flag:string
 }
 
 export const  productoSchema = SchemaFactory.createForClass(Producto)

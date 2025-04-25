@@ -37,7 +37,8 @@ export class CombinacionRecetaService {
     private readonly comisionRecetaService: ComisionRecetaService
   ) {}
   async create(createCombinacionRecetaDto: CreateCombinacionRecetaDto) {
-
+ 
+    
     for (const data of createCombinacionRecetaDto.data) {
       const tratamiento = await this.tratamientoService.guardarTratamiento(
         data.tratamiento,

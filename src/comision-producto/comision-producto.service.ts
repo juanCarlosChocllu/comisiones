@@ -33,8 +33,22 @@ export class ComisionProductoService {
   }
 
 
-  async listarComosionPorProducto(producto:Types.ObjectId){
-    const comision = await this.comisionProducto.find({producto:new Types.ObjectId(producto)})    
+  async listarComosionPorProducto(producto:Types.ObjectId, precio:string){
+    const comision = await this.comisionProducto.find({producto:new Types.ObjectId(producto),precio:precio.toLowerCase()})    
+ 
+    
     return comision
   }
+
+  async guardarComisionProducto(producto:Types.ObjectId, monto:number, comision:number, nombre:string, precio:string ) {
+    comision = comision ? comision :0
+    monto = monto ? monto :0
+    const diferencia = comision - monto
+    const comisionProducto = await this.comisionProducto.findOne({producto:new Types.ObjectId(producto),comision:comision, diferencia:diferencia,monto:monto,nombre:nombre ,precio:precio})
+    if(!comisionProducto) {
+      await this.comisionProducto.create({producto:new Types.ObjectId(producto),comision:comision, diferencia:diferencia,monto:monto,nombre:nombre ,precio:precio})
+    }
+  }
+
+
 }

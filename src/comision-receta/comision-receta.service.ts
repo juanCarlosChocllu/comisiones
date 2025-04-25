@@ -25,7 +25,7 @@ export class ComisionRecetaService {
   }
 
   async guardarComisionReceta(combinacionReceta:Types.ObjectId, monto:number, comision:number, nombre:string, precio:string ) {
-    const diferencia = monto - comision
+    const diferencia = comision- monto
     await this.comisionReceta.create({combinacionReceta:new Types.ObjectId(combinacionReceta),comision:comision, diferencia:diferencia,monto:monto,nombre:nombre ,precio:precio})
   }
 
