@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { VentaService } from './services/venta.service';
 import { CreateVentaDto } from './dto/create-venta.dto';
 import { UpdateVentaDto } from './dto/update-venta.dto';
+import { BuscadorVentaDto } from './dto/buscadorVenta.dto,';
 
 @Controller('venta')
 export class VentaController {
@@ -13,8 +14,8 @@ export class VentaController {
   }
 
   @Get()
-  findAll() {
-    return this.ventaService.listarVentas();
+  listdarVentas(@Body() buscadorVentaDto:BuscadorVentaDto) {
+    return this.ventaService.listarVentas( buscadorVentaDto);
   }
 
   @Get(':id')

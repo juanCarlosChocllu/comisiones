@@ -13,8 +13,13 @@ export class AsesorService {
     return 'This action adds a new asesor';
   }
 
-  async listarAsesor() {
+  async listarAsesor(sucursal:Types.ObjectId) {
     const asesor:ScursalAsesorI[] = await this.asesor.aggregate([
+      {
+        $match:{
+          sucursal:new Types.ObjectId(sucursal)
+        }
+      },
      
       {
         $lookup:{
