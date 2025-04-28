@@ -33,10 +33,8 @@ export class ComisionProductoService {
   }
 
 
-  async listarComosionPorProducto(producto:Types.ObjectId, precio:string){
-    const comision = await this.comisionProducto.find({producto:new Types.ObjectId(producto),precio:precio.toLowerCase()})    
- 
-    
+  async listarComosionPorProducto(producto:Types.ObjectId, precio:string){   
+    const comision = await this.comisionProducto.find({producto:new Types.ObjectId(producto),precio:precio.toUpperCase()})    
     return comision
   }
 

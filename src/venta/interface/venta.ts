@@ -56,21 +56,16 @@ export interface Comision {
 }
 
 interface Combinacion {
-  id: string;
-  material: string;
-  tipoLente: string;
-  rango: string;
-  colorLente: string;
-  marcaLente: string;
-  tratamiento: string;
-  tipoColorLente: string;
+  id: Types.ObjectId;
+  descripcion: string;
+
 }
 
 interface Producto {
   id: Types.ObjectId;
   tipo: string;
   marca: string;
-  categoria: string;
+ 
 }
 
 interface ServiciosI {
