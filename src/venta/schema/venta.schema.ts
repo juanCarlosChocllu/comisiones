@@ -87,6 +87,8 @@ export class DetalleVenta {
   @Prop()
   marca:string
 
+
+
   @Prop({ type: Types.ObjectId, ref: 'Producto' })
   producto: Types.ObjectId;
 

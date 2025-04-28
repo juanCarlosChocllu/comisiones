@@ -42,7 +42,8 @@ export class VentaService {
   
     for (const sucursal of buscadorVentaDto.sucursal) {
       const asesores = await this.asesorService.listarAsesor(sucursal);
-  
+
+      
       const asesoresProcesados = await Promise.all(asesores.map(async (asesor) => {
         const [metas, ventas] = await Promise.all([
           this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal),
@@ -72,27 +73,23 @@ export class VentaService {
           totalDescuento: 0,
           ventas: [],
         };
+    
+        
   
         const ventasProcesadas = await Promise.all(ventas.map(async (venta) => {
+       
+          
           const detalles = await this.detalleVentaService.listarDetalleVenta(venta._id);
-  
+        
+          
           const detalleProcesado = await Promise.all(detalles.map(async (detalle) => {
             if (detalle.rubro === productoE.lente) {
-              const [combinacion, comisiones] = await Promise.all([
-                this.combinacionRecetaService.listarCombinacionPorVenta(detalle.combinacionReceta),
-                this.comisionRecetaService.listarComisionReceta(venta.precio, detalle.combinacionReceta),
-              ]);
-  
+              const  comisiones = await this.comisionRecetaService.listarComisionReceta(venta.precio, detalle.combinacionReceta)
               return {
                 combinacion: {
-                  id: combinacion._id,
-                  material: combinacion.material,
-                  tipoLente: combinacion.tipoLente,
-                  rango: combinacion.rango,
-                  colorLente: combinacion.colorLente,
-                  marcaLente: combinacion.marcaLente,
-                  tratamiento: combinacion.tratamiento,
-                  tipoColorLente: combinacion.tipoColorLente,
+
+                  descripcion:detalle.descripcion,
+                  id:detalle.combinacionReceta
                 },
                 importe: detalle.importe,
                 comisiones: comisiones.map((com) => ({
@@ -107,17 +104,16 @@ export class VentaService {
               detalle.rubro === productoE.lenteDeContacto ||
               detalle.rubro === productoE.gafa
             ) {
-              const [producto, comisiones] = await Promise.all([
-                this.productoService.verificarProductoventa(detalle.producto),
-                this.comisionProductoService.listarComosionPorProducto(detalle.producto, venta.precio),
-              ]);
+              const  comisiones = await 
+                this.comisionProductoService.listarComosionPorProducto(detalle.producto, venta.precio)
+          
   
               return {
                 producto: {
-                  id: producto._id,
-                  tipo: producto.tipoProducto,
-                  marca: producto.marca,
-                  categoria: producto.categoria,
+                  id: detalle._id,
+                  tipo: detalle.rubro,
+                  marca: detalle.marca,
+           
                 },
                 importe: detalle.importe,
                 comisiones: comisiones.map((com) => ({

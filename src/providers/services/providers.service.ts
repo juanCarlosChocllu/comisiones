@@ -186,7 +186,9 @@ export class ProvidersService {
               importe: data.importe,
               rubro: data.rubro,
               venta: venta._id,
-              marca:producto.marca
+              marca:producto.marca,
+             
+              
             };
             await this.ventaService.tieneProducto(venta._id, true);
             await this.detalleVentaService.guardarDetalleVenta(detalle);

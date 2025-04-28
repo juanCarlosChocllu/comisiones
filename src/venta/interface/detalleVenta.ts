@@ -17,4 +17,8 @@ export interface detalleVentaI{
       descripcion?:string
 
       marca?:string
+
+ 
+
+      
 }
