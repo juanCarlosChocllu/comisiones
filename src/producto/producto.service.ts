@@ -65,10 +65,10 @@ export class ProductoService {
   }
 
   async verificarProducto(codigoMia:string) {
-   /* const producto = await this.producto.aggregate([
+    const producto = await this.producto.aggregate([
       {
         $match: {
-          tipoProducto: tipoProducto,
+          codigoMia: codigoMia,
         },
       },
       {
@@ -80,25 +80,15 @@ export class ProductoService {
         },
       },
       {
-        $unwind: { path: '$marca', preserveNullAndEmptyArrays: false },
-      },
-
-      {
-        $match: {
-          'marca.nombre': marca,
-        },
-      },
-      {
         $project: {
           tipoProducto: 1,
-          marca: '$marca.nombre',
+          marca: { $arrayElemAt: ['$marca.nombre', 0] },
         },
       },
     ]);
 
-    return producto[0];*/
-    const producto = await this.producto.findOne({codigoMia:codigoMia})
-    return producto
+ 
+    return producto[0]
   }
 
   async verificarProductoventa(

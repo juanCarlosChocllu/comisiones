@@ -13,4 +13,8 @@ export interface detalleVentaI{
       producto?: Types.ObjectId;
     
       rubro: string;
+
+      descripcion?:string
+
+      marca?:string
 }

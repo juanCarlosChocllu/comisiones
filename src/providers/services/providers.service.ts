@@ -69,7 +69,7 @@ export class ProvidersService {
         ),
       );
 
-      await this.guardardataVenta(ventas.data);
+     return  await this.guardardataVenta(ventas.data);
     } catch (error) {
       console.log(error);
     }
@@ -168,6 +168,7 @@ export class ProvidersService {
                 importe: data.importe,
                 rubro: data.rubro,
                 venta: venta._id,
+                descripcion:`${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`
               };
               await this.ventaService.tieneReceta(venta._id, true);
               await this.detalleVentaService.guardarDetalleVenta(detalle);
@@ -185,6 +186,7 @@ export class ProvidersService {
               importe: data.importe,
               rubro: data.rubro,
               venta: venta._id,
+              marca:producto.marca
             };
             await this.ventaService.tieneProducto(venta._id, true);
             await this.detalleVentaService.guardarDetalleVenta(detalle);
