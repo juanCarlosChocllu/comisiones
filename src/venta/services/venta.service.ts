@@ -48,9 +48,7 @@ export class VentaService {
         const [metas, ventas] = await Promise.all([
           this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal),
           this.listarVentasPorAsesor(asesor._id, buscadorVentaDto.fechaInicio,buscadorVentaDto.fechaFin)
-        ]);
-
-        
+        ]); 
         const ventaAsesor: RegistroVentas = {
           metaProductosVip: metas,
           sucursal: asesor.sucursalNombre,
@@ -63,6 +61,7 @@ export class VentaService {
           montoTotal: 0,
           totalDescuento: 0,
           ventas: [],
+          
         };
     
         
@@ -168,7 +167,7 @@ export class VentaService {
     let monturavip: number = 0;
     let gafaVip: number = 0;
     let lenteDeContacto: number = 0;
-    //console.log(venta.sucursal);
+
 
     for (const vent of venta.ventas) {
       for (const detalle of vent.detalle) {

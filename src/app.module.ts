@@ -24,6 +24,10 @@ import { ColorModule } from './color/color.module';
 import { TipoVentaModule } from './tipo-venta/tipo-venta.module';
 import { ZonaModule } from './zona/zona.module';
 import { MetasProductoVipModule } from './metas-producto-vip/metas-producto-vip.module';
+import { AutenticacionModule } from './autenticacion/autenticacion.module';
+import { UsuarioModule } from './usuario/usuario.module';
+import { APP_GUARD } from '@nestjs/core';
+import { TokenGuard } from './autenticacion/guards/token/token.guard';
 
 
 @Module({
@@ -55,8 +59,15 @@ import { MetasProductoVipModule } from './metas-producto-vip/metas-producto-vip.
     TipoVentaModule,
     ZonaModule,
     MetasProductoVipModule,
+    AutenticacionModule,
+    UsuarioModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    /*{
+      provide:APP_GUARD,
+      useClass:TokenGuard
+    }*/
+  ],
 })
 export class AppModule {}
