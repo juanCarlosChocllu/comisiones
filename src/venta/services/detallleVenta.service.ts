@@ -10,7 +10,11 @@ export class DetalleVentaService {
   constructor(@InjectModel(DetalleVenta.name) private readonly detalleVenta:Model<DetalleVenta>) {}
 
    async guardarDetalleVenta(data:detalleVentaI){
-     return this.detalleVenta.create(data)
+     const detalle = await this.detalleVenta.findOne(data)
+     if(!detalle) {
+      return this.detalleVenta.create(data)
+     }
+  
    } 
 
    async listarDetalleVenta(venta:Types.ObjectId){

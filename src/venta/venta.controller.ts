@@ -8,12 +8,8 @@ import { BuscadorVentaDto } from './dto/buscadorVenta.dto,';
 export class VentaController {
   constructor(private readonly ventaService: VentaService) {}
 
-  @Post()
-  create(@Body() createVentaDto: CreateVentaDto) {
-    return this.ventaService.create(createVentaDto);
-  }
 
-  @Get()
+  @Post()
   listdarVentas(@Body() buscadorVentaDto:BuscadorVentaDto) {
     return this.ventaService.listarVentas( buscadorVentaDto);
   }

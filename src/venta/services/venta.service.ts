@@ -37,24 +37,34 @@ export class VentaService {
     return 'This action adds a new venta';
   }
 
-  async listarVentas(buscadorVentaDto:BuscadorVentaDto) {
+  async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const data: RegistroVentas[] = [];
+  
     for (const sucursal of buscadorVentaDto.sucursal) {
       const asesores = await this.asesorService.listarAsesor(sucursal);
-    
-      let contador = 0;
-      for (const asesor of asesores) {
-        contador++;
-        const metas =
-          await this.metasProductoVipService.listarMetasProductosVipPorSucursal(
-            asesor.idSucursal,
-          );
+  
+      const asesoresProcesados = await Promise.all(asesores.map(async (asesor) => {
+        const [metas, ventas] = await Promise.all([
+          this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal),
+          this.venta.find({
+            asesor: asesor._id,
+            flag: flagVenta.finalizado,
+            comisiona:true
+            ,
+             tipoVenta:{$in :[new Types.ObjectId('680cf0e721a6f4ae4df636e7') , new Types.ObjectId('680cf0a921a6f4ae4df591f7')]} ,
+            fechaFinalizacion: {
+              $gte: new Date(buscadorVentaDto.fechaInicio),
+              $lte: new Date(buscadorVentaDto.fechaFin),
+            },
+          }),
+        ]);
   
         const ventaAsesor: RegistroVentas = {
           metaProductosVip: metas,
           sucursal: asesor.sucursalNombre,
           asesor: asesor.nombre,
           empresa: asesor.empresa,
+          
           gafaVip: 0,
           monturaVip: 0,
           lenteDeContacto: 0,
@@ -63,51 +73,17 @@ export class VentaService {
           ventas: [],
         };
   
-        const ventas = await this.venta.find({ 
-          asesor: asesor._id , 
-          flag:flagVenta.finalizado,
-          fechaFinalizacion:{
-            $gte:new Date(buscadorVentaDto.fechaInicio),
-            $lte:new Date (buscadorVentaDto.fechaFin)
-          }
-        
-        });
-        for (const venta of ventas) {
-          const detalles = await this.detalleVentaService.listarDetalleVenta(
-            venta._id,
-          );
+        const ventasProcesadas = await Promise.all(ventas.map(async (venta) => {
+          const detalles = await this.detalleVentaService.listarDetalleVenta(venta._id);
   
-          const ventaData: VentaAsesor = {
-            idVenta: venta.id_venta,
-  
-            descuento: venta.descuento,
-            montoTotal: venta.montoTotal,
-            comisiona: venta.comisiona,
-            tipo: venta.tipo,
-            tipo2: venta.tipo2,
-            nombrePromocion: venta.nombrePromocion,
-            tipoDescuento: venta.tipoDescuento,
-            descuentoPromocion: venta.descuentoPromocion,
-            descuentoPromocion2: venta.descuentoPromocion2,
-  
-            detalle: [],
-          };
-  
-          for (const detalle of detalles) {
+          const detalleProcesado = await Promise.all(detalles.map(async (detalle) => {
             if (detalle.rubro === productoE.lente) {
-              const combinacion =
-                await this.combinacionRecetaService.listarCombinacionPorVenta(
-                  detalle.combinacionReceta,
-                );
-              
-               
-              const comisiones =
-                await this.comisionRecetaService.listarComisionReceta(
-                  venta.precio,
-                  combinacion._id
-                );
+              const [combinacion, comisiones] = await Promise.all([
+                this.combinacionRecetaService.listarCombinacionPorVenta(detalle.combinacionReceta),
+                this.comisionRecetaService.listarComisionReceta(venta.precio, detalle.combinacionReceta),
+              ]);
   
-              const ventaCombinacion: DetalleVenta = {
+              return {
                 combinacion: {
                   id: combinacion._id,
                   material: combinacion.material,
@@ -126,57 +102,60 @@ export class VentaService {
                   precio: com.precio,
                 })),
               };
+            } else if (
+              detalle.rubro === productoE.montura ||
+              detalle.rubro === productoE.lenteDeContacto ||
+              detalle.rubro === productoE.gafa
+            ) {
+              const [producto, comisiones] = await Promise.all([
+                this.productoService.verificarProductoventa(detalle.producto),
+                this.comisionProductoService.listarComosionPorProducto(detalle.producto, venta.precio),
+              ]);
   
-              ventaData.detalle.push(ventaCombinacion);
+              return {
+                producto: {
+                  id: producto._id,
+                  tipo: producto.tipoProducto,
+                  marca: producto.marca,
+                  categoria: producto.categoria,
+                },
+                importe: detalle.importe,
+                comisiones: comisiones.map((com) => ({
+                  id: com._id,
+                  nombre: com.nombre,
+                  monto: com.monto,
+                  precio: com.precio,
+                })),
+              };
             } else {
-              if (
-                detalle.rubro === productoE.montura ||
-                detalle.rubro === productoE.lenteDeContacto ||
-                detalle.rubro === productoE.gafa
-              ) {
-                const producto =
-                  await this.productoService.verificarProductoventa(
-                    detalle.producto,
-                  );
-              
-                const comisiones =
-                  await this.comisionProductoService.listarComosionPorProducto(
-                    producto._id, venta.precio
-                  );
-  
-                const ventaProducto = {
-                  producto: {
-                    id: producto._id,
-                    tipo: producto.tipoProducto,
-                    marca: producto.marca,
-                    categoria: producto.categoria,
-                  },
-                  importe: detalle.importe,
-                  comisiones: comisiones.map((com) => ({
-                    id: com._id,
-                    nombre: com.nombre,
-                    monto: com.monto,
-                    precio: com.precio,
-                  })),
-                };
-  
-                ventaData.detalle.push(ventaProducto);
-              }else {
-                const servicios = {
-                  servicios: {
-                    id: detalle._id,
-                    tipo: detalle.rubro,     
-                  },
-                  importe: detalle.importe
-              }
-              ventaData.detalle.push(servicios);
-              }
+              return {
+                servicios: {
+                  id: detalle._id,
+                  tipo: detalle.rubro,
+                },
+                importe: detalle.importe,
+              };
             }
-          }
-          ventaAsesor.ventas.push(ventaData);
-        }
-        const { gafaVip, monturavip, lenteDeContacto } =
-          this.monturasYgafasVip(ventaAsesor);
+          }));
+  
+          return {
+            idVenta: venta.id_venta,
+            descuento: venta.descuento,
+            montoTotal: venta.montoTotal,
+            comisiona: venta.comisiona,
+            tipo: venta.tipo,
+            tipo2: venta.tipo2,
+            nombrePromocion: venta.nombrePromocion,
+            tipoDescuento: venta.tipoDescuento,
+            descuentoPromocion: venta.descuentoPromocion,
+            descuentoPromocion2: venta.descuentoPromocion2,
+            detalle: detalleProcesado,
+          };
+        }));
+  
+        ventaAsesor.ventas = ventasProcesadas;
+  
+        const { gafaVip, monturavip, lenteDeContacto } = this.monturasYgafasVip(ventaAsesor);
         ventaAsesor.gafaVip = gafaVip;
         ventaAsesor.monturaVip = monturavip;
         ventaAsesor.lenteDeContacto = lenteDeContacto;
@@ -188,14 +167,16 @@ export class VentaService {
           (acc, item) => acc + item.montoTotal,
           0,
         );
-        data.push(ventaAsesor);
-      }
   
- 
+        return ventaAsesor;
+      }));
+  
+      data.push(...asesoresProcesados);
     }
+  
     return data;
   }
-
+  
   private monturasYgafasVip(venta: RegistroVentas) {
     let monturavip: number = 0;
     let gafaVip: number = 0;
