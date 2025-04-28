@@ -47,19 +47,34 @@ export class VentaService {
       const asesoresProcesados = await Promise.all(asesores.map(async (asesor) => {
         const [metas, ventas] = await Promise.all([
           this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal),
-          this.venta.find({
-            asesor: asesor._id,
-            flag: flagVenta.finalizado,
-            comisiona:true
-            ,
-             tipoVenta:{$in :[new Types.ObjectId('680cf0e721a6f4ae4df636e7') , new Types.ObjectId('680cf0a921a6f4ae4df591f7')]} ,
-            fechaFinalizacion: {
-              $gte: new Date(buscadorVentaDto.fechaInicio),
-              $lte: new Date(buscadorVentaDto.fechaFin),
+          this.venta.aggregate( [
+            {
+              $match:{
+                asesor: asesor._id,
+                flag: flagVenta.finalizado,
+                comisiona:true,
+                 tipoVenta:{$in :[new Types.ObjectId('680cf0e721a6f4ae4df636e7') , new Types.ObjectId('680cf0a921a6f4ae4df591f7')]} ,
+                fechaFinalizacion: {
+                  $gte: new Date(buscadorVentaDto.fechaInicio),
+                  $lte: new Date(buscadorVentaDto.fechaFin),
+                },
+              }
             },
-          }),
+            {
+              $project:{
+                id_venta:1,
+                montoTotal:1,
+                tipo:1,
+                tipo2:1,
+                tipoDescuento:1,
+                precio:1
+              }
+            }
+
+          ]),
         ]);
-  
+        console.log(ventas);
+        
         const ventaAsesor: RegistroVentas = {
           metaProductosVip: metas,
           sucursal: asesor.sucursalNombre,
