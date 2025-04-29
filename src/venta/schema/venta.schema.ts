@@ -6,7 +6,6 @@ import { flag } from 'src/core/enum/flag';
 export class Venta {
   @Prop()
   id_venta: string;
-
   @Prop()
   montoTotal: number;
 
@@ -87,7 +86,8 @@ export class DetalleVenta {
   @Prop()
   marca:string
 
-
+ // @Prop()
+  //comision:number[]
 
   @Prop({ type: Types.ObjectId, ref: 'Producto' })
   producto: Types.ObjectId;

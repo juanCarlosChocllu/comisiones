@@ -18,6 +18,8 @@ export interface detalleVentaI{
 
       marca?:string
 
+   //   comision?:number[]
+
  
 
       

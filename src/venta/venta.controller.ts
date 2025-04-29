@@ -3,6 +3,8 @@ import { VentaService } from './services/venta.service';
 import { CreateVentaDto } from './dto/create-venta.dto';
 import { UpdateVentaDto } from './dto/update-venta.dto';
 import { BuscadorVentaDto } from './dto/buscadorVenta.dto,';
+import { Types } from 'mongoose';
+import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 
 @Controller('venta')
 export class VentaController {
@@ -14,9 +16,13 @@ export class VentaController {
     return this.ventaService.listarVentas( buscadorVentaDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ventaService.findOne(+id);
+  @Get('detalle/:asesor/:fechaInicio/:fechaFin')
+  findOne(
+    @Param('asesor', ValidateIdPipe) asesor:Types.ObjectId,
+    @Param('fechaInicio') fechaInicio:string,
+    @Param('fechaFin') fechaFin:string
+ ) {
+    return this.ventaService.ventaConSusComiones(asesor,fechaInicio, fechaFin);
   }
 
   @Patch(':id')

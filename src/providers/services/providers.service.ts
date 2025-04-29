@@ -31,6 +31,9 @@ import { ProductoService } from 'src/producto/producto.service';
 import { TipoVentaService } from 'src/tipo-venta/tipo-venta.service';
 import * as ExcelJS from 'exceljs';
 import { DataProductoI, productosExcelI } from 'src/producto/interface/dataProducto';
+import { ComisionRecetaService } from 'src/comision-receta/comision-receta.service';
+import { ComisionProducto } from 'src/comision-producto/schema/comision-producto.schema';
+import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
 @Injectable()
 export class ProvidersService {
   constructor(
@@ -52,6 +55,8 @@ export class ProvidersService {
     private readonly tipoMonturaService: TipoMonturaService,
     private readonly productoService: ProductoService,
     private readonly tipoVentaService: TipoVentaService,
+    private readonly comisionRecetaService: ComisionRecetaService,
+    private readonly comisionProductoService: ComisionProductoService,
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -106,7 +111,7 @@ export class ProvidersService {
           tipo2: data.tipo2,
           tipoDescuento: data.tipoDescuento,
           flag: data.flag,
-          precio: data.precio,
+          precio: data.precio,// se veridica en cada venta
           fechaVenta: new Date(data.fecha),
           ...(data.fecha_finalizacion && {
             fechaFinalizacion: new Date(data.fecha_finalizacion),
@@ -162,12 +167,16 @@ export class ProvidersService {
               );
 
             if (recetaCombinacion && venta) {
+            //  const comision = await this.comisionRecetaService.listarComisionReceta(data.precio, recetaCombinacion._id)
+           
+              
               const detalle: detalleVentaI = {
                 cantidad: 1,
                 combinacionReceta: recetaCombinacion._id,
                 importe: data.importe,
                 rubro: data.rubro,
                 venta: venta._id,
+               // comision:comision.map((item => item.monto)),
                 descripcion:`${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`
               };
               await this.ventaService.tieneReceta(venta._id, true);
@@ -180,12 +189,16 @@ export class ProvidersService {
           );
         
           if (producto) {
+           // const comision = await this.comisionProductoService.listarComosionPorProducto(producto._id, data.precio)
+
+           
             const detalle: detalleVentaI = {
               cantidad: 1,
               producto: producto._id,
               importe: data.importe,
               rubro: data.rubro,
               venta: venta._id,
+             // comision:comision.map((item => item.monto)),
               marca:producto.marca,
              
               

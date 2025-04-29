@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateVentaDto } from '../dto/create-venta.dto';
 import { UpdateVentaDto } from '../dto/update-venta.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Venta } from '../schema/venta.schema';
+import { DetalleVenta, Venta } from '../schema/venta.schema';
 import { Model, Types } from 'mongoose';
 import { RegistroVentas, VentaAsesor, VentaI } from '../interface/venta';
 import { AsesorService } from 'src/asesor/asesor.service';
@@ -15,15 +15,16 @@ import { ComisionRecetaService } from 'src/comision-receta/comision-receta.servi
 import { ProductoService } from 'src/producto/producto.service';
 import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
 import { MetasProductoVipService } from 'src/metas-producto-vip/metas-producto-vip.service';
-import { DetalleVenta } from './../interface/venta';
-import { lstat } from 'fs';
 import { PreciosService } from 'src/precios/service/precios.service';
 import { BuscadorVentaDto } from '../dto/buscadorVenta.dto,';
 import { flagVenta } from '../enum/flagVenta';
+import { flag } from 'src/core/enum/flag';
+import { Sucursal } from 'src/sucursal/schema/sucursal.schema';
 @Injectable()
 export class VentaService {
   constructor(
     @InjectModel(Venta.name) private readonly venta: Model<Venta>,
+    @InjectModel(DetalleVenta.name) private readonly DetalleVenta: Model<Venta>,
     private readonly asesorService: AsesorService,
     private readonly detalleVentaService: DetalleVentaService,
     private combinacionRecetaService: CombinacionRecetaService,
@@ -37,9 +38,9 @@ export class VentaService {
     return 'This action adds a new venta';
   }
 
-  async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
+  /* async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const data: RegistroVentas[] = [];
-  
+
     for (const sucursal of buscadorVentaDto.sucursal) {
       const asesores = await this.asesorService.listarAsesor(sucursal);
 
@@ -61,7 +62,7 @@ export class VentaService {
           montoTotal: 0,
           totalDescuento: 0,
           ventas: [],
-          
+
         };
     
         
@@ -161,13 +162,308 @@ export class VentaService {
     }
   
     return data;
+  }*/
+
+   
+  
+  
+  async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
+    const detalles = await this.DetalleVenta.aggregate([
+      {
+        $lookup: {
+          from: 'Venta',
+          foreignField: '_id',
+          localField: 'venta',
+          as: 'venta',
+        },
+      },
+      { $unwind: { path: '$venta', preserveNullAndEmptyArrays: false } },
+      {
+        $match: {
+          'venta.sucursal': {
+            $in: buscadorVentaDto.sucursal.map(
+              (item) => new Types.ObjectId(item),
+            ),
+          },
+          'venta.fecha': {
+            $gte: new Date(buscadorVentaDto.fechaInicio),
+            $lte: new Date(buscadorVentaDto.fechaFin),
+          },
+          'venta.flag': flagVenta.finalizado,
+        },
+      },
+      {
+        $lookup: {
+          from: 'Asesor',
+          foreignField: '_id',
+          localField: 'venta.asesor',
+          as: 'asesor',
+        },
+      },
+      {
+        $unwind: { path: '$asesor', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'Sucursal',
+          foreignField: '_id',
+          localField: 'venta.sucursal',
+          as: 'sucursal',
+        },
+      },
+      {
+        $unwind: { path: '$sucursal', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $group: {
+          _id: '$asesor._id',
+          sucursal: { $first: '$sucursal.nombre' },
+          asesor: { $first: '$asesor.nombre' },
+          descuento: { $sum: '$venta.descuento' },
+          importe: { $sum: '$importe' },
+          montoTotal: { $sum: '$venta.montoTotal' },
+          tickets:{$addToSet:'$producto'},
+    
+         
+        },
+      },
+
+      {
+        $project: {
+         sucursal:1,
+          asesor: 1,
+          descuento: 1,
+          importe: 1,
+          montoTotal: 1,
+          tickets: { $size: '$tickets' }, 
+        },
+      }
+    ]);
+    return detalles;
+  }
+
+  async ventaConSusComiones(
+    asesor: Types.ObjectId,
+    fechaInicio: string,
+    fechaFin: string,
+  ) {
+    const ventas = await this.venta.aggregate([
+      {
+        $match: {
+          asesor: new Types.ObjectId(asesor),
+          fecha: {
+            $gte: new Date(fechaInicio),
+            $lte: new Date(fechaFin),
+          },
+          flag: flagVenta.finalizado,
+        },
+      },
+      {
+        $lookup:{
+          from:'Sucursal',
+           foreignField:'_id',
+           localField:'sucursal',
+           as:'sucursal'
+        }
+      },
+     
+      {
+        $project: {
+          sucursal: { $arrayElemAt: ["$sucursal.nombre", 0]},
+          id_venta: 1,
+          montoTotal: 1,
+          tipo: 1,
+          tipo2: 1,
+          tipoDescuento: 1,
+          descuento: 1,
+          precio: 1,
+        },
+      },
+    ]);
+   
+    
+    const data = await Promise.all(
+      ventas.map(async (venta) => {
+        const dataventa = {
+          sucursal:venta.sucursal,
+          id_venta: venta.id_venta,
+          descuento: venta.descuento,
+          detalle: [],
+        };
+  
+        const detalles = await this.detalleVentaService.listarDetalleVenta(venta._id);
+  
+        const detalleConComisiones = await Promise.all(
+          detalles.map(async (detalle) => {
+            if (detalle.rubro === productoE.lente) {
+              const comisiones = await this.comisionRecetaService.listarComisionReceta(
+                venta.precio,
+                detalle.combinacionReceta,
+              );
+              return {
+                combinacion: {
+                  descripcion: detalle.descripcion,
+                  id: detalle.combinacionReceta,
+                },
+                importe: detalle.importe,
+                comisiones: comisiones.map((com) => ({
+                  id: com._id,
+                  nombre: com.nombre,
+                  monto: com.monto,
+                  precio: com.precio,
+                })),
+              };
+            } else if (
+              detalle.rubro === productoE.montura ||
+              detalle.rubro === productoE.lenteDeContacto ||
+              detalle.rubro === productoE.gafa
+            ) {
+              const comisiones = await this.comisionProductoService.listarComosionPorProducto(
+                detalle.producto,
+                venta.precio,
+              );
+              return {
+                producto: {
+                  id: detalle._id,
+                  tipo: detalle.rubro,
+                  marca: detalle.marca,
+                },
+                importe: detalle.importe,
+                comisiones: comisiones.map((com) => ({
+                  id: com._id,
+                  nombre: com.nombre,
+                  monto: com.monto,
+                  precio: com.precio,
+                })),
+              };
+            } else {
+              return {
+                servicios: {
+                  id: detalle._id,
+                  tipo: detalle.rubro,
+                },
+                importe: detalle.importe,
+              };
+            }
+          })
+        );
+  
+        dataventa.detalle = detalleConComisiones;
+        return dataventa;
+      })
+    );
+    const { gafaVip, lenteDeContacto, monturavip } = this.monturasYgafasVip2(data);
+
+    return {
+      gafaVip,
+      lenteDeContacto,
+      monturavip,
+      data,
+     
+    };
   }
   
-  private monturasYgafasVip(venta: RegistroVentas) {
+  private monturasYgafasVip2(ventas: any[]) {
     let monturavip: number = 0;
     let gafaVip: number = 0;
     let lenteDeContacto: number = 0;
 
+    for (const vent of ventas) {
+    
+      
+      for (const detalle of vent.detalle) {
+        if (detalle.producto && detalle.producto.tipo == productoE.montura) {
+  
+          
+          if (vent.sucursal == 'SUCRE  CENTRAL') {
+            if (
+              detalle.producto.marca == 'PRADA' ||
+              detalle.producto.marca == 'GUCCI' ||
+              detalle.producto.marca == 'TOM FORD' ||
+              detalle.producto.marca == 'BURBERRY' ||
+              detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
+              detalle.producto.marca == 'FRED' ||
+              detalle.producto.marca == 'LOEWE' ||
+              detalle.producto.marca == 'PORSHE DESIGN' ||
+              detalle.producto.marca == 'RINOWA' ||
+              detalle.producto.marca == 'MONTBLANC' ||
+              detalle.producto.marca == 'TIFFANY'
+            ) {
+              monturavip++;
+            }
+          } else if (
+            detalle.producto &&
+            detalle.producto.tipo == productoE.montura &&
+            detalle.importe >= 700
+          ) {
+            monturavip++;
+          }
+        }
+
+        if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
+          if (vent.sucursal == 'SUCRE  CENTRAL') {
+            if (
+              detalle.producto.marca == 'PRADA' ||
+              detalle.producto.marca == 'GUCCI' ||
+              detalle.producto.marca == 'TOM FORD' ||
+              detalle.producto.marca == 'BURBERRY' ||
+              detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
+              detalle.producto.marca == 'FRED' ||
+              detalle.producto.marca == 'LOEWE' ||
+              detalle.producto.marca == 'PORSHE DESIGN' ||
+              detalle.producto.marca == 'RINOWA' ||
+              detalle.producto.marca == 'MONTBLANC' ||
+              detalle.producto.marca == 'TIFFANY'
+            ) {
+              gafaVip++;
+            }
+          } else if (
+            detalle.producto &&
+            detalle.producto.tipo == productoE.gafa &&
+            detalle.importe >= 700
+          ) {
+            gafaVip++;
+          }
+        }
+
+        if (
+          detalle.producto &&
+          detalle.producto.tipo == productoE.lenteDeContacto
+        ) {
+          if (vent.sucursal == 'SUCRE  CENTRAL') {
+            if (
+              detalle.producto.marca == 'PRADA' ||
+              detalle.producto.marca == 'GUCCI' ||
+              detalle.producto.marca == 'TOM FORD' ||
+              detalle.producto.marca == 'BURBERRY' ||
+              detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
+              detalle.producto.marca == 'FRED' ||
+              detalle.producto.marca == 'LOEWE' ||
+              detalle.producto.marca == 'PORSHE DESIGN' ||
+              detalle.producto.marca == 'RINOWA' ||
+              detalle.producto.marca == 'MONTBLANC' ||
+              detalle.producto.marca == 'TIFFANY'
+            ) {
+              lenteDeContacto++;
+            }
+          } else if (
+            detalle.producto &&
+            detalle.producto.tipo == productoE.lenteDeContacto &&
+            detalle.importe >= 700
+          ) {
+            lenteDeContacto++;
+          }
+        }
+      }
+    }
+
+    return { monturavip, gafaVip, lenteDeContacto };
+  }
+
+  private monturasYgafasVip(venta: any) {
+    let monturavip: number = 0;
+    let gafaVip: number = 0;
+    let lenteDeContacto: number = 0;
 
     for (const vent of venta.ventas) {
       for (const detalle of vent.detalle) {
@@ -257,34 +553,42 @@ export class VentaService {
     return { monturavip, gafaVip, lenteDeContacto };
   }
 
-  private async listarVentasPorAsesor (asesor:Types.ObjectId, fechaInicio:string, fechaFin:string){
-   const ventas = await  this.venta.aggregate( [
+  private async listarVentasPorAsesor(
+    asesor: Types.ObjectId,
+    fechaInicio: string,
+    fechaFin: string,
+  ) {
+    const ventas = await this.venta.aggregate([
       {
-        $match:{
+        $match: {
           asesor: new Types.ObjectId(asesor),
           flag: flagVenta.finalizado,
-          comisiona:true,
-           tipoVenta:{$in :[new Types.ObjectId('680cf0e721a6f4ae4df636e7') , new Types.ObjectId('680cf0a921a6f4ae4df591f7')]} ,
+          comisiona: true,
+          tipoVenta: {
+            $in: [
+              new Types.ObjectId('680cf0e721a6f4ae4df636e7'),
+              new Types.ObjectId('680cf0a921a6f4ae4df591f7'),
+            ],
+          },
           fechaFinalizacion: {
             $gte: new Date(fechaInicio),
             $lte: new Date(fechaFin),
           },
-        }
+        },
       },
       {
-        $project:{
-          id_venta:1,
-          montoTotal:1,
-          tipo:1,
-          tipo2:1,
-          tipoDescuento:1,
-          descuento:1,
-          precio:1
-        }
-      }
-
-    ])
-    return ventas
+        $project: {
+          id_venta: 1,
+          montoTotal: 1,
+          tipo: 1,
+          tipo2: 1,
+          tipoDescuento: 1,
+          descuento: 1,
+          precio: 1,
+        },
+      },
+    ]);
+    return ventas;
   }
 
   findOne(id: number) {

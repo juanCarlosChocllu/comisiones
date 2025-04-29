@@ -19,6 +19,8 @@ import { MarcaModule } from 'src/marca/marca.module';
 import { TipoMonturaModule } from 'src/tipo-montura/tipo-montura.module';
 import { ProductoModule } from 'src/producto/producto.module';
 import { TipoVentaModule } from 'src/tipo-venta/tipo-venta.module';
+import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
+import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module';
 
 @Module({
   imports: [
@@ -38,7 +40,9 @@ import { TipoVentaModule } from 'src/tipo-venta/tipo-venta.module';
     MarcaModule,
     TipoMonturaModule,
     ProductoModule,
-    TipoVentaModule
+    TipoVentaModule,
+    ComisionProductoModule,
+    ComisionRecetaModule
   ],
   controllers: [ProvidersController],
   providers: [ProvidersService],
