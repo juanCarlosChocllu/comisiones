@@ -15,7 +15,11 @@ import { TipoColorLente } from 'src/tipo-color-lente/schema/tipoColorLente.schem
 import { TipoLenteService } from 'src/tipo-lente/tipo-lente.service';
 import { productoE } from '../enum/productos';
 import { AsesorService } from 'src/asesor/asesor.service';
-import { combinacionReceta, comisionesI, GuardarComisionRecetaI } from 'src/combinacion-receta/interface/combinacionReceta';
+import {
+  combinacionReceta,
+  comisionesI,
+  GuardarComisionRecetaI,
+} from 'src/combinacion-receta/interface/combinacionReceta';
 import { CombinacionRecetaService } from 'src/combinacion-receta/combinacion-receta.service';
 import { VentaI } from 'src/venta/interface/venta';
 import { Types } from 'mongoose';
@@ -30,7 +34,10 @@ import { TipoMonturaService } from 'src/tipo-montura/tipo-montura.service';
 import { ProductoService } from 'src/producto/producto.service';
 import { TipoVentaService } from 'src/tipo-venta/tipo-venta.service';
 import * as ExcelJS from 'exceljs';
-import { DataProductoI, productosExcelI } from 'src/producto/interface/dataProducto';
+import {
+  DataProductoI,
+  productosExcelI,
+} from 'src/producto/interface/dataProducto';
 import { ComisionRecetaService } from 'src/comision-receta/comision-receta.service';
 import { ComisionProducto } from 'src/comision-producto/schema/comision-producto.schema';
 import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
@@ -74,7 +81,7 @@ export class ProvidersService {
         ),
       );
 
-     return  await this.guardardataVenta(ventas.data);
+      return await this.guardardataVenta(ventas.data);
     } catch (error) {
       console.log(error);
     }
@@ -111,7 +118,7 @@ export class ProvidersService {
           tipo2: data.tipo2,
           tipoDescuento: data.tipoDescuento,
           flag: data.flag,
-          precio: data.precio,// se veridica en cada venta
+          precio: data.precio, // se veridica en cada venta
           fechaVenta: new Date(data.fecha),
           ...(data.fecha_finalizacion && {
             fechaFinalizacion: new Date(data.fecha_finalizacion),
@@ -119,32 +126,23 @@ export class ProvidersService {
         };
         const venta = await this.ventaService.guardarVenta(ventaGuardar);
         if (data.rubro === productoE.lente) {
-          const coloLente = await this.colorLenteService.verificarColorLente(
-            data.atributo1,
-          );
-          const tipoLente = await this.tipoLenteService.guardarTipoLente(
-            data.atributo2,
-          );
-          const material = await this.materialService.guardarMaterial(
-            data.atributo3,
-          );
-
-          const tipoColorLente =
-            await this.tipoColorLenteService.verificarTipoColorLente(
-              data.atributo4,
-            );
-
-          const marca = await this.marcaLenteService.guardarMarcaLente(
-            data.atributo5,
-          );
-
-          const tratamiento = await this.tratamientoService.guardarTratamiento(
-            data.atributo6,
-          );
-
-          const rango = await this.rangoService.guardarRangoLente(
-            data.atributo7,
-          );
+          const [
+            coloLente,
+            tipoLente,
+            material,
+            tipoColorLente,
+            marca,
+            tratamiento,
+            rango,
+          ] = await Promise.all([
+            this.colorLenteService.verificarColorLente(data.atributo1),
+            this.tipoLenteService.guardarTipoLente(data.atributo2),
+            this.materialService.guardarMaterial(data.atributo3),
+            this.tipoColorLenteService.verificarTipoColorLente(data.atributo4),
+            this.marcaLenteService.guardarMarcaLente(data.atributo5),
+            this.tratamientoService.guardarTratamiento(data.atributo6),
+            this.rangoService.guardarRangoLente(data.atributo7),
+          ]);
 
           if (
             !!coloLente &&
@@ -167,220 +165,229 @@ export class ProvidersService {
               );
 
             if (recetaCombinacion && venta) {
-            //  const comision = await this.comisionRecetaService.listarComisionReceta(data.precio, recetaCombinacion._id)
-           
-              
+              //  const comision = await this.comisionRecetaService.listarComisionReceta(data.precio, recetaCombinacion._id)
+
               const detalle: detalleVentaI = {
                 cantidad: 1,
                 combinacionReceta: recetaCombinacion._id,
                 importe: data.importe,
                 rubro: data.rubro,
                 venta: venta._id,
-               // comision:comision.map((item => item.monto)),
-                descripcion:`${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`
+                // comision:comision.map((item => item.monto)),
+                descripcion: `${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`,
               };
               await this.ventaService.tieneReceta(venta._id, true);
               await this.detalleVentaService.guardarDetalleVenta(detalle);
+            }  else {
+                const codigo = this.combinacionRecetaService.generarCodigo(tratamiento.nombre, material.nombre, marca.nombre, coloLente.nombre, rango.nombre, tipoColorLente.nombre, tipoColorLente.nombre)
+                const recetaCombinacion = await this.combinacionRecetaService.crearCombinacion(
+                  tratamiento._id,
+                  material._id,
+                  marca._id,
+                  coloLente._id,
+                  rango._id,
+                  tipoLente._id,
+                  tipoColorLente._id,
+                  codigo
+                );
+                if(recetaCombinacion && venta) {
+                  
+                const detalle: detalleVentaI = {
+                  cantidad: 1,
+                  combinacionReceta: recetaCombinacion._id,
+                  importe: data.importe,
+                  rubro: data.rubro,
+                  venta: venta._id,
+                 // comision:comision.map((item => item.monto)),
+                  descripcion:`${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`
+                };
+                await this.ventaService.tieneReceta(venta._id, true);
+                await this.detalleVentaService.guardarDetalleVenta(detalle);
+
+                }
+                
+
+              
             }
           }
-        } else if (data.rubro == productoE.gafa || data.rubro == productoE.lenteDeContacto || data.rubro == productoE.montura) {
+        } else if (
+          data.rubro == productoE.gafa ||
+          data.rubro == productoE.lenteDeContacto ||
+          data.rubro == productoE.montura
+        ) {
           const producto = await this.productoService.verificarProducto(
-            data.codProducto
+            data.codProducto,
           );
-        
-          if (producto) {
-           // const comision = await this.comisionProductoService.listarComosionPorProducto(producto._id, data.precio)
 
-           
+          if (producto) {
+            // const comision = await this.comisionProductoService.listarComosionPorProducto(producto._id, data.precio)
+
             const detalle: detalleVentaI = {
               cantidad: 1,
               producto: producto._id,
               importe: data.importe,
               rubro: data.rubro,
               venta: venta._id,
-             // comision:comision.map((item => item.monto)),
-              marca:producto.marca,
-             
-              
+              // comision:comision.map((item => item.monto)),
+              marca: producto.marca,
             };
             await this.ventaService.tieneProducto(venta._id, true);
             await this.detalleVentaService.guardarDetalleVenta(detalle);
           }
-        }else {
-            const detalle: detalleVentaI = {
-              cantidad: 1,
-              importe: data.importe,
-              rubro: data.rubro,
-              venta: venta._id,
-            };
-            await this.detalleVentaService.guardarDetalleVenta(detalle);
-          
+        } else {
+          const detalle: detalleVentaI = {
+            cantidad: 1,
+            importe: data.importe,
+            rubro: data.rubro,
+            venta: venta._id,
+          };
+          await this.detalleVentaService.guardarDetalleVenta(detalle);
+          await this.ventaService.tipoPrecio(venta._id, data.precio);
         }
       }
     }
     return { status: HttpStatus.CREATED };
   }
 
-  
-  async guardarComisionesReceta(){
-    
-    const workbook= this.hojaDeTrabajo('./upload/archivo.xlsx')
+  async guardarComisionesReceta() {
+    const workbook = this.hojaDeTrabajo('./upload/archivo.xlsx');
     let contador = 0;
     for await (const hojas of workbook) {
       for await (const hoja of hojas) {
-          contador++;
-          if (contador === 1) continue;
-    
-          const tipoLente = hoja.getCell(1).value
-          const meterial = hoja.getCell(2).value
-          const tratamiento = hoja.getCell(3).value
-          const marca= hoja.getCell(4).value
-          const  tipoColor = hoja.getCell(5).value
-          const  rangos = hoja.getCell(6).value
-          const  colorLente = hoja.getCell(7).value
-          const  precio = hoja.getCell(8).value
-          const comisiones:comisionesI[] = [
-              {
-           
-                comision:Number(hoja.getCell(9).value),
-                monto:hoja.getCell(10).value,
-                
-              },
-              {
-                
-                comision:Number(hoja.getCell(12).value),
-                monto:hoja.getCell(13).value
-              }
-          ]
-          const data:GuardarComisionRecetaI ={
-            colorLente:String(colorLente).toUpperCase().trim(),
-            comisiones:comisiones,
-            marcaLente:String(marca).toUpperCase().trim(),
-            material:String(meterial).toUpperCase().trim(),
-            rango:String(rangos).toUpperCase().trim(),
-            tipoColorLente:String(tipoColor).toUpperCase().trim(),
-            tipoLente:String(tipoLente).toUpperCase().trim(),
-            tratamiento:String(tratamiento).toUpperCase().trim(),
-            precio:String(precio).toUpperCase().trim()
+        contador++;
+        if (contador === 1) continue;
 
-
-          }
-          await this.combinacionRecetaService.guardarComisionrecetaCombinacion(data)
+        const tipoLente = hoja.getCell(1).value;
+        const meterial = hoja.getCell(2).value;
+        const tratamiento = hoja.getCell(3).value;
+        const marca = hoja.getCell(4).value;
+        const tipoColor = hoja.getCell(5).value;
+        const rangos = hoja.getCell(6).value;
+        const colorLente = hoja.getCell(7).value;
+        const precio = hoja.getCell(8).value;
+        const comisiones: comisionesI[] = [
+          {
+            comision: Number(hoja.getCell(9).value),
+            monto: hoja.getCell(10).value,
+          },
+          {
+            comision: Number(hoja.getCell(12).value),
+            monto: hoja.getCell(13).value,
+          },
+        ];
+        const data: GuardarComisionRecetaI = {
+          colorLente: String(colorLente).toUpperCase().trim(),
+          comisiones: comisiones,
+          marcaLente: String(marca).toUpperCase().trim(),
+          material: String(meterial).toUpperCase().trim(),
+          rango: String(rangos).toUpperCase().trim(),
+          tipoColorLente: String(tipoColor).toUpperCase().trim(),
+          tipoLente: String(tipoLente).toUpperCase().trim(),
+          tratamiento: String(tratamiento).toUpperCase().trim(),
+          precio: String(precio).toUpperCase().trim(),
+        };
+        await this.combinacionRecetaService.guardarComisionrecetaCombinacion(
+          data,
+        );
       }
 
-     
-      
-      break
+      break;
     }
-    
   }
 
-   async guardarComisionesProducto(){
-      const workbook = this.hojaDeTrabajo('./upload/3.xlsx')
-      let contador:number=0
-      for await (const hojas of workbook) {
-        
-          for await (const hoja of hojas) {
-            contador ++
-            if(contador == 1) {
-              continue
-            }
-            const codigoMia = hoja.getCell(1).value
-            const codigoQr = hoja.getCell(2).value
-            const producto = hoja.getCell(3).value
-            const marca = hoja.getCell(4).value
-            const color = hoja.getCell(5).value
-            const serie = hoja.getCell(6).value
-            const genero = hoja.getCell(7).value
-            const tipoMontura = hoja.getCell(8).value
-            const categoria = hoja.getCell(9).value
-            const precio = hoja.getCell(10).value
-            
-            
-            const comisiones:comisionesI[] = [
-              {
-                comision:hoja.getCell(12).value,
-                monto:hoja.getCell(13).value,
-              },
-              {
-                
-                comision:hoja.getCell(14).value,
-                monto:hoja.getCell(15).value
-              }
-          ]
-            
-            const data:productosExcelI = {
-              codigoMia:String(codigoMia),
-              categoria:String(categoria),
-              color:String(color),
-              marca:String(marca),
-              serie:String(serie),
-              comisiones:comisiones,
-              codigoQR:String(codigoQr),
-              tipoProducto:String(producto),
-              precio:String(precio),
-              tipoMontura:String(tipoMontura),
-            
-            }
-           
-            await this.productoService.guardaProductoComisiones(data)
-          
-          }
-          break
-      }
-    
-      return {status:HttpStatus.OK}
-
-  }
-  
-  
-  async guardarComisionesProducto1(){
-    const workbook = this.hojaDeTrabajo('./upload/2.xlsx')
-    let contador:number=0
+  async guardarComisionesProducto() {
+    const workbook = this.hojaDeTrabajo('./upload/3.xlsx');
+    let contador: number = 0;
     for await (const hojas of workbook) {
-      
-        for await (const hoja of hojas) {
-          contador ++
-          if(contador == 1) {
-            continue
-          }
-          const codigoMia = hoja.getCell(1).value
-          const codigoQr = hoja.getCell(2).value
-          const producto = hoja.getCell(3).value
-          const marca = hoja.getCell(4).value
-          const color = hoja.getCell(5).value
-          const serie = hoja.getCell(6).value
-          const genero = hoja.getCell(7).value
-          const tipoMontura = hoja.getCell(8).value
-          const categoria = hoja.getCell(9).value
-          const precio = hoja.getCell(10).value
-        
-          
-          const data:productosExcelI = {
-            codigoMia:String(codigoMia),
-            categoria:String(categoria),
-            color:String(color),
-            marca:String(marca),
-            serie:String(serie),
-           
-            codigoQR:String(codigoQr),
-            tipoProducto:String(producto),
-            precio:String(precio),
-            tipoMontura:String(tipoMontura)
-          }
-          await this.productoService.guardaProductoExcel(data)
-        
+      for await (const hoja of hojas) {
+        contador++;
+        if (contador == 1) {
+          continue;
         }
+        const codigoMia = hoja.getCell(1).value;
+        const codigoQr = hoja.getCell(2).value;
+        const producto = hoja.getCell(3).value;
+        const marca = hoja.getCell(4).value;
+        const color = hoja.getCell(5).value;
+        const serie = hoja.getCell(6).value;
+        const genero = hoja.getCell(7).value;
+        const tipoMontura = hoja.getCell(8).value;
+        const categoria = hoja.getCell(9).value;
+        const precio = hoja.getCell(10).value;
+
+        const comisiones: comisionesI[] = [
+          {
+            comision: hoja.getCell(12).value,
+            monto: hoja.getCell(13).value,
+          },
+          {
+            comision: hoja.getCell(14).value,
+            monto: hoja.getCell(15).value,
+          },
+        ];
+
+        const data: productosExcelI = {
+          codigoMia: String(codigoMia),
+          categoria: String(categoria),
+          color: String(color),
+          marca: String(marca),
+          serie: String(serie),
+          comisiones: comisiones,
+          codigoQR: String(codigoQr),
+          tipoProducto: String(producto),
+          precio: String(precio),
+          tipoMontura: String(tipoMontura),
+        };
+
+        await this.productoService.guardaProductoComisiones(data);
+      }
+      break;
     }
-    
 
-}
+    return { status: HttpStatus.OK };
+  }
 
+  async guardarComisionesProducto1() {
+    const workbook = this.hojaDeTrabajo('./upload/2.xlsx');
+    let contador: number = 0;
+    for await (const hojas of workbook) {
+      for await (const hoja of hojas) {
+        contador++;
+        if (contador == 1) {
+          continue;
+        }
+        const codigoMia = hoja.getCell(1).value;
+        const codigoQr = hoja.getCell(2).value;
+        const producto = hoja.getCell(3).value;
+        const marca = hoja.getCell(4).value;
+        const color = hoja.getCell(5).value;
+        const serie = hoja.getCell(6).value;
+        const genero = hoja.getCell(7).value;
+        const tipoMontura = hoja.getCell(8).value;
+        const categoria = hoja.getCell(9).value;
+        const precio = hoja.getCell(10).value;
 
-  private hojaDeTrabajo(ruta:string) {
+        const data: productosExcelI = {
+          codigoMia: String(codigoMia),
+          categoria: String(categoria),
+          color: String(color),
+          marca: String(marca),
+          serie: String(serie),
+
+          codigoQR: String(codigoQr),
+          tipoProducto: String(producto),
+          precio: String(precio),
+          tipoMontura: String(tipoMontura),
+        };
+        await this.productoService.guardaProductoExcel(data);
+      }
+    }
+  }
+
+  private hojaDeTrabajo(ruta: string) {
     const workbook = new ExcelJS.stream.xlsx.WorkbookReader(ruta, {
-      entries:'emit'
+      entries: 'emit',
     });
-    return workbook
-  } 
+    return workbook;
+  }
 }

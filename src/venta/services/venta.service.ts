@@ -38,7 +38,7 @@ export class VentaService {
     return 'This action adds a new venta';
   }
 
-  /* async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
+  async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const data: RegistroVentas[] = [];
 
     for (const sucursal of buscadorVentaDto.sucursal) {
@@ -129,6 +129,7 @@ export class VentaService {
             idVenta: venta.id_venta,
             descuento: venta.descuento,
             montoTotal: venta.montoTotal,
+            precio: venta.precio,
             comisiona: venta.comisiona,
             tipo: venta.tipo,
             tipo2: venta.tipo2,
@@ -162,12 +163,12 @@ export class VentaService {
     }
   
     return data;
-  }*/
+  }
 
    
   
   
-  async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
+  /*async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const detalles = await this.DetalleVenta.aggregate([
       {
         $lookup: {
@@ -212,7 +213,7 @@ export class VentaService {
         },
       },
       {
-        $unwind: { path: '$sucursal', preserveNullAndEmptyArrays: false },
+        $unwind: { path: '$asesor', preserveNullAndEmptyArrays: false },
       },
       {
         $group: {
@@ -240,13 +241,15 @@ export class VentaService {
       }
     ]);
     return detalles;
-  }
+  }*/
 
-  async ventaConSusComiones(
+ /* async ventaConSusComiones(
     asesor: Types.ObjectId,
     fechaInicio: string,
     fechaFin: string,
   ) {
+    const dataAsesor =await  this.asesorService.asesorEmpresa(asesor)
+   const metas=await   this.metasProductoVipService.listarMetasProductosVipPorSucursal(dataAsesor.sucursal)
     const ventas = await this.venta.aggregate([
       {
         $match: {
@@ -290,9 +293,7 @@ export class VentaService {
           descuento: venta.descuento,
           detalle: [],
         };
-  
         const detalles = await this.detalleVentaService.listarDetalleVenta(venta._id);
-  
         const detalleConComisiones = await Promise.all(
           detalles.map(async (detalle) => {
             if (detalle.rubro === productoE.lente) {
@@ -355,111 +356,16 @@ export class VentaService {
     const { gafaVip, lenteDeContacto, monturavip } = this.monturasYgafasVip2(data);
 
     return {
+      metaProductosVip:metas,
+      empresa:dataAsesor.empresa,
       gafaVip,
       lenteDeContacto,
       monturavip,
       data,
      
     };
-  }
-  
-  private monturasYgafasVip2(ventas: any[]) {
-    let monturavip: number = 0;
-    let gafaVip: number = 0;
-    let lenteDeContacto: number = 0;
-
-    for (const vent of ventas) {
-    
-      
-      for (const detalle of vent.detalle) {
-        if (detalle.producto && detalle.producto.tipo == productoE.montura) {
-  
-          
-          if (vent.sucursal == 'SUCRE  CENTRAL') {
-            if (
-              detalle.producto.marca == 'PRADA' ||
-              detalle.producto.marca == 'GUCCI' ||
-              detalle.producto.marca == 'TOM FORD' ||
-              detalle.producto.marca == 'BURBERRY' ||
-              detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-              detalle.producto.marca == 'FRED' ||
-              detalle.producto.marca == 'LOEWE' ||
-              detalle.producto.marca == 'PORSHE DESIGN' ||
-              detalle.producto.marca == 'RINOWA' ||
-              detalle.producto.marca == 'MONTBLANC' ||
-              detalle.producto.marca == 'TIFFANY'
-            ) {
-              monturavip++;
-            }
-          } else if (
-            detalle.producto &&
-            detalle.producto.tipo == productoE.montura &&
-            detalle.importe >= 700
-          ) {
-            monturavip++;
-          }
-        }
-
-        if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
-          if (vent.sucursal == 'SUCRE  CENTRAL') {
-            if (
-              detalle.producto.marca == 'PRADA' ||
-              detalle.producto.marca == 'GUCCI' ||
-              detalle.producto.marca == 'TOM FORD' ||
-              detalle.producto.marca == 'BURBERRY' ||
-              detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-              detalle.producto.marca == 'FRED' ||
-              detalle.producto.marca == 'LOEWE' ||
-              detalle.producto.marca == 'PORSHE DESIGN' ||
-              detalle.producto.marca == 'RINOWA' ||
-              detalle.producto.marca == 'MONTBLANC' ||
-              detalle.producto.marca == 'TIFFANY'
-            ) {
-              gafaVip++;
-            }
-          } else if (
-            detalle.producto &&
-            detalle.producto.tipo == productoE.gafa &&
-            detalle.importe >= 700
-          ) {
-            gafaVip++;
-          }
-        }
-
-        if (
-          detalle.producto &&
-          detalle.producto.tipo == productoE.lenteDeContacto
-        ) {
-          if (vent.sucursal == 'SUCRE  CENTRAL') {
-            if (
-              detalle.producto.marca == 'PRADA' ||
-              detalle.producto.marca == 'GUCCI' ||
-              detalle.producto.marca == 'TOM FORD' ||
-              detalle.producto.marca == 'BURBERRY' ||
-              detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-              detalle.producto.marca == 'FRED' ||
-              detalle.producto.marca == 'LOEWE' ||
-              detalle.producto.marca == 'PORSHE DESIGN' ||
-              detalle.producto.marca == 'RINOWA' ||
-              detalle.producto.marca == 'MONTBLANC' ||
-              detalle.producto.marca == 'TIFFANY'
-            ) {
-              lenteDeContacto++;
-            }
-          } else if (
-            detalle.producto &&
-            detalle.producto.tipo == productoE.lenteDeContacto &&
-            detalle.importe >= 700
-          ) {
-            lenteDeContacto++;
-          }
-        }
-      }
-    }
-
-    return { monturavip, gafaVip, lenteDeContacto };
-  }
-
+  }*/
+ 
   private monturasYgafasVip(venta: any) {
     let monturavip: number = 0;
     let gafaVip: number = 0;
@@ -566,8 +472,8 @@ export class VentaService {
           comisiona: true,
           tipoVenta: {
             $in: [
-              new Types.ObjectId('680cf0e721a6f4ae4df636e7'),
-              new Types.ObjectId('680cf0a921a6f4ae4df591f7'),
+              new Types.ObjectId('681248f1f877868fbf0ef04b'),
+              new Types.ObjectId('68124908f877868fbf0f6dcc'),
             ],
           },
           fechaFinalizacion: {
@@ -630,6 +536,17 @@ export class VentaService {
       return await this.venta.updateOne(
         { _id: id },
         { tieneProducto: tieneProducto },
+      );
+    }
+  }
+
+  async tipoPrecio(id: Types.ObjectId, precio: string) {
+    const v = await this.venta.findOne({ _id: id });
+
+    if (v) {
+      return await this.venta.updateOne(
+        { _id: id },
+        { precio: precio },
       );
     }
   }

@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Asesor } from './schema/asesor.schema';
 import { Model, Types } from 'mongoose';
 import { ScursalAsesorI } from './interface/sucursalAsesor';
+import { from } from 'rxjs';
 
 @Injectable()
 export class AsesorService {
@@ -65,6 +66,42 @@ export class AsesorService {
       return  await this.asesor.create({nombre:nombre.toUpperCase(), sucursal:sucursal})
     }
     return asesor
+   }
+
+   async asesorEmpresa(asesor:Types.ObjectId){
+    const empresa = await this.asesor.aggregate([
+      {
+      $match:{
+        _id:new Types.ObjectId(asesor)
+
+      },
+      
+      },
+      {
+        $lookup:{
+          from:'Sucursal',
+          foreignField:'_id',
+          localField:'sucursal',
+          as:'sucursal'
+        }
+      },
+      {
+        $lookup:{
+          from:'Empresa',
+          foreignField:'_id',
+          localField:'sucursal.empresa',
+          as:'empresa'
+        }
+      },
+      {
+        $project: {
+          empresa: { $arrayElemAt: ["$empresa.nombre", 0] },
+          sucursal: { $arrayElemAt: ["$usucrsal._id", 0] }
+        }
+      }
+    
+  ])
+    return empresa[0]
    }
    
 }

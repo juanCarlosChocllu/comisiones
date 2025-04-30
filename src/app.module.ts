@@ -33,7 +33,7 @@ import { TokenGuard } from './autenticacion/guards/token/token.guard';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb://kanna:kanna@localhost:27017/comision3?authSource=admin'
+      'mongodb://kanna:kanna@localhost:27017/comision4?authSource=admin'
     ),
     EmpresaModule,
     SucursalModule,

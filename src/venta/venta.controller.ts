@@ -16,14 +16,14 @@ export class VentaController {
     return this.ventaService.listarVentas( buscadorVentaDto);
   }
 
-  @Get('detalle/:asesor/:fechaInicio/:fechaFin')
+ /* @Get('detalle/:asesor/:fechaInicio/:fechaFin')
   findOne(
     @Param('asesor', ValidateIdPipe) asesor:Types.ObjectId,
     @Param('fechaInicio') fechaInicio:string,
     @Param('fechaFin') fechaFin:string
  ) {
     return this.ventaService.ventaConSusComiones(asesor,fechaInicio, fechaFin);
-  }
+  }*/
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateVentaDto: UpdateVentaDto) {

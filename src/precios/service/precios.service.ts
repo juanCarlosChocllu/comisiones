@@ -49,7 +49,6 @@ export class PreciosService {
     
       if(tipo === tipoProductoPrecio.lente) {
           const detalle = await this.detallePrecio.findOne({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo })
-        console.log(detalle);
         
           if(!detalle) {
             await this.detallePrecio.create({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo })

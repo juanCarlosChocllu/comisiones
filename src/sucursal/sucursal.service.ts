@@ -86,4 +86,8 @@ export class SucursalService {
     const empresa = await this.sucursal.find({empresa:new Types.ObjectId(id)})
     return empresa
   }
+
+  async listarSucursales () {
+    return await this.sucursal.find({flag:flag.nuevo})
+  }
 }

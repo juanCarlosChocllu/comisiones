@@ -26,6 +26,11 @@ export class SucursalController {
     return this.sucursalService.listarSucucrsalPorEmpresa(empresa);
   }
 
+  @Get()  
+  listarSucursales() {
+    return this.sucursalService.listarSucursales();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sucursalService.findOne(+id);
