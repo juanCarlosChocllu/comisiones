@@ -4,7 +4,7 @@ import { UpdateVentaDto } from '../dto/update-venta.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { DetalleVenta, Venta } from '../schema/venta.schema';
 import { Model, Types } from 'mongoose';
-import { RegistroVentas, VentaAsesor, VentaI } from '../interface/venta';
+import { FiltroI, RegistroVentas, VentaAsesor, VentaI } from '../interface/venta';
 import { AsesorService } from 'src/asesor/asesor.service';
 import { DetalleVentaService } from './detallleVenta.service';
 import { CombinacionReceta } from 'src/combinacion-receta/schema/combinacion-receta.schema';
@@ -18,8 +18,8 @@ import { MetasProductoVipService } from 'src/metas-producto-vip/metas-producto-v
 import { PreciosService } from 'src/precios/service/precios.service';
 import { BuscadorVentaDto } from '../dto/buscadorVenta.dto,';
 import { flagVenta } from '../enum/flagVenta';
-import { flag } from 'src/core/enum/flag';
-import { Sucursal } from 'src/sucursal/schema/sucursal.schema';
+
+
 @Injectable()
 export class VentaService {
   constructor(
@@ -45,10 +45,11 @@ export class VentaService {
       const asesores = await this.asesorService.listarAsesor(sucursal);
 
       
+      
       const asesoresProcesados = await Promise.all(asesores.map(async (asesor) => {
         const [metas, ventas] = await Promise.all([
           this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal),
-          this.listarVentasPorAsesor(asesor._id, buscadorVentaDto.fechaInicio,buscadorVentaDto.fechaFin)
+          this.listarVentasPorAsesor(asesor._id, buscadorVentaDto.fechaInicio,buscadorVentaDto.fechaFin, buscadorVentaDto.tipoVenta)
         ]); 
         const ventaAsesor: RegistroVentas = {
           metaProductosVip: metas,
@@ -463,24 +464,28 @@ export class VentaService {
     asesor: Types.ObjectId,
     fechaInicio: string,
     fechaFin: string,
+    tipoVenta:Types.ObjectId[]
   ) {
+  
+    const filter:FiltroI={
+      fechaFinalizacion:{
+        $gte:new Date(fechaInicio),
+        $lte:new Date(fechaFin)
+
+      },
+      comisiona:true,
+      flag:flagVenta.finalizado,
+      asesor: new Types.ObjectId(asesor),
+    
+
+    }
+
+    tipoVenta.length > 0 ? filter.tipoVenta ={$in: tipoVenta.map((item)=> new Types.ObjectId(item))}: filter
+    console.log(filter);
+    
     const ventas = await this.venta.aggregate([
       {
-        $match: {
-          asesor: new Types.ObjectId(asesor),
-          flag: flagVenta.finalizado,
-          comisiona: true,
-          tipoVenta: {
-            $in: [
-              new Types.ObjectId('681248f1f877868fbf0ef04b'),
-              new Types.ObjectId('68124908f877868fbf0f6dcc'),
-            ],
-          },
-          fechaFinalizacion: {
-            $gte: new Date(fechaInicio),
-            $lte: new Date(fechaFin),
-          },
-        },
+        $match: filter
       },
       {
         $project: {
@@ -496,7 +501,7 @@ export class VentaService {
     ]);
     return ventas;
   }
-
+ 
   findOne(id: number) {
     return `This action returns a #${id} venta`;
   }

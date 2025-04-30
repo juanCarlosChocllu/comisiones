@@ -3,7 +3,7 @@ import { TipoVentaService } from './tipo-venta.service';
 import { CreateTipoVentaDto } from './dto/create-tipo-venta.dto';
 import { UpdateTipoVentaDto } from './dto/update-tipo-venta.dto';
 
-@Controller('tipo-venta')
+@Controller('tipo/venta')
 export class TipoVentaController {
   constructor(private readonly tipoVentaService: TipoVentaService) {}
 
@@ -13,8 +13,8 @@ export class TipoVentaController {
   }
 
   @Get()
-  findAll() {
-    return this.tipoVentaService.findAll();
+  listarTipoDeVenta() {
+    return this.tipoVentaService.listarTipoDeVenta();
   }
 
   @Get(':id')

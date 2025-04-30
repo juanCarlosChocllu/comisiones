@@ -1,5 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Types } from 'mongoose';
+import { flag } from 'src/core/enum/flag';
+import { flagVenta } from '../enum/flagVenta';
 
 export interface VentaI {
   id_venta?: string;
@@ -108,4 +110,16 @@ export interface RegistroVentas {
   gafaVip:number,
   lenteDeContacto:number
   ventas: VentaAsesor[];
+}
+
+
+export interface FiltroI {
+  asesor?: Types.ObjectId;
+  flag: flagVenta | flag; 
+  comisiona: boolean;
+  tipoVenta?: {$in:Types.ObjectId[]};
+  fechaFinalizacion: {
+    $gte:  Date
+    $lte: Date
+  },
 }

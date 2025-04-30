@@ -12,8 +12,9 @@ export class TipoVentaService {
     return 'This action adds a new tipoVenta';
   }
 
-  findAll() {
-    return `This action returns all tipoVenta`;
+  async listarTipoDeVenta() {
+    const  tipoVentas = await this.tipoVenta.find()
+    return  tipoVentas;
   }
 
   findOne(id: number) {
