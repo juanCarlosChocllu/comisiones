@@ -437,7 +437,7 @@ export class CombinacionRecetaService {
       this.tipoLenteService.guardarTipoLente(data.tipoLente),
       this.tipoColorLenteService.guardarTipoColorLente(data.tipoColorLente),
     ]);
-    
+
     const combinacion: combinacionReceta = {
       // codigoMia:data.codigoMia,
 
@@ -451,11 +451,9 @@ export class CombinacionRecetaService {
     };
     const combinacionL = await this.combinacionReceta.findOne(combinacion);
     if (combinacionL) {
-      console.log('existe', combinacionL._id , data.precio );
-      
-      const precio = await this.preciosService.guardarPrecioReceta(data.precio)
-      
-        
+     
+      const precio = await this.preciosService.guardarPrecioReceta(data.precio);
+
       if (precio) {
         await this.preciosService.guardarDetallePrecio(
           tipoProductoPrecio.lente,
@@ -463,25 +461,23 @@ export class CombinacionRecetaService {
           precio._id,
         );
       }
-          let contador: number = 0;
-          for (const com of data.comisiones) {
-            contador++;
-            const nombre = `Comision ${contador}`;
+      let contador: number = 0;
+      for (const com of data.comisiones) {
+        contador++;
+        const nombre = `Comision ${contador}`;
 
-            await this.comisionRecetaService.guardarComisionReceta(
-              combinacionL._id,
-              com.monto.result,
-              com.comision,
-              nombre,
-              data.precio,
-            );
-         
+        await this.comisionRecetaService.guardarComisionReceta(
+          combinacionL._id,
+          com.monto.result,
+          com.comision,
+          nombre,
+          data.precio,
+        );
       }
     } else {
-     
       const combinacionL = await this.combinacionReceta.create(combinacion);
-      const precio = await this.preciosService.guardarPrecioReceta(data.precio)
-      console.log('no existe', combinacionL._id , data.precio );
+      const precio = await this.preciosService.guardarPrecioReceta(data.precio);
+     
       if (precio) {
         await this.preciosService.guardarDetallePrecio(
           tipoProductoPrecio.lente,
@@ -489,7 +485,7 @@ export class CombinacionRecetaService {
           precio._id,
         );
       }
-      let contador = 0
+      let contador = 0;
       for (const com of data.comisiones) {
         contador++;
         const nombre = `Comision ${contador}`;
@@ -502,6 +498,5 @@ export class CombinacionRecetaService {
         );
       }
     }
-    
   }
 }
