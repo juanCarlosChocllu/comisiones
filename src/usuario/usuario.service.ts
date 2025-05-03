@@ -40,8 +40,9 @@ export class UsuarioService {
     const usuario = await this.usuario.findOne({_id:new Types.ObjectId(id),flag:flag.nuevo})
     return usuario
   }
-  findAll() {
-    return `This action returns all usuario`;
+  async listarusuarios() {
+    const usuario = await this.usuario.find()
+    return  usuario;
   }
 
   findOne(id: number) {

@@ -33,6 +33,9 @@ export class Producto {
     @Prop({type:Date, default:()=> Date.now()})
     fecha:Date
 
+    @Prop()
+    comision:boolean
+
     @Prop({type:String, default:flag.nuevo})
     flag:string
 }

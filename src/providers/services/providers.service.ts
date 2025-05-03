@@ -198,7 +198,6 @@ export class ProvidersService {
                   importe: data.importe,
                   rubro: data.rubro,
                   venta: venta._id,
-                 // comision:comision.map((item => item.monto)),
                   descripcion:`${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`
                 };
                 await this.ventaService.tieneReceta(venta._id, true);
@@ -220,20 +219,31 @@ export class ProvidersService {
           );
 
           if (producto) {
-            // const comision = await this.comisionProductoService.listarComosionPorProducto(producto._id, data.precio)
-
+           
             const detalle: detalleVentaI = {
               cantidad: 1,
               producto: producto._id,
               importe: data.importe,
               rubro: data.rubro,
               venta: venta._id,
-              // comision:comision.map((item => item.monto)),
               marca: producto.marca,
             };
             await this.ventaService.tieneProducto(venta._id, true);
             await this.detalleVentaService.guardarDetalleVenta(detalle);
-          }
+          }else {
+           const producto=  await this.productoService.guardarProducto(data.codProducto, data.rubro,data.atributo1, data.atributo4)
+            
+           const detalle: detalleVentaI = {
+            cantidad: 1,
+            producto: producto._id,
+            importe: data.importe,
+            rubro: data.rubro,
+            venta: venta._id,
+            marca:data.atributo1,
+          };
+          await this.ventaService.tieneProducto(venta._id, true);
+          await this.detalleVentaService.guardarDetalleVenta(detalle);
+          } 
         } else {
           const detalle: detalleVentaI = {
             cantidad: 1,
@@ -250,32 +260,38 @@ export class ProvidersService {
   }
 
   async guardarComisionesReceta() {
-    const workbook = this.hojaDeTrabajo('./upload/archivo.xlsx');
+    const workbook = this.hojaDeTrabajo('./upload/RECETAS.xlsx');
     let contador = 0;
     for await (const hojas of workbook) {
       for await (const hoja of hojas) {
         contador++;
         if (contador === 1) continue;
-
-        const tipoLente = hoja.getCell(1).value;
+        const codigoMia = hoja.getCell(1).value;
         const meterial = hoja.getCell(2).value;
-        const tratamiento = hoja.getCell(3).value;
-        const marca = hoja.getCell(4).value;
-        const tipoColor = hoja.getCell(5).value;
+        const tipoLente = hoja.getCell(3).value;
+        const tipoColor = hoja.getCell(4).value;
+
+        const tratamiento = hoja.getCell(5).value;
+
         const rangos = hoja.getCell(6).value;
-        const colorLente = hoja.getCell(7).value;
-        const precio = hoja.getCell(8).value;
+        const marca = hoja.getCell(7).value;
+       
+      
+        const colorLente = hoja.getCell(8).value;
+        const precio = hoja.getCell(9).value;
+        const monto = hoja.getCell(10).value
         const comisiones: comisionesI[] = [
           {
-            comision: Number(hoja.getCell(9).value),
-            monto: hoja.getCell(10).value,
+            comision: hoja.getCell(11).value,
+            monto: hoja.getCell(12).value,
           },
           {
-            comision: Number(hoja.getCell(12).value),
-            monto: hoja.getCell(13).value,
+            comision: hoja.getCell(13).value,
+            monto: hoja.getCell(14).value,
           },
         ];
         const data: GuardarComisionRecetaI = {
+          codigoMia:String(codigoMia),
           colorLente: String(colorLente).toUpperCase().trim(),
           comisiones: comisiones,
           marcaLente: String(marca).toUpperCase().trim(),
@@ -285,7 +301,10 @@ export class ProvidersService {
           tipoLente: String(tipoLente).toUpperCase().trim(),
           tratamiento: String(tratamiento).toUpperCase().trim(),
           precio: String(precio).toUpperCase().trim(),
+          monto:Number(monto)
         };
+        console.log(data.monto);
+        
         await this.combinacionRecetaService.guardarComisionrecetaCombinacion(
           data,
         );

@@ -17,7 +17,7 @@ export class CreateUsuarioDto {
     @MinLength(8, { message: 'Mínimo 8 caracteres.' })
   
     @IsStrongPassword({}, { 
-        message: 'Incluir mayúsculas, minúsculas, números y símbolos.' 
+        message: 'password Incluir mayúsculas, minúsculas, números y símbolos.' 
     })
     password: string;
 

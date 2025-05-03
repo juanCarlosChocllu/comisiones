@@ -10,7 +10,6 @@ export class CombinacionReceta {
     @Prop()
     codigoMia:string
     
-
     @Prop({type:Types.ObjectId, ref:'Material'})
     material:Types.ObjectId
 
@@ -31,8 +30,14 @@ export class CombinacionReceta {
 
     @Prop({type:Types.ObjectId, ref:'TipoColorLente'})
     tipoColorLente:Types.ObjectId
-    
-     @Prop({ type: Date, default: Date.now() })
+
+    @Prop()
+    comision:boolean
+
+    @Prop()
+    monto:number
+
+    @Prop({ type: Date, default: Date.now() })
     fecha: Date;
         
     @Prop({ type: String, enum: flag, default: flag.nuevo })

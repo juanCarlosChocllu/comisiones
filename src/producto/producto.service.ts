@@ -64,6 +64,31 @@ export class ProductoService {
     return { status: HttpStatus.CREATED };
   }
 
+  async guardarProducto (codigoMia:string, rubro:string, /*colorProducto:string*/ marcaProducto:string, tipo:string ){//datal color
+    //const color = await this.colorService.guardarColor(colorProducto);
+    const marca = await this.marcaService.guardarMarca(marcaProducto);
+
+    const dataProducto: DataProductoI = {
+      codigoMia: codigoMia,
+      tipoProducto: rubro,
+      marca: marca._id,
+      //color: color._id,
+      serie: 'sin serie',
+      categoria: 'sin categoria',
+      codigoQR: 'sin codigo qr',
+      comision:false
+   
+    };
+    if (rubro == productoE.montura) {
+      const tipoMontura = await this.tipoMonturaService.guardarTipoMontura(
+        tipo
+      );
+      dataProducto.tipoMontura = tipoMontura._id;
+    }
+    const producto = await this.producto.create(dataProducto);
+    return producto
+  }
+
   async verificarProducto(codigoMia:string) {
     const producto = await this.producto.aggregate([
       {

@@ -13,8 +13,8 @@ export class UsuarioController {
   }
 
   @Get()
-  findAll() {
-    return this.usuarioService.findAll();
+  listarusuarios() {
+    return this.usuarioService.listarusuarios();
   }
 
   @Get(':id')

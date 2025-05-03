@@ -21,9 +21,12 @@ export interface combinacionReceta {
         tratamiento:Types.ObjectId
 
         tipoColorLente:Types.ObjectId
+
+        monto:number
 }
 
 export interface GuardarComisionRecetaI {
+        codigoMia?:string
         material:string, 
         tipoLente:string,
         rango:string, 
@@ -33,6 +36,8 @@ export interface GuardarComisionRecetaI {
         tipoColorLente:string
         comisiones:comisionesI[]
         precio:string
+        comision?:boolean
+        monto:number
 }
 
 export interface  comisionesI {
