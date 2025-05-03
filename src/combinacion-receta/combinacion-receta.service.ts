@@ -282,7 +282,7 @@ export class CombinacionRecetaService {
         {
           $project: {
             codigo: 1,
-            
+            monto:1,
             material: '$material.nombre',
             tipoLente: '$tipoLente.nombre',
             rango: '$rango.nombre',
@@ -308,15 +308,14 @@ export class CombinacionRecetaService {
       { header: 'marca', key: 'marca' , width:30},
       { header: 'color', key: 'color' , width:30},
       { header: 'tipoPrecio', key: 'tipoPrecio' , width:30},
-      { header: 'comision', key: 'comision 3%' , width:30},
-      { header: 'comisionFija', key: 'comisionFija', width:30 },
-      { header: 'comision', key: 'comision 2%', width:30 },
-      { header: 'comisionFija', key: 'comisionFija' , width:30},
+      { header: 'monto', key: 'monto' , width:15},
+      { header: 'comision_3%', key: 'comision1' , width:30},
+      { header: 'comisionFija', key: 'comisionFija1', width:30 },
+      { header: 'comision', key: 'comision_2', width:30 },
+      { header: 'comisionFija', key: 'comisionFija2' , width:30},
     ]
-
+ 
     for (const comb of combinacion) {
-      console.log(comb.comisionReceta.length);
-      
       worksheet.addRow({
         id:comb._id,
         material:comb.material,
@@ -325,7 +324,14 @@ export class CombinacionRecetaService {
         tratamiento:comb.tratamiento,
         rangos:comb.rango,
         marca:comb.marcaLente,
-        color:comb.colorLente
+        color:comb.colorLente,
+        tipoPrecio:comb.comisionReceta.length > 0 ? comb.comisionReceta[0].precio :'',
+        monto:comb.monto,
+        comision1:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision > max.comision ? actual.comision : max.comision ) :0,
+        comisionFija1:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto > max.monto ? actual.monto : max.monto) :0,
+        comision_2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision<  max.comision ? actual.comision : max.comision ) :0,
+        comisionFija2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto < max.monto ? actual.monto : max.monto) :0,
+       
         
         
       })
@@ -337,38 +343,17 @@ export class CombinacionRecetaService {
       });
     });
   
-    // 🔒 Bloquear solo la columna 'id' (columna 1)
-    worksheet.getColumn(1).eachCell((cell, rowNumber) => {
-      if (rowNumber > 1) {
-        cell.protection = { locked: true };
-      }
-    });
+    for (let index = 0; index < 8; index++) {
+      worksheet.getColumn(index + 1).eachCell((cell, rowNumber) => {
+        if (rowNumber > 1) {
+          cell.protection = { locked: true };
+        }
+      });
+      
+    }
     
-    worksheet.getColumn(2).eachCell((cell, rowNumber) => {
-      if (rowNumber > 1) {
-        cell.protection = { locked: true };
-      }
-    });
-
-    worksheet.getColumn(3).eachCell((cell, rowNumber) => {
-      if (rowNumber > 1) {
-        cell.protection = { locked: true };
-      }
-    });
-
-    worksheet.getColumn(4).eachCell((cell, rowNumber) => {
-      if (rowNumber > 1) {
-        cell.protection = { locked: true };
-      }
-    });
-
-    worksheet.getColumn(5).eachCell((cell, rowNumber) => {
-      if (rowNumber > 1) {
-        cell.protection = { locked: true };
-      }
-    });
-    // 🔐 Proteger la hoja
-    await worksheet.protect('tu-contraseña-aqui', {
+    
+    await worksheet.protect('gay el que lo adivina', {
       selectLockedCells: true,
       selectUnlockedCells: true
     });
