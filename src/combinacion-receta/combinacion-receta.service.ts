@@ -177,7 +177,7 @@ export class CombinacionRecetaService {
     return combinacion;
   }
   async listarCombinaciones(paginadorDto: PaginadorDto) {
-    const data = await this.combinaciones(true, paginadorDto)
+    const data = await this.combinaciones(true,paginadorDto)
     return { data: data.data, paginas:data.total };
   }
 
@@ -187,7 +187,10 @@ export class CombinacionRecetaService {
        return await this.combinacionReceta.updateOne({_id:new Types.ObjectId(id)},{comision:true})
     }
   }
-
+  async listarCombinacionesSinComision(paginadorDto:PaginadorDto){
+    const data = await this.combinaciones(false,paginadorDto)
+    return { data: data.data, paginas:data.total };
+  }
   async descargarCombinaciones(){
     const combinacion = await this.combinacionReceta.aggregate(
       [
@@ -399,27 +402,19 @@ export class CombinacionRecetaService {
    
     
   }
- private async combinaciones(paginador:boolean, paginadorDto?:PaginadorDto){
-
-  let ids = [];
-  if (paginador) {
+ private async combinaciones(comision:boolean, paginadorDto:PaginadorDto){  
     const skip = (paginadorDto.pagina - 1) * paginadorDto.limite;
     const docs = await this.combinacionReceta
-      .find({ flag: flag.nuevo })
+      .find({ flag: flag.nuevo , ...comision==false ? {comision:comision} :{}  })
       .select('_id')
       .skip(skip)
       .limit(paginadorDto.limite)
       .lean();
     
-    ids = docs.map(doc => doc._id);
-  }
-
-  
   const pipeline:PipelineStage[] =[
     {
       $match: {
-        flag: flag.nuevo,
-        _id:{$in:ids}
+        _id:{$in: docs.map(doc => doc._id)}
       },
     },
     {
@@ -526,15 +521,11 @@ export class CombinacionRecetaService {
    
   ] 
 
-  let total = 0;
-  if (paginador) {
-    const countDocuments = await this.combinacionReceta.countDocuments({ flag: flag.nuevo });
-    total = paginas(countDocuments, paginadorDto.limite)
-  }
-  
-  const combinaciones = await this.combinacionReceta.aggregate(pipeline,{allowDiskUse:true});
  
-  
+ 
+    const countDocuments = await this.combinacionReceta.countDocuments({ flag: flag.nuevo, ...comision==false ? {comision:comision} :{}  });
+    const total = paginas(countDocuments, paginadorDto.limite)
+  const combinaciones = await this.combinacionReceta.aggregate(pipeline,{allowDiskUse:true});  
   return{ data: combinaciones, total } ;
  }
 

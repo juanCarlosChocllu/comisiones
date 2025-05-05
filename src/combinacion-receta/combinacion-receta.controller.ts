@@ -20,6 +20,10 @@ export class CombinacionRecetaController {
     return this.combinacionRecetaService.listarCombinaciones(paginadorDto);
   }
 
+  @Get('sinComision')
+  listarCombinacionesSinComision(@Query () paginadorDto:PaginadorDto) {
+    return this.combinacionRecetaService.listarCombinacionesSinComision(paginadorDto);
+  }
   @Get('descargar')
   async descargarCombinaciones(@Res() response: Response) {
     const  workbook =await this.combinacionRecetaService.descargarCombinaciones();
