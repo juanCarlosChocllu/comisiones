@@ -181,8 +181,8 @@ export class CombinacionRecetaService {
     return { data: data.data, paginas:data.total };
   }
 
-  async asignarComisionReecta (id:Types.ObjectId) {
-    const data = await this.combinacionReceta.findOne({_id:new Types.ObjectId, comision:false})
+  async asignarComisionReceta (id:Types.ObjectId) {
+    const data = await this.combinacionReceta.findOne({_id:new Types.ObjectId(id), comision:false})
     if(data) {
        return await this.combinacionReceta.updateOne({_id:new Types.ObjectId(id)},{comision:true})
     }

@@ -1,6 +1,7 @@
 import { Type } from "class-transformer"
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsString, ValidateNested } from "class-validator"
 import { Types } from "mongoose"
+import { PreciosE } from "../enum/precio"
 
 
 export class CreateComisionRecetaDto {
@@ -16,7 +17,7 @@ data:DataComisionRecetaDto[]
 
 export class DataComisionRecetaDto {
         @IsString()
-        @IsNotEmpty()
+        @IsEnum(PreciosE)
         precio:string
 
         @IsString()
@@ -27,17 +28,12 @@ export class DataComisionRecetaDto {
         @IsNotEmpty()
         monto:number
 
-        @IsNumber()
-        @IsNotEmpty()
-        diferencia:number
 
         @IsNumber()
         @IsNotEmpty()
         comision:number
 
 
-      
-       
 
         
 }

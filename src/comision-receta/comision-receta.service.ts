@@ -14,7 +14,7 @@ export class ComisionRecetaService {
     @Inject(forwardRef(()=>CombinacionRecetaService )) private readonly combinacionRecetaService: CombinacionRecetaService,
   ) {}
   async create(createComisionRecetaDto: CreateComisionRecetaDto) {
-    const comision = await this.combinacionRecetaService.asignarComisionReecta(
+    const comision = await this.combinacionRecetaService.asignarComisionReceta(
       createComisionRecetaDto.combinacionReceta,
     );
     if (comision) {
