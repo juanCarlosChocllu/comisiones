@@ -119,6 +119,7 @@ export class CombinacionRecetaService {
     rango: string,
     tipoLente: string,
     tipoColorLente: string,
+    
   ) {
     const cortar = (texto: string) => texto.slice(0, 3).toUpperCase();
     return [
@@ -162,6 +163,8 @@ export class CombinacionRecetaService {
     tipoLente: Types.ObjectId,
     tipoColorLente: Types.ObjectId,
     codigo: string,
+    precio:string,
+    importe:number
   ) {
     const combinacion = await this.combinacionReceta.create({
       material: material,
@@ -174,6 +177,8 @@ export class CombinacionRecetaService {
       codigo: codigo,
       comision:false
     });
+    const precioEcontrado = await  this.preciosService.buscarPrecioPorNombre(precio)
+    await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.lente, combinacion._id, precioEcontrado._id,importe )
     return combinacion;
   }
   async listarCombinaciones(paginadorDto: PaginadorDto) {
@@ -663,16 +668,14 @@ export class CombinacionRecetaService {
     ]);
 
     const combinacion: combinacionReceta = {
-       codigoMia:data.codigoMia,
+      //codigoMia:data.codigoMia,
       colorLente: coloLente._id,
       marcaLente: marca._id,
       material: material._id,
       rango: rango._id,
       tipoLente: tipoLente._id,
       tratamiento: tratamiento._id,
-      tipoColorLente: tipoColorLente._id,
-      monto:data.monto
-    
+      tipoColorLente: tipoColorLente._id,    
     };
     const combinacionL = await this.combinacionReceta.findOne(combinacion);
     if (combinacionL) {
@@ -684,6 +687,7 @@ export class CombinacionRecetaService {
           tipoProductoPrecio.lente,
           combinacionL._id,
           precio._id,
+          data.monto
         );
       }
       let contador: number = 0;
@@ -708,6 +712,7 @@ export class CombinacionRecetaService {
           tipoProductoPrecio.lente,
           combinacionL._id,
           precio._id,
+          data.monto
         );
       }
       let contador = 0;
@@ -720,6 +725,7 @@ export class CombinacionRecetaService {
           com.comision.result,
           nombre,
           data.precio,
+          
         );
       }
     }

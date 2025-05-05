@@ -22,7 +22,7 @@ export interface combinacionReceta {
 
         tipoColorLente:Types.ObjectId
 
-        monto:number
+        monto?:number
 }
 
 export interface GuardarComisionRecetaI {

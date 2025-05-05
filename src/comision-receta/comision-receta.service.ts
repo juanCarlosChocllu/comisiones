@@ -1,10 +1,11 @@
-import { forwardRef, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateComisionRecetaDto } from './dto/create-comision-receta.dto';
 import { UpdateComisionRecetaDto } from './dto/update-comision-receta.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { ComisionReceta } from './schema/comision-receta.schema';
 import { Model, Types } from 'mongoose';
 import { CombinacionRecetaService } from 'src/combinacion-receta/combinacion-receta.service';
+import { ActualizarComisionReceta } from './dto/actulizarComisionReceta';
 
 @Injectable()
 export class ComisionRecetaService {
@@ -69,19 +70,13 @@ export class ComisionRecetaService {
     }
   }
 
-  findAll() {
-    return `This action returns all comisionReceta`;
-  }
+  async actualizarComsion( actualizarComisionReceta: ActualizarComisionReceta) {
+    const comision = await this.comisionReceta.findOne({_id:new Types.ObjectId(actualizarComisionReceta.idComision)})
+    if(!comision) {
+      throw new NotFoundException()
+    }
+    await this.comisionReceta.updateOne({_id:new Types.ObjectId(actualizarComisionReceta.idComision)},{monto:actualizarComisionReceta.monto})
+    return {status:HttpStatus.OK}
 
-  findOne(id: number) {
-    return `This action returns a #${id} comisionReceta`;
-  }
-
-  update(id: number, updateComisionRecetaDto: UpdateComisionRecetaDto) {
-    return `This action updates a #${id} comisionReceta`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} comisionReceta`;
   }
 }

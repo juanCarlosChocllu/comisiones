@@ -13,6 +13,9 @@ export class DetallePrecio {
     precio:Types.ObjectId
 
     @Prop()
+    monto:number
+
+    @Prop()
     tipo:string
     
 }

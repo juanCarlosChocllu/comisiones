@@ -44,14 +44,14 @@ export class PreciosService {
       return precio
    }
 
-   async  guardarDetallePrecio(tipo:tipoProductoPrecio,producto:Types.ObjectId, precio:Types.ObjectId ){
+   async  guardarDetallePrecio(tipo:tipoProductoPrecio,producto:Types.ObjectId, precio:Types.ObjectId , monto:number = 0){
     
     
       if(tipo === tipoProductoPrecio.lente) {
-          const detalle = await this.detallePrecio.findOne({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo })
+          const detalle = await this.detallePrecio.findOne({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo , monto:monto})
         
           if(!detalle) {
-            await this.detallePrecio.create({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo })
+            await this.detallePrecio.create({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo, monto:monto })
           }
       }else {
         const detalle= await this.detallePrecio.findOne({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipoProductoPrecio.producto })
@@ -110,7 +110,10 @@ export class PreciosService {
 
     async buscarPrecioPorNombre(nombre:string){
       const precio = await this.precio.findOne({nombre:nombre.toUpperCase()})
-    
+      if(!precio) {
+        return await this.precio.create({nombre:nombre.toUpperCase()})
+      }
+
       return precio
     }
 }

@@ -242,6 +242,7 @@ export class ProductoService {
         tipoProductoPrecio.producto,
         producto._id,
         precio._id,
+   
       );
 
       if (data.precio === precio.nombre) {

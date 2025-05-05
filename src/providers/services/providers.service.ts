@@ -188,7 +188,9 @@ export class ProvidersService {
                   rango._id,
                   tipoLente._id,
                   tipoColorLente._id,
-                  codigo
+                  codigo,
+                  data.precio,
+                  data.importe
                 );
                 if(recetaCombinacion && venta) {
                   

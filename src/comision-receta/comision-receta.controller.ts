@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ComisionRecetaService } from './comision-receta.service';
 import { CreateComisionRecetaDto } from './dto/create-comision-receta.dto';
 import { UpdateComisionRecetaDto } from './dto/update-comision-receta.dto';
+import { ActualizarComisionReceta } from './dto/actulizarComisionReceta';
 
 @Controller('comision/receta')
 export class ComisionRecetaController {
@@ -12,23 +13,11 @@ export class ComisionRecetaController {
     return this.comisionRecetaService.create(createComisionRecetaDto);
   }
 
-  @Get()
-  findAll() {
-    return this.comisionRecetaService.findAll();
+  @Patch()
+  actualizarComsion(@Body() actualizarComisionReceta: ActualizarComisionReceta) {
+    return this.comisionRecetaService.actualizarComsion(actualizarComisionReceta);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.comisionRecetaService.findOne(+id);
-  }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateComisionRecetaDto: UpdateComisionRecetaDto) {
-    return this.comisionRecetaService.update(+id, updateComisionRecetaDto);
-  }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.comisionRecetaService.remove(+id);
-  }
 }
