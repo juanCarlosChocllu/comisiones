@@ -15,6 +15,8 @@ import { verificarProductoI } from './interface/verificaProducto';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
 import { log } from 'console';
+import { flag } from 'src/core/enum/flag';
+import { paginas, skip } from 'src/core/utils/paginador';
 
 @Injectable()
 export class ProductoService {
@@ -149,10 +151,11 @@ export class ProductoService {
   }
 
   async listarProductos(paginadorDto: PaginadorDto) {
+   const data = await this.producto.find({flag:flag.nuevo}).select('_id').skip(skip(paginadorDto.pagina, paginadorDto.limite)).limit(paginadorDto.limite).lean()    
     const producto = await this.producto.aggregate([
       {
         $match: {
-          tipoProducto: productoE.gafa,
+          _id:{$in: data.map((item)=> item._id)}
         },
       },
       {
@@ -164,7 +167,7 @@ export class ProductoService {
         },
       },
       {
-        $unwind: { path: '$marca', preserveNullAndEmptyArrays: false },
+        $unwind: { path: '$marca', preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
@@ -175,7 +178,7 @@ export class ProductoService {
         },
       },
       {
-        $unwind: { path: '$color', preserveNullAndEmptyArrays: false },
+        $unwind: { path: '$color', preserveNullAndEmptyArrays: true },
       },
 
       {
@@ -189,37 +192,18 @@ export class ProductoService {
           codigoQR: 1,
         },
       },
-      {
-        $facet: {
-          data: [
-            {
-              $skip: (paginadorDto.pagina - 1) * paginadorDto.limite,
-            },
-            {
-              $limit: paginadorDto.limite,
-            },
-          ],
-          countDocuments: [
-            {
-              $count: 'total',
-            },
-          ],
-        },
-      },
+     
     ]);
-    const countDocuments = producto[0].countDocuments[0]
-      ? producto[0].countDocuments[0].total
-      : 1;
-    const paginas = Math.ceil(countDocuments / paginadorDto.limite);
-    return { data: producto[0].data, paginas };
+    const total = await this.producto.countDocuments({flag:flag.nuevo})
+    const pagina = paginas(total, paginadorDto.limite)
+    return { data: producto , paginas:pagina };
   }
 
   async guardaProductoComisiones(data: productosExcelI) {
     const producto = await this.producto.findOne({ codigoMia: data.codigoMia });
     
     if (!producto) {
-      console.log('no existe prodcuto',data.codigoMia, data.tipoProducto, data.precio);
-      
+    
       const [color, marca] = await Promise.all([
         this.colorService.guardarColor(data.color),
         this.marcaService.guardarMarca(data.marca),

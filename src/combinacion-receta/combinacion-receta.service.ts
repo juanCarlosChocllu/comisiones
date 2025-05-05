@@ -24,6 +24,7 @@ import { log } from 'node:console';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import { ComisionRecetaService } from 'src/comision-receta/comision-receta.service';
 import  * as ExcelJS from 'exceljs'
+import { paginas } from 'src/core/utils/paginador';
 @Injectable()
 export class CombinacionRecetaService {
  
@@ -519,12 +520,13 @@ console.log(paginadorDto);
 
   let total = 0;
   if (paginador) {
-    total = await this.combinacionReceta.countDocuments({ flag: flag.nuevo });
+    const countDocuments = await this.combinacionReceta.countDocuments({ flag: flag.nuevo });
+    total = paginas(countDocuments, paginadorDto.limite)
   }
   
   const combinaciones = await this.combinacionReceta.aggregate(pipeline,{allowDiskUse:true});
  
-
+  
   return{ data: combinaciones, total } ;
  }
 
