@@ -182,6 +182,16 @@ export class ProductoService {
       },
 
       {
+        $lookup: {
+          from: 'ComisionProducto',
+          foreignField: 'producto',
+          localField: '_id',
+          as: 'comisionProducto',
+        },
+      },
+     
+
+      {
         $project: {
           codigoMia: 1,
           tipoProducto: 1,
@@ -190,6 +200,7 @@ export class ProductoService {
           color: '$color.nombre',
           categoria: 1,
           codigoQR: 1,
+          comisionProducto:1
         },
       },
      
