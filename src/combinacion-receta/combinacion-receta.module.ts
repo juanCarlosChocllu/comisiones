@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CombinacionRecetaService } from './combinacion-receta.service';
 import { CombinacionRecetaController } from './combinacion-receta.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -34,7 +34,7 @@ import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module
     MaterialModule,
     ColorLenteModule,
     PreciosModule,
-    ComisionRecetaModule
+    forwardRef(()=> ComisionRecetaModule)
   ],
   controllers: [CombinacionRecetaController],
   providers: [CombinacionRecetaService],

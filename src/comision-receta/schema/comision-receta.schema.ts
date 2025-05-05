@@ -21,8 +21,7 @@ export class ComisionReceta {
     @Prop()
     comision:number
 
-    @Prop()
-    base:boolean
+    
 }
 
 export const  comisionRecetaSchema = SchemaFactory.createForClass(ComisionReceta) 

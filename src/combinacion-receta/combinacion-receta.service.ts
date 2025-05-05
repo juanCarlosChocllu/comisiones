@@ -180,6 +180,14 @@ export class CombinacionRecetaService {
     const data = await this.combinaciones(true, paginadorDto)
     return { data: data.data, paginas:data.total };
   }
+
+  async asignarComisionReecta (id:Types.ObjectId) {
+    const data = await this.combinacionReceta.findOne({_id:new Types.ObjectId, comision:false})
+    if(data) {
+       return await this.combinacionReceta.updateOne({_id:new Types.ObjectId(id)},{comision:true})
+    }
+  }
+
   async descargarCombinaciones(){
     const combinacion = await this.combinacionReceta.aggregate(
       [
@@ -315,7 +323,9 @@ export class CombinacionRecetaService {
     
     for (const comb of combinacion) {
       console.log(comb.comisionReceta);
-      worksheet.addRow({
+    //  console.log(comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision > max.comision ? actual.comision : max.comision ) :0);
+      
+     /* worksheet.addRow({
         id:comb._id,
         material:comb.material,
         tipoLente:comb.tipoLente,
@@ -330,7 +340,7 @@ export class CombinacionRecetaService {
         comisionFija1:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto > max.monto ? actual.monto : max.monto) :0,
         comision_2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision<  max.comision ? actual.comision : max.comision ) :0,
         comisionFija2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto < max.monto ? actual.monto : max.monto) :0,  
-      })
+      })*/
       
     }
     worksheet.eachRow((row) => {
@@ -383,7 +393,7 @@ export class CombinacionRecetaService {
         cell.protection = { locked: false };
       }
     });
-    // Guar
+    
     
    return workbook
    
@@ -392,8 +402,6 @@ export class CombinacionRecetaService {
  private async combinaciones(paginador:boolean, paginadorDto?:PaginadorDto){
 
   let ids = [];
-console.log(paginadorDto);
-
   if (paginador) {
     const skip = (paginadorDto.pagina - 1) * paginadorDto.limite;
     const docs = await this.combinacionReceta

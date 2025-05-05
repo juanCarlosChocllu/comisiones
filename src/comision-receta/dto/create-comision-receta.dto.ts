@@ -4,6 +4,9 @@ import { Types } from "mongoose"
 
 
 export class CreateComisionRecetaDto {
+        @IsMongoId()
+        @IsNotEmpty()
+        combinacionReceta:Types.ObjectId
 @IsArray()
 @ArrayMinSize(1)
 @Type(()=>DataComisionRecetaDto)
@@ -12,6 +15,10 @@ data:DataComisionRecetaDto[]
 }
 
 export class DataComisionRecetaDto {
+        @IsString()
+        @IsNotEmpty()
+        precio:string
+
         @IsString()
         @IsNotEmpty()
         nombre:string
@@ -28,13 +35,11 @@ export class DataComisionRecetaDto {
         @IsNotEmpty()
         comision:number
 
-        @IsNotEmpty()
-        @IsMongoId()
-        precio:Types.ObjectId
 
-        @IsNotEmpty()
-        @IsBoolean()
-        base:string
+      
+       
+
+        
 }
 
 

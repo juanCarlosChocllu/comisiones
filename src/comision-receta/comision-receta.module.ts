@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ComisionRecetaService } from './comision-receta.service';
 import { ComisionRecetaController } from './comision-receta.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ComisionReceta, comisionRecetaSchema } from './schema/comision-receta.schema';
+import { CombinacionRecetaModule } from 'src/combinacion-receta/combinacion-receta.module';
 
 @Module({ 
     imports:[
@@ -11,7 +12,8 @@ import { ComisionReceta, comisionRecetaSchema } from './schema/comision-receta.s
           name:ComisionReceta.name, schema:comisionRecetaSchema
         },
       
-      ])
+      ]),
+      forwardRef(()=> CombinacionRecetaModule)
     ],
   controllers: [ComisionRecetaController],
   providers: [ComisionRecetaService],
