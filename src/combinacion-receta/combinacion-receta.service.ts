@@ -176,12 +176,8 @@ export class CombinacionRecetaService {
     return combinacion;
   }
   async listarCombinaciones(paginadorDto: PaginadorDto) {
-    const combinaciones = await this.combinaciones(true, paginadorDto)
-    const countDocuments = combinaciones[0].countDocuments[0]
-      ? combinaciones[0].countDocuments[0].total
-      : 1;
-    const paginas = Math.ceil(countDocuments / paginadorDto.limite);
-    return { data: combinaciones[0].data, paginas };
+    const data = await this.combinaciones(true, paginadorDto)
+    return { data: data.data, paginas:data.total };
   }
   async descargarCombinaciones(){
     const combinacion = await this.combinacionReceta.aggregate(
@@ -314,8 +310,10 @@ export class CombinacionRecetaService {
       { header: 'comision', key: 'comision_2', width:30 },
       { header: 'comisionFija', key: 'comisionFija2' , width:30},
     ]
- 
+
+    
     for (const comb of combinacion) {
+      console.log(comb.comisionReceta);
       worksheet.addRow({
         id:comb._id,
         material:comb.material,
@@ -330,10 +328,7 @@ export class CombinacionRecetaService {
         comision1:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision > max.comision ? actual.comision : max.comision ) :0,
         comisionFija1:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto > max.monto ? actual.monto : max.monto) :0,
         comision_2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision<  max.comision ? actual.comision : max.comision ) :0,
-        comisionFija2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto < max.monto ? actual.monto : max.monto) :0,
-       
-        
-        
+        comisionFija2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto < max.monto ? actual.monto : max.monto) :0,  
       })
       
     }
@@ -394,10 +389,28 @@ export class CombinacionRecetaService {
     
   }
  private async combinaciones(paginador:boolean, paginadorDto?:PaginadorDto){
+
+  let ids = [];
+console.log(paginadorDto);
+
+  if (paginador) {
+    const skip = (paginadorDto.pagina - 1) * paginadorDto.limite;
+    const docs = await this.combinacionReceta
+      .find({ flag: flag.nuevo })
+      .select('_id')
+      .skip(skip)
+      .limit(paginadorDto.limite)
+      .lean();
+    
+    ids = docs.map(doc => doc._id);
+  }
+
+  
   const pipeline:PipelineStage[] =[
     {
       $match: {
         flag: flag.nuevo,
+        _id:{$in:ids}
       },
     },
     {
@@ -502,29 +515,17 @@ export class CombinacionRecetaService {
       },
     }
    
-  ]
-  if(paginador){
-    pipeline.push( {
-      $facet: {
-        data: [
-          {
-            $skip: (paginadorDto.pagina - 1) * paginadorDto.limite,
-          },
-          {
-            $limit: paginadorDto.limite,
-          },
-        ],
-        countDocuments: [
-          {
-            $count: 'total',
-          },
-        ],
-      },
-    }
-  )
+  ] 
+
+  let total = 0;
+  if (paginador) {
+    total = await this.combinacionReceta.countDocuments({ flag: flag.nuevo });
   }
-  const combinaciones = await this.combinacionReceta.aggregate(pipeline);
-  return combinaciones
+  
+  const combinaciones = await this.combinacionReceta.aggregate(pipeline,{allowDiskUse:true});
+ 
+
+  return{ data: combinaciones, total } ;
  }
 
   findOne(id: number) {

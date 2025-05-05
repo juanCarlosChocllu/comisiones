@@ -49,7 +49,14 @@ export const combinacionRecetaSchema = SchemaFactory.createForClass(CombinacionR
 
 
 
-
+combinacionRecetaSchema.index({ flag: 1 })
+combinacionRecetaSchema.index({ material: 1 })
+combinacionRecetaSchema.index({ tipoLente: 1 })
+combinacionRecetaSchema.index({ rango: 1 })
+combinacionRecetaSchema.index({ colorLente: 1 })
+combinacionRecetaSchema.index({ marcaLente: 1 })
+combinacionRecetaSchema.index({ tratamiento: 1 })
+combinacionRecetaSchema.index({ tipoColorLente: 1 })
 
 
 
