@@ -38,7 +38,7 @@ export class DataComisionRecetaDto {
   @IsNotEmpty()
   monto: number;
 
-  @IsNumber()
+ /* @IsNumber()
   @IsNotEmpty()
-  comision: number;
+  comision: number;*/
 }
