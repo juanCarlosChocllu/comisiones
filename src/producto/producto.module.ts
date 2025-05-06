@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ProductoService } from './producto.service';
 import { ProductoController } from './producto.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -20,7 +20,7 @@ import { ComisionProductoModule } from 'src/comision-producto/comision-producto.
     MarcaModule,
     TipoMonturaModule,
     PreciosModule,
-    ComisionProductoModule
+    forwardRef(()=> ComisionProductoModule)
   ],
   controllers: [ProductoController],
   providers: [ProductoService],

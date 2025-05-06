@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { ColorService } from 'src/color/color.service';
@@ -17,6 +17,7 @@ import { ComisionProductoService } from 'src/comision-producto/comision-producto
 import { log } from 'console';
 import { flag } from 'src/core/enum/flag';
 import { calcularPaginas, skip } from 'src/core/utils/paginador';
+import { BuscadorVentaDto } from 'src/venta/dto/buscadorVenta.dto,';
 
 @Injectable()
 export class ProductoService {
@@ -28,7 +29,7 @@ export class ProductoService {
     private readonly precioService: PreciosService,
 
     private readonly preciosService: PreciosService,
-    private readonly comisionProductoService: ComisionProductoService,
+   @Inject(forwardRef(()=> ComisionProductoService))  private readonly comisionProductoService: ComisionProductoService,
   ) {}
   async create(createProductoDto: CreateProductoDto) {
     for (const data of createProductoDto.data) {
@@ -165,13 +166,10 @@ export class ProductoService {
     return { data: data , paginas:paginas };
   }
   private async productoListar (paginadorDto: PaginadorDto, comision:boolean) {
-    const data = await this.producto.find({flag:flag.nuevo}).select('_id').skip(skip(paginadorDto.pagina, paginadorDto.limite)).limit(paginadorDto.limite).lean()    
-    console.log({  ...(comision === false) ? {  comision:comision}:{}});
-    
+   
     const producto = await this.producto.aggregate([
       {
         $match: {
-          _id:{$in: data.map((item)=> item._id)},
           ...(comision === false) ? {  comision:comision}:{}
         },
       },
@@ -220,12 +218,28 @@ export class ProductoService {
           comisionProducto:1
         },
       },
-     
+     {
+      $skip:skip(paginadorDto.pagina, paginadorDto.limite)
+     },
+     {
+      $limit:paginadorDto.limite
+     }
     ]);
     const total = await this.producto.countDocuments({flag:flag.nuevo,  ...(comision === false) ? {  comision:comision}:{}})
     const pagina = calcularPaginas(total, paginadorDto.limite)
     return { data: producto , paginas:pagina };
   }
+
+  async asignaComisionProducto(id:Types.ObjectId) {
+      const producto = await this.producto.findOne({_id:new Types.ObjectId(id), comision:false})
+
+      
+      if(producto){
+        console.log(producto);
+        return await this.producto.updateOne({_id:new Types.ObjectId(id)}, {comision:true})
+      }
+  }
+
   async guardaProductoComisiones(data: productosExcelI) {
     const producto = await this.producto.findOne({ codigoMia: data.codigoMia });
     
