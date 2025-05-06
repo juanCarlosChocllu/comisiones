@@ -434,6 +434,7 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
       },
+      ...(buscadorCombinacionDto.material) ? [{$match:{'material.nombre': new RegExp(buscadorCombinacionDto.material,'i') }}  ]:[],
       {
         $lookup: {
           from: 'TipoLente',

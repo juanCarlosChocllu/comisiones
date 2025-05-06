@@ -16,4 +16,9 @@ export class ProductoController {
   listarProductos(@Query() paginadorDto:PaginadorDto ){
     return this.productoService.listarProductos(paginadorDto)
   }
-}
+
+  @Get('sinComision')
+  listarProductosSinComision(@Query() paginadorDto:PaginadorDto ){
+    return this.productoService.listarProductosSinComision(paginadorDto)
+  }
+} 

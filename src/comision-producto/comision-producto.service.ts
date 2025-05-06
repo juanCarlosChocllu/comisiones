@@ -9,8 +9,8 @@ import { Model, Types } from 'mongoose';
 export class ComisionProductoService {
   constructor(@InjectModel(ComisionProducto.name) private readonly  comisionProducto:Model<ComisionProducto>){}
    async create(createComisionProductoDto: CreateComisionProductoDto) {
+    createComisionProductoDto.producto = new Types.ObjectId(createComisionProductoDto.producto)
     for (const data of createComisionProductoDto.data) {
-      data.precio = new Types.ObjectId(data.precio)
       await this.comisionProducto.create(data)
     }
     return  {status:HttpStatus.CREATED};

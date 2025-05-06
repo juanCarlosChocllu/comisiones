@@ -54,9 +54,9 @@ export class PreciosService {
             await this.detallePrecio.create({combinacionReceta:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipo, monto:monto })
           }
       }else {
-        const detalle= await this.detallePrecio.findOne({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipoProductoPrecio.producto })
+        const detalle= await this.detallePrecio.findOne({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipoProductoPrecio.producto ,  monto:monto})
         if(!detalle) {
-          await this.detallePrecio.create({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipoProductoPrecio.producto })
+          await this.detallePrecio.create({producto:new Types.ObjectId(producto), precio:new Types.ObjectId(precio), tipo:tipoProductoPrecio.producto , monto:monto})
         }
       }
 

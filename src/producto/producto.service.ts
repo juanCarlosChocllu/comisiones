@@ -66,10 +66,10 @@ export class ProductoService {
     return { status: HttpStatus.CREATED };
   }
 
-  async guardarProducto (codigoMia:string, rubro:string, /*colorProducto:string*/ marcaProducto:string, tipo:string ){//datal color
+  async guardarProducto (codigoMia:string, rubro:string, /*colorProducto:string*/ marcaProducto:string, tipo:string , precio:string, importe:number){//datal color
     //const color = await this.colorService.guardarColor(colorProducto);
     const marca = await this.marcaService.guardarMarca(marcaProducto);
-
+ 
     const dataProducto: DataProductoI = {
       codigoMia: codigoMia,
       tipoProducto: rubro,
@@ -88,6 +88,13 @@ export class ProductoService {
       dataProducto.tipoMontura = tipoMontura._id;
     }
     const producto = await this.producto.create(dataProducto);
+    const precioEcontrado = await this.preciosService.buscarPrecioPorNombre(precio);
+    await this.preciosService.guardarDetallePrecio(
+      tipoProductoPrecio.producto,
+      producto._id,
+      precioEcontrado._id,
+      importe,
+    );
     return producto
   }
 
@@ -149,13 +156,23 @@ export class ProductoService {
 
     return productos[0];
   }
-
+  async listarProductosSinComision(paginadorDto: PaginadorDto) {
+    const {data,paginas} = await this.productoListar(paginadorDto, false)
+    return { data: data , paginas:paginas };
+  }
   async listarProductos(paginadorDto: PaginadorDto) {
-   const data = await this.producto.find({flag:flag.nuevo}).select('_id').skip(skip(paginadorDto.pagina, paginadorDto.limite)).limit(paginadorDto.limite).lean()    
+   const {data,paginas} = await this.productoListar(paginadorDto, true)
+    return { data: data , paginas:paginas };
+  }
+  private async productoListar (paginadorDto: PaginadorDto, comision:boolean) {
+    const data = await this.producto.find({flag:flag.nuevo}).select('_id').skip(skip(paginadorDto.pagina, paginadorDto.limite)).limit(paginadorDto.limite).lean()    
+    console.log({  ...(comision === false) ? {  comision:comision}:{}});
+    
     const producto = await this.producto.aggregate([
       {
         $match: {
-          _id:{$in: data.map((item)=> item._id)}
+          _id:{$in: data.map((item)=> item._id)},
+          ...(comision === false) ? {  comision:comision}:{}
         },
       },
       {
@@ -205,11 +222,10 @@ export class ProductoService {
       },
      
     ]);
-    const total = await this.producto.countDocuments({flag:flag.nuevo})
+    const total = await this.producto.countDocuments({flag:flag.nuevo,  ...(comision === false) ? {  comision:comision}:{}})
     const pagina = calcularPaginas(total, paginadorDto.limite)
     return { data: producto , paginas:pagina };
   }
-
   async guardaProductoComisiones(data: productosExcelI) {
     const producto = await this.producto.findOne({ codigoMia: data.codigoMia });
     

@@ -233,7 +233,7 @@ export class ProvidersService {
             await this.ventaService.tieneProducto(venta._id, true);
             await this.detalleVentaService.guardarDetalleVenta(detalle);
           }else {
-           const producto=  await this.productoService.guardarProducto(data.codProducto, data.rubro,data.atributo1, data.atributo4)
+           const producto=  await this.productoService.guardarProducto(data.codProducto, data.rubro,data.atributo1, data.atributo4,data.precio, data.importe)
             
            const detalle: detalleVentaI = {
             cantidad: 1,
