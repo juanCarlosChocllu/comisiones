@@ -23,12 +23,12 @@ import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
 import { log } from 'node:console';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import { ComisionRecetaService } from 'src/comision-receta/comision-receta.service';
-import  * as ExcelJS from 'exceljs'
-import { paginas } from 'src/core/utils/paginador';
+import * as ExcelJS from 'exceljs';
+import { calcularPaginas } from 'src/core/utils/paginador';
+import { BuscadorCombinacionDto } from './dto/buscadorCombinacionReceta.dto';
+import { BuscadorCombinacioRecetaI } from './interface/buscadorCombinacion';
 @Injectable()
 export class CombinacionRecetaService {
- 
-
   constructor(
     @InjectModel(CombinacionReceta.name)
     private readonly combinacionReceta: Model<CombinacionReceta>,
@@ -81,7 +81,7 @@ export class CombinacionRecetaService {
         tipoLente: tipoLente._id,
         tratamiento: tratamiento._id,
         tipoColorLente: tipoColorLente._id,
-        monto:0
+        monto: 0,
       };
       const combinacionL = await this.combinacionReceta.findOne(combinacion);
       if (combinacionL) {
@@ -119,7 +119,6 @@ export class CombinacionRecetaService {
     rango: string,
     tipoLente: string,
     tipoColorLente: string,
-    
   ) {
     const cortar = (texto: string) => texto.slice(0, 3).toUpperCase();
     return [
@@ -163,8 +162,8 @@ export class CombinacionRecetaService {
     tipoLente: Types.ObjectId,
     tipoColorLente: Types.ObjectId,
     codigo: string,
-    precio:string,
-    importe:number
+    precio: string,
+    importe: number,
   ) {
     const combinacion = await this.combinacionReceta.create({
       material: material,
@@ -175,165 +174,173 @@ export class CombinacionRecetaService {
       rango: rango,
       tratamiento: tratamiento,
       codigo: codigo,
-      comision:false
+      comision: false,
     });
-    const precioEcontrado = await  this.preciosService.buscarPrecioPorNombre(precio)
-    await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.lente, combinacion._id, precioEcontrado._id,importe )
+    const precioEcontrado =
+      await this.preciosService.buscarPrecioPorNombre(precio);
+    await this.preciosService.guardarDetallePrecio(
+      tipoProductoPrecio.lente,
+      combinacion._id,
+      precioEcontrado._id,
+      importe,
+    );
     return combinacion;
   }
-  async listarCombinaciones(paginadorDto: PaginadorDto) {
-    const data = await this.combinaciones(true,paginadorDto)
-    return { data: data.data, paginas:data.total };
+  async listarCombinaciones( buscadorCombinacionDto:BuscadorCombinacionDto) {
+    const data = await this.combinaciones(true, buscadorCombinacionDto);
+    return { data: data.data, paginas: data.total };
   }
 
-  async asignarComisionReceta (id:Types.ObjectId) {
-    const data = await this.combinacionReceta.findOne({_id:new Types.ObjectId(id), comision:false})
-    if(data) {
-       return await this.combinacionReceta.updateOne({_id:new Types.ObjectId(id)},{comision:true})
+  async asignarComisionReceta(id: Types.ObjectId) {
+    const data = await this.combinacionReceta.findOne({
+      _id: new Types.ObjectId(id),
+      comision: false,
+    });
+    if (data) {
+      return await this.combinacionReceta.updateOne(
+        { _id: new Types.ObjectId(id) },
+        { comision: true },
+      );
     }
   }
-  async listarCombinacionesSinComision(paginadorDto:PaginadorDto){
-    const data = await this.combinaciones(false,paginadorDto)
-    return { data: data.data, paginas:data.total };
+  async listarCombinacionesSinComision(buscadorCombinacionDto:BuscadorCombinacionDto) {
+    const data = await this.combinaciones(false, buscadorCombinacionDto);
+    return { data: data.data, paginas: data.total };
   }
-  async descargarCombinaciones(){
-    const combinacion = await this.combinacionReceta.aggregate(
-      [
-        {
-          $match: {
-            flag: flag.nuevo,
-          },
+  async descargarCombinaciones() {
+    const combinacion = await this.combinacionReceta.aggregate([
+      {
+        $match: {
+          flag: flag.nuevo,
         },
-        {
-          $lookup: {
-            from: 'Material',
-            foreignField: '_id',
-            localField: 'material',
-            as: 'material',
-          },
+      },
+      {
+        $lookup: {
+          from: 'Material',
+          foreignField: '_id',
+          localField: 'material',
+          as: 'material',
         },
-        {
-          $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'TipoLente',
+          foreignField: '_id',
+          localField: 'tipoLente',
+          as: 'tipoLente',
         },
-        {
-          $lookup: {
-            from: 'TipoLente',
-            foreignField: '_id',
-            localField: 'tipoLente',
-            as: 'tipoLente',
-          },
-        },
-        {
-          $unwind: { path: '$tipoLente', preserveNullAndEmptyArrays: false },
-        },
-    
-        {
-          $lookup: {
-            from: 'Rango',
-            foreignField: '_id',
-            localField: 'rango',
-            as: 'rango',
-          },
-        },
-        {
-          $unwind: { path: '$rango', preserveNullAndEmptyArrays: false },
-        },
-    
-        {
-          $lookup: {
-            from: 'ColorLente',
-            foreignField: '_id',
-            localField: 'colorLente',
-            as: 'colorLente',
-          },
-        },
-        {
-          $unwind: { path: '$colorLente', preserveNullAndEmptyArrays: false },
-        },
-        {
-          $lookup: {
-            from: 'MarcaLente',
-            foreignField: '_id',
-            localField: 'marcaLente',
-            as: 'marcaLente',
-          },
-        },
-        {
-          $unwind: { path: '$marcaLente', preserveNullAndEmptyArrays: false },
-        },
-        {
-          $lookup: {
-            from: 'Tratamiento',
-            foreignField: '_id',
-            localField: 'tratamiento',
-            as: 'tratamiento',
-          },
-        },
-        {
-          $unwind: { path: '$tratamiento', preserveNullAndEmptyArrays: false },
-        },
-        {
-          $lookup: {
-            from: 'TipoColorLente',
-            foreignField: '_id',
-            localField: 'tipoColorLente',
-            as: 'tipoColorLente',
-          },
-        },
-        {
-          $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
-        },
-        {
-          $lookup: {
-            from: 'ComisionReceta',
-            foreignField: 'combinacionReceta',
-            localField: '_id',
-            as: 'comisionReceta',
-          },
-        },
-      
-        {
-          $project: {
-            codigo: 1,
-            monto:1,
-            material: '$material.nombre',
-            tipoLente: '$tipoLente.nombre',
-            rango: '$rango.nombre',
-            colorLente: '$colorLente.nombre',
-            marcaLente: '$marcaLente.nombre',
-            tratamiento: '$tratamiento.nombre',
-            tipoColorLente: '$tipoColorLente.nombre',
-            comisionReceta: 1,
-          },
-        }
-       
-      ]
-    )
-    const  workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('hoja 1');
-    worksheet.columns= [
-      { header: 'id', key: 'id' , width:30},
-      { header: 'material', key: 'material' , width:30},
-      { header: 'tipoLente', key: 'tipoLente' , width:30},
-      { header: 'tipoColor', key: 'tipoColor', width:30 },
-      { header: 'tratamiento', key: 'tratamiento' , width:30},
-      { header: 'rangos', key: 'rangos', width:60 },
-      { header: 'marca', key: 'marca' , width:30},
-      { header: 'color', key: 'color' , width:30},
-      { header: 'tipoPrecio', key: 'tipoPrecio' , width:30},
-      { header: 'monto', key: 'monto' , width:15},
-      { header: 'comision_3%', key: 'comision1' , width:30},
-      { header: 'comisionFija', key: 'comisionFija1', width:30 },
-      { header: 'comision', key: 'comision_2', width:30 },
-      { header: 'comisionFija', key: 'comisionFija2' , width:30},
-    ]
+      },
+      {
+        $unwind: { path: '$tipoLente', preserveNullAndEmptyArrays: false },
+      },
 
-    
+      {
+        $lookup: {
+          from: 'Rango',
+          foreignField: '_id',
+          localField: 'rango',
+          as: 'rango',
+        },
+      },
+      {
+        $unwind: { path: '$rango', preserveNullAndEmptyArrays: false },
+      },
+
+      {
+        $lookup: {
+          from: 'ColorLente',
+          foreignField: '_id',
+          localField: 'colorLente',
+          as: 'colorLente',
+        },
+      },
+      {
+        $unwind: { path: '$colorLente', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'MarcaLente',
+          foreignField: '_id',
+          localField: 'marcaLente',
+          as: 'marcaLente',
+        },
+      },
+      {
+        $unwind: { path: '$marcaLente', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'Tratamiento',
+          foreignField: '_id',
+          localField: 'tratamiento',
+          as: 'tratamiento',
+        },
+      },
+      {
+        $unwind: { path: '$tratamiento', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'TipoColorLente',
+          foreignField: '_id',
+          localField: 'tipoColorLente',
+          as: 'tipoColorLente',
+        },
+      },
+      {
+        $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'ComisionReceta',
+          foreignField: 'combinacionReceta',
+          localField: '_id',
+          as: 'comisionReceta',
+        },
+      },
+
+      {
+        $project: {
+          codigo: 1,
+          monto: 1,
+          material: '$material.nombre',
+          tipoLente: '$tipoLente.nombre',
+          rango: '$rango.nombre',
+          colorLente: '$colorLente.nombre',
+          marcaLente: '$marcaLente.nombre',
+          tratamiento: '$tratamiento.nombre',
+          tipoColorLente: '$tipoColorLente.nombre',
+          comisionReceta: 1,
+        },
+      },
+    ]);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('hoja 1');
+    worksheet.columns = [
+      { header: 'id', key: 'id', width: 30 },
+      { header: 'material', key: 'material', width: 30 },
+      { header: 'tipoLente', key: 'tipoLente', width: 30 },
+      { header: 'tipoColor', key: 'tipoColor', width: 30 },
+      { header: 'tratamiento', key: 'tratamiento', width: 30 },
+      { header: 'rangos', key: 'rangos', width: 60 },
+      { header: 'marca', key: 'marca', width: 30 },
+      { header: 'color', key: 'color', width: 30 },
+      { header: 'tipoPrecio', key: 'tipoPrecio', width: 30 },
+      { header: 'monto', key: 'monto', width: 15 },
+      { header: 'comision_3%', key: 'comision1', width: 30 },
+      { header: 'comisionFija', key: 'comisionFija1', width: 30 },
+      { header: 'comision', key: 'comision_2', width: 30 },
+      { header: 'comisionFija', key: 'comisionFija2', width: 30 },
+    ];
+
     for (const comb of combinacion) {
       console.log(comb.comisionReceta);
-    //  console.log(comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision > max.comision ? actual.comision : max.comision ) :0);
-      
-     /* worksheet.addRow({
+      //  console.log(comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision > max.comision ? actual.comision : max.comision ) :0);
+
+      /* worksheet.addRow({
         id:comb._id,
         material:comb.material,
         tipoLente:comb.tipoLente,
@@ -349,29 +356,26 @@ export class CombinacionRecetaService {
         comision_2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision<  max.comision ? actual.comision : max.comision ) :0,
         comisionFija2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto < max.monto ? actual.monto : max.monto) :0,  
       })*/
-      
     }
     worksheet.eachRow((row) => {
       row.eachCell((cell) => {
         cell.protection = { locked: false };
       });
     });
-  
+
     for (let index = 0; index < 8; index++) {
       worksheet.getColumn(index + 1).eachCell((cell, rowNumber) => {
         if (rowNumber > 1) {
           cell.protection = { locked: true };
         }
       });
-      
     }
-    
-    
+
     await worksheet.protect('gay el que lo adivina', {
       selectLockedCells: true,
-      selectUnlockedCells: true
+      selectUnlockedCells: true,
     });
-    
+
     worksheet.getColumn(10).eachCell((cell, rowNumber) => {
       if (rowNumber > 1) {
         cell.protection = { locked: false };
@@ -401,138 +405,148 @@ export class CombinacionRecetaService {
         cell.protection = { locked: false };
       }
     });
-    
-    
-   return workbook
-   
-    
+
+    return workbook;
   }
- private async combinaciones(comision:boolean, paginadorDto:PaginadorDto){  
-    const skip = (paginadorDto.pagina - 1) * paginadorDto.limite;
-    const docs = await this.combinacionReceta
+  private async combinaciones(comision: boolean, buscadorCombinacionDto:BuscadorCombinacionDto) {
+  
+      
+    const skip = (buscadorCombinacionDto.pagina - 1) * buscadorCombinacionDto.limite;
+
+    /* const docs = await this.combinacionReceta
       .find({ flag: flag.nuevo , ...comision==false ? {comision:comision} :{}  })
       .select('_id')
       .skip(skip)
       .limit(paginadorDto.limite)
-      .lean();
-    
-  const pipeline:PipelineStage[] =[
-    {
-      $match: {
-        _id:{$in: docs.map(doc => doc._id)}
+      .lean();*/
+     
+      
+  
+    const pipeline: PipelineStage[] = [
+      {
+        $lookup: {
+          from: 'Material',
+          foreignField: '_id',
+          localField: 'material',
+          as: 'material',
+        },
       },
-    },
-    {
-      $lookup: {
-        from: 'Material',
-        foreignField: '_id',
-        localField: 'material',
-        as: 'material',
+      {
+        $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
       },
-    },
-    {
-      $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
-    },
-    {
-      $lookup: {
-        from: 'TipoLente',
-        foreignField: '_id',
-        localField: 'tipoLente',
-        as: 'tipoLente',
+      {
+        $lookup: {
+          from: 'TipoLente',
+          foreignField: '_id',
+          localField: 'tipoLente',
+          as: 'tipoLente',
+        },
       },
-    },
-    {
-      $unwind: { path: '$tipoLente', preserveNullAndEmptyArrays: false },
-    },
+      {
+        $unwind: { path: '$tipoLente', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.tipoLente) ? [{$match:{'tipoLente.nombre': new RegExp(buscadorCombinacionDto.tipoLente,'i') }}  ]:[],
+      {
+        $lookup: {
+          from: 'Rango',
+          foreignField: '_id',
+          localField: 'rango',
+          as: 'rango',
+        },
+      },
+      {
+        $unwind: { path: '$rango', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.rango) ? [{$match:{'rango.nombre': new RegExp(buscadorCombinacionDto.rango,'i') }}  ]:[],
+      {
+        $lookup: {
+          from: 'ColorLente',
+          foreignField: '_id',
+          localField: 'colorLente',
+          as: 'colorLente',
+        },
+      },
+      {
+        $unwind: { path: '$colorLente', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.colorLente) ? [{$match:{'colorLente.nombre': new RegExp(buscadorCombinacionDto.colorLente,'i') }}]:[],
+      {
+        $lookup: {
+          from: 'MarcaLente',
+          foreignField: '_id',
+          localField: 'marcaLente',
+          as: 'marcaLente',
+        },
+      },
+      {
+        $unwind: { path: '$marcaLente', preserveNullAndEmptyArrays: false },
+      },
 
-    {
-      $lookup: {
-        from: 'Rango',
-        foreignField: '_id',
-        localField: 'rango',
-        as: 'rango',
+      ...(buscadorCombinacionDto.marcaLente) ? [{$match:{'marcaLente.nombre': new RegExp(buscadorCombinacionDto.marcaLente,'i') }}]:[],
+      {
+        $lookup: {
+          from: 'Tratamiento',
+          foreignField: '_id',
+          localField: 'tratamiento',
+          as: 'tratamiento',
+        },
       },
-    },
-    {
-      $unwind: { path: '$rango', preserveNullAndEmptyArrays: false },
-    },
+      {
+        $unwind: { path: '$tratamiento', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.tratamiento) ? [{$match:{'tratamiento.nombre': new RegExp(buscadorCombinacionDto.tratamiento,'i') }}]:[],
+      {
+        $lookup: {
+          from: 'TipoColorLente',
+          foreignField: '_id',
+          localField: 'tipoColorLente',
+          as: 'tipoColorLente',
+        },
+      },
+      {
+        $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.tipoColorLente) ? [{$match:{'tipoColorLente.nombre': new RegExp(buscadorCombinacionDto.tipoColorLente,'i') }}]:[],
+      {
+        $lookup: {
+          from: 'ComisionReceta',
+          foreignField: 'combinacionReceta',
+          localField: '_id',
+          as: 'comisionReceta',
+        },
+      },
+      
+      {
+        $project: {
+          codigo: 1,
+          material: '$material.nombre',
+          tipoLente: '$tipoLente.nombre',
+          rango: '$rango.nombre',
+          colorLente: '$colorLente.nombre',
+          marcaLente: '$marcaLente.nombre',
+          tratamiento: '$tratamiento.nombre',
+          tipoColorLente: '$tipoColorLente.nombre',
+          comisionReceta: 1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: buscadorCombinacionDto.limite,
+      },
+    ];
 
-    {
-      $lookup: {
-        from: 'ColorLente',
-        foreignField: '_id',
-        localField: 'colorLente',
-        as: 'colorLente',
-      },
-    },
-    {
-      $unwind: { path: '$colorLente', preserveNullAndEmptyArrays: false },
-    },
-    {
-      $lookup: {
-        from: 'MarcaLente',
-        foreignField: '_id',
-        localField: 'marcaLente',
-        as: 'marcaLente',
-      },
-    },
-    {
-      $unwind: { path: '$marcaLente', preserveNullAndEmptyArrays: false },
-    },
-    {
-      $lookup: {
-        from: 'Tratamiento',
-        foreignField: '_id',
-        localField: 'tratamiento',
-        as: 'tratamiento',
-      },
-    },
-    {
-      $unwind: { path: '$tratamiento', preserveNullAndEmptyArrays: false },
-    },
-    {
-      $lookup: {
-        from: 'TipoColorLente',
-        foreignField: '_id',
-        localField: 'tipoColorLente',
-        as: 'tipoColorLente',
-      },
-    },
-    {
-      $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
-    },
-    {
-      $lookup: {
-        from: 'ComisionReceta',
-        foreignField: 'combinacionReceta',
-        localField: '_id',
-        as: 'comisionReceta',
-      },
-    },
-
-    {
-      $project: {
-        codigo: 1,
-        material: '$material.nombre',
-        tipoLente: '$tipoLente.nombre',
-        rango: '$rango.nombre',
-        colorLente: '$colorLente.nombre',
-        marcaLente: '$marcaLente.nombre',
-        tratamiento: '$tratamiento.nombre',
-        tipoColorLente: '$tipoColorLente.nombre',
-        comisionReceta: 1,
-      },
-    }
-   
-  ] 
-
- 
- 
-    const countDocuments = await this.combinacionReceta.countDocuments({ flag: flag.nuevo, ...comision==false ? {comision:comision} :{}  });
-    const total = paginas(countDocuments, paginadorDto.limite)
-  const combinaciones = await this.combinacionReceta.aggregate(pipeline,{allowDiskUse:true});  
-  return{ data: combinaciones, total } ;
- }
+    const countDocuments = await this.combinacionReceta.countDocuments({
+      flag: flag.nuevo,
+      ...(comision == false ? { comision: comision } : {}),
+    });
+    const total = calcularPaginas(countDocuments, buscadorCombinacionDto.limite);
+    const combinaciones = await this.combinacionReceta.aggregate(pipeline, {
+      allowDiskUse: true,
+    });
+    return { data: combinaciones, total };
+  }
 
   findOne(id: number) {
     return `This action returns a #${id} combinacionReceta`;
@@ -633,6 +647,7 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
       },
+      
       {
         $project: {
           material: '$material.nombre',
@@ -675,11 +690,10 @@ export class CombinacionRecetaService {
       rango: rango._id,
       tipoLente: tipoLente._id,
       tratamiento: tratamiento._id,
-      tipoColorLente: tipoColorLente._id,    
+      tipoColorLente: tipoColorLente._id,
     };
     const combinacionL = await this.combinacionReceta.findOne(combinacion);
     if (combinacionL) {
-     
       const precio = await this.preciosService.guardarPrecioReceta(data.precio);
 
       if (precio) {
@@ -687,7 +701,7 @@ export class CombinacionRecetaService {
           tipoProductoPrecio.lente,
           combinacionL._id,
           precio._id,
-          data.monto
+          data.monto,
         );
       }
       let contador: number = 0;
@@ -704,15 +718,18 @@ export class CombinacionRecetaService {
         );
       }
     } else {
-      const combinacionL = await this.combinacionReceta.create({...combinacion, comision:true});
+      const combinacionL = await this.combinacionReceta.create({
+        ...combinacion,
+        comision: true,
+      });
       const precio = await this.preciosService.guardarPrecioReceta(data.precio);
-     
+
       if (precio) {
         await this.preciosService.guardarDetallePrecio(
           tipoProductoPrecio.lente,
           combinacionL._id,
           precio._id,
-          data.monto
+          data.monto,
         );
       }
       let contador = 0;
@@ -725,7 +742,6 @@ export class CombinacionRecetaService {
           com.comision.result,
           nombre,
           data.precio,
-          
         );
       }
     }

@@ -4,6 +4,7 @@ import { CreateCombinacionRecetaDto } from './dto/create-combinacion-receta.dto'
 import { UpdateCombinacionRecetaDto } from './dto/update-combinacion-receta.dto';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import {Response} from 'express'
+import { BuscadorCombinacionDto } from './dto/buscadorCombinacionReceta.dto';
 @Controller('combinacion/receta')
 export class CombinacionRecetaController {
   constructor(private readonly combinacionRecetaService: CombinacionRecetaService) {}
@@ -16,13 +17,13 @@ export class CombinacionRecetaController {
   }
 
   @Get()
-  listarCombinaciones(@Query () paginadorDto:PaginadorDto) {
-    return this.combinacionRecetaService.listarCombinaciones(paginadorDto);
+  listarCombinaciones(@Query () buscadorCombinacionDto:BuscadorCombinacionDto) {
+    return this.combinacionRecetaService.listarCombinaciones(buscadorCombinacionDto);
   }
 
   @Get('sinComision')
-  listarCombinacionesSinComision(@Query () paginadorDto:PaginadorDto) {
-    return this.combinacionRecetaService.listarCombinacionesSinComision(paginadorDto);
+  listarCombinacionesSinComision(@Query () buscadorCombinacionDto:BuscadorCombinacionDto) {
+    return this.combinacionRecetaService.listarCombinacionesSinComision(buscadorCombinacionDto);
   }
   @Get('descargar')
   async descargarCombinaciones(@Res() response: Response) {

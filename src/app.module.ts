@@ -26,9 +26,6 @@ import { ZonaModule } from './zona/zona.module';
 import { MetasProductoVipModule } from './metas-producto-vip/metas-producto-vip.module';
 import { AutenticacionModule } from './autenticacion/autenticacion.module';
 import { UsuarioModule } from './usuario/usuario.module';
-import { APP_GUARD } from '@nestjs/core';
-import { TokenGuard } from './autenticacion/guards/token/token.guard';
-
 
 @Module({
   imports: [

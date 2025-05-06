@@ -16,7 +16,7 @@ import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
 import { log } from 'console';
 import { flag } from 'src/core/enum/flag';
-import { paginas, skip } from 'src/core/utils/paginador';
+import { calcularPaginas, skip } from 'src/core/utils/paginador';
 
 @Injectable()
 export class ProductoService {
@@ -206,7 +206,7 @@ export class ProductoService {
      
     ]);
     const total = await this.producto.countDocuments({flag:flag.nuevo})
-    const pagina = paginas(total, paginadorDto.limite)
+    const pagina = calcularPaginas(total, paginadorDto.limite)
     return { data: producto , paginas:pagina };
   }
 
