@@ -161,17 +161,15 @@ export class ProductoService {
     const {data,paginas} = await this.productoListar(paginadorDto, false)
     return { data: data , paginas:paginas };
   }
-  async listarProductos(paginadorDto: PaginadorDto) {
-   const {data,paginas} = await this.productoListar(paginadorDto, true)
+  async listarProductos(paginadorDto: PaginadorDto, rubro:productoE) {
+   const {data,paginas} = await this.productoListar(paginadorDto, true, rubro)
     return { data: data , paginas:paginas };
   }
-  private async productoListar (paginadorDto: PaginadorDto, comision:boolean) {
-   
+  private async productoListar (paginadorDto: PaginadorDto, comision:boolean, rubro?:string|null) {
+    const match = {flag:flag.nuevo,  ...(comision === false) ? {  comision:comision}:{},    ...(rubro) ? {  tipoProducto:rubro}:{}}
     const producto = await this.producto.aggregate([
       {
-        $match: {
-          ...(comision === false) ? {  comision:comision}:{}
-        },
+        $match: match
       },
       {
         $lookup: {
@@ -225,7 +223,7 @@ export class ProductoService {
       $limit:paginadorDto.limite
      }
     ]);
-    const total = await this.producto.countDocuments({flag:flag.nuevo,  ...(comision === false) ? {  comision:comision}:{}})
+    const total = await this.producto.countDocuments(match)
     const pagina = calcularPaginas(total, paginadorDto.limite)
     return { data: producto , paginas:pagina };
   }

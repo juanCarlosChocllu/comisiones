@@ -26,6 +26,8 @@ import { ZonaModule } from './zona/zona.module';
 import { MetasProductoVipModule } from './metas-producto-vip/metas-producto-vip.module';
 import { AutenticacionModule } from './autenticacion/autenticacion.module';
 import { UsuarioModule } from './usuario/usuario.module';
+import { ServicioModule } from './servicio/servicio.module';
+import { ComisionServicioModule } from './comision-servicio/comision-servicio.module';
 
 @Module({
   imports: [
@@ -58,6 +60,8 @@ import { UsuarioModule } from './usuario/usuario.module';
     MetasProductoVipModule,
     AutenticacionModule,
     UsuarioModule,
+    ServicioModule,
+    ComisionServicioModule,
   ],
   controllers: [],
   providers: [

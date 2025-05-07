@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ComisionProducto } from './schema/comision-producto.schema';
 import { Model, Types } from 'mongoose';
 import { ProductoService } from 'src/producto/producto.service';
+import { ActualizarProductoComisionDto } from './dto/ActualizarComisionProducto.dto';
 
 @Injectable()
 export class ComisionProductoService {
@@ -30,21 +31,7 @@ export class ComisionProductoService {
     throw new NotFoundException()
   }
 
-  findAll() {
-    return `This action returns all comisionProducto`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} comisionProducto`;
-  }
-
-  update(id: number, updateComisionProductoDto: UpdateComisionProductoDto) {
-    return `This action updates a #${id} comisionProducto`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} comisionProducto`;
-  }
+ 
 
   async listarComosionPorProducto(producto: Types.ObjectId, precio: string) {
     const comision = await this.comisionProducto.find({
@@ -83,4 +70,15 @@ export class ComisionProductoService {
       });
     }
   }
+
+  async actulizaComision (actualizarProductoComisionDto: ActualizarProductoComisionDto) {
+    const comision = await this.comisionProducto.findOne({_id:new Types.ObjectId(actualizarProductoComisionDto.idComision)})
+    if(!comision) {
+      throw new NotFoundException()
+    }
+    await this.comisionProducto.updateOne({_id:new Types.ObjectId(actualizarProductoComisionDto.idComision)},{monto:actualizarProductoComisionDto.monto})
+    return {status:HttpStatus.OK}
+
+  }
+  
 }
