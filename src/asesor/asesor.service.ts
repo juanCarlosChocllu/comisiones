@@ -14,11 +14,11 @@ export class AsesorService {
     return 'This action adds a new asesor';
   }
 
-  async listarAsesor(sucursal:Types.ObjectId) {
+  async listarAsesor(sucursal:Types.ObjectId[]) {
     const asesor:ScursalAsesorI[] = await this.asesor.aggregate([
       {
         $match:{
-          sucursal:new Types.ObjectId(sucursal)
+          sucursal:{$in:sucursal.map((id)=> new Types.ObjectId(id))}
         }
       },
      

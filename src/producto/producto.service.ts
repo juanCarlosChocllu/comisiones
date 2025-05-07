@@ -67,34 +67,34 @@ export class ProductoService {
     return { status: HttpStatus.CREATED };
   }
 
-  async guardarProducto (codigoMia:string, rubro:string, /*colorProducto:string*/ marcaProducto:string, tipo:string , precio:string, importe:number){//datal color
-    //const color = await this.colorService.guardarColor(colorProducto);
-    const marca = await this.marcaService.guardarMarca(marcaProducto);
+  async guardarProducto (data:productosExcelI){//datal color
+    const color = await this.colorService.guardarColor(data.color);
+    const marca = await this.marcaService.guardarMarca(data.color);
  
     const dataProducto: DataProductoI = {
-      codigoMia: codigoMia,
-      tipoProducto: rubro,
+      codigoMia: data.codigoMia,
+      tipoProducto: data.tipoProducto,
       marca: marca._id,
-      //color: color._id,
-      serie: 'sin serie',
-      categoria: 'sin categoria',
-      codigoQR: 'sin codigo qr',
+      color: color._id,
+      serie: data.serie,
+      categoria: data.categoria,
+      codigoQR: data.codigoQR,
       comision:false
    
     };
-    if (rubro == productoE.montura) {
+    if (data.tipoProducto == productoE.montura) {
       const tipoMontura = await this.tipoMonturaService.guardarTipoMontura(
-        tipo
+        data.tipoMontura
       );
       dataProducto.tipoMontura = tipoMontura._id;
     }
     const producto = await this.producto.create(dataProducto);
-    const precioEcontrado = await this.preciosService.buscarPrecioPorNombre(precio);
+    const precioEcontrado = await this.preciosService.buscarPrecioPorNombre(data.precio);
     await this.preciosService.guardarDetallePrecio(
       tipoProductoPrecio.producto,
       producto._id,
       precioEcontrado._id,
-      importe,
+      data.importe,
     );
     return producto
   }

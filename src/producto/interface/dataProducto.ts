@@ -25,6 +25,7 @@ export interface DataProductoI {
      categoria: string;
      codigoQR: string;
      precio: string;
+     importe?: number;
       comisiones?:comisionesI[],
       tipoMontura:string
    }

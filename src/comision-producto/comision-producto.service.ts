@@ -21,14 +21,9 @@ export class ComisionProductoService {
     const producto = await this.productoService.asignaComisionProducto(
       createComisionProductoDto.producto,
     );
-
-    console.log(createComisionProductoDto);
-
     if (producto && producto.modifiedCount > 0) {
       for (const data of createComisionProductoDto.data) {
-        console.log(data);
-
-        await this.comisionProducto.create(data);
+        await this.comisionProducto.create({...data, producto:createComisionProductoDto.producto});
       }
       return { status: HttpStatus.CREATED };
     }

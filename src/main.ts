@@ -6,7 +6,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-  app.useGlobalPipes(new ValidationPipe({transform:true}));
+  app.useGlobalPipes(new ValidationPipe({
+    transform:true,
+    whitelist:true
+  
+  }));
   app.setGlobalPrefix('api')
   const config = new DocumentBuilder()
   .setTitle('Cats example')

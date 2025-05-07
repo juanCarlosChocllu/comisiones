@@ -39,15 +39,8 @@ export class VentaService {
   }
 
   async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
-    const data: RegistroVentas[] = [];
-
-    for (const sucursal of buscadorVentaDto.sucursal) {
-      const asesores = await this.asesorService.listarAsesor(sucursal);
-
-  
-      
+      const asesores = await this.asesorService.listarAsesor(buscadorVentaDto.sucursal);
       const asesoresProcesados = await Promise.all(asesores.map(async (asesor) => {
-        //await this.listarDetalleVentas(asesor._id, buscadorVentaDto.fechaInicio, buscadorVentaDto.fechaFin, buscadorVentaDto.tipoVenta)
         const [metas, ventas] = await Promise.all([
           this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal),
           this.listarVentasPorAsesor(asesor._id, buscadorVentaDto.fechaInicio,buscadorVentaDto.fechaFin, buscadorVentaDto.tipoVenta)
@@ -160,11 +153,10 @@ export class VentaService {
   
         return ventaAsesor;
       }));
-  
-      data.push(...asesoresProcesados);
-    }
-  
-    return data;
+      console.log(asesoresProcesados);
+      
+ 
+    return asesoresProcesados;
   }
 
   /*async listarVentas2(buscadorVentaDto: BuscadorVentaDto): Promise<RegistroVentas[]> {

@@ -15,10 +15,10 @@ export class ComisionRecetaService {
     @Inject(forwardRef(()=>CombinacionRecetaService )) private readonly combinacionRecetaService: CombinacionRecetaService,
   ) {}
   async create(createComisionRecetaDto: CreateComisionRecetaDto) {
-    const comision = await this.combinacionRecetaService.asignarComisionReceta(
+    const combinacionReceta = await this.combinacionRecetaService.asignarComisionReceta(
       createComisionRecetaDto.combinacionReceta,
     );
-    if (comision) {
+    if (combinacionReceta  && combinacionReceta.modifiedCount > 0 ) {
       for (const data of createComisionRecetaDto.data) {
         await this.comisionReceta.create({
           ...data,
@@ -29,6 +29,7 @@ export class ComisionRecetaService {
       }
       return { status: HttpStatus.CREATED };
     }
+    throw new NotFoundException()
   }
 
   async listarComisionReceta(

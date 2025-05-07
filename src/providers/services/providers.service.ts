@@ -233,7 +233,19 @@ export class ProvidersService {
             await this.ventaService.tieneProducto(venta._id, true);
             await this.detalleVentaService.guardarDetalleVenta(detalle);
           }else {
-           const producto=  await this.productoService.guardarProducto(data.codProducto, data.rubro,data.atributo1, data.atributo4,data.precio, data.importe)
+            const dataProducto:productosExcelI= {
+                categoria:data.atributo3,
+                codigoQR:data.atributo6,
+                serie:data.atributo7,
+                codigoMia:data.codProducto,
+                color:data.atributo5,
+                marca:data.atributo1,
+                precio:data.precio,
+                importe:data.importe,
+                tipoProducto:data.rubro,
+                tipoMontura:data.atributo4
+            }
+           const producto=  await this.productoService.guardarProducto(dataProducto)
             
            const detalle: detalleVentaI = {
             cantidad: 1,
