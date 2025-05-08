@@ -30,10 +30,7 @@ export class AsesorService {
           as:'sucursal'
         }
       },
-      {
-        $unwind:{path:'$sucursal', preserveNullAndEmptyArrays:false}
-      },
-
+     
       {
         $lookup:{
           from:'Empresa',
@@ -42,15 +39,13 @@ export class AsesorService {
           as:'empresa'
         }
       },
-      {
-        $unwind:{path:'$empresa', preserveNullAndEmptyArrays:false}
-      },
+    
       {
         $project:{
           nombre:1,
-          sucursalNombre:'$sucursal.nombre',
-          idSucursal:'$sucursal._id',
-          empresa:'$empresa.nombre'
+          sucursalNombre:{$arrayElemAt:['$sucursal.nombre',0]},
+          idSucursal:{$arrayElemAt:['$sucursal._id',0]},
+          empresa:{$arrayElemAt:['$empresa.nombre',0]}
       
         }
       }

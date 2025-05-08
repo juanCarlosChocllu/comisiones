@@ -9,6 +9,7 @@ import { productoE } from 'src/providers/enum/productos';
 import { tipoProductoPrecio } from '../enum/tipoProductoPrecio';
 import { Type } from 'class-transformer';
 import { preciosI } from '../interface/precios';
+import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class PreciosService {
@@ -16,25 +17,7 @@ export class PreciosService {
     @InjectModel(Precio.name) private readonly   precio:Model<Precio>,
     @InjectModel(DetallePrecio.name)  private readonly  detallePrecio:Model<DetallePrecio>
  ){}
-  create(createPrecioDto: CreatePrecioDto) {
-    return 'This action adds a new precio';
-  }
-
-  findAll() {
-    return `This action returns all precios`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} precio`;
-  }
-
-  update(id: number, updatePrecioDto: UpdatePrecioDto) {
-    return `This action updates a #${id} precio`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} precio`;
-  }
+ 
 
    async guardarPrecioReceta(nombre:string){
       const precio = await this.precio.findOne({nombre:nombre.toUpperCase()})
@@ -116,4 +99,73 @@ export class PreciosService {
 
       return precio
     }
+
+    async listar() {
+      const precio = await this.precio.find()
+      return precio
+    }
+
+   async  precioCombinacion(id:Types.ObjectId){
+    const detalle=  await this.detallePrecio.aggregate([
+      {
+        $match:{combinacionReceta:new Types.ObjectId(id)}
+        
+      },
+      {
+        $lookup:{
+          from:'Precio',
+          foreignField:'_id',
+          localField:'precio',
+          as:'precio'
+
+        }
+      },
+      {
+        $group:{
+          _id:{$arrayElemAt:['$precio.nombre',0]},
+          nombre:{$first:{$arrayElemAt:['$precio.nombre',0]}}
+        }
+      },
+      {
+        $project:{
+          nombre:1,
+          //monto:1
+        }
+      }
+    ])
+    return detalle  
+  }
+
+  async  precioProducto(id:Types.ObjectId){
+    const detalle=  await this.detallePrecio.aggregate([
+      {
+        $match:{producto:new Types.ObjectId(id)}
+        
+      },
+      {
+        $lookup:{
+          from:'Precio',
+          foreignField:'_id',
+          localField:'precio',
+          as:'precio'
+
+        }
+      },
+      {
+        $group:{
+          _id:{$arrayElemAt:['$precio.nombre',0]},
+          nombre:{$first:{$arrayElemAt:['$precio.nombre',0]}}
+        }
+      },
+      {
+        $project:{
+          nombre:1,
+          //monto:1
+        }
+      }
+    ])
+    return detalle  
+  }
+
+
 }

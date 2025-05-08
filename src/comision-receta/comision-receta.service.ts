@@ -1,4 +1,10 @@
-import { forwardRef, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateComisionRecetaDto } from './dto/create-comision-receta.dto';
 import { UpdateComisionRecetaDto } from './dto/update-comision-receta.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,13 +12,15 @@ import { ComisionReceta } from './schema/comision-receta.schema';
 import { Model, Types } from 'mongoose';
 import { CombinacionRecetaService } from 'src/combinacion-receta/combinacion-receta.service';
 import { ActualizarComisionReceta } from './dto/actulizarComisionReceta';
+import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class ComisionRecetaService {
   constructor(
     @InjectModel(ComisionReceta.name)
     private readonly comisionReceta: Model<ComisionReceta>,
-    @Inject(forwardRef(()=>CombinacionRecetaService )) private readonly combinacionRecetaService: CombinacionRecetaService,
+    @Inject(forwardRef(() => CombinacionRecetaService))
+    private readonly combinacionRecetaService: CombinacionRecetaService
   ) {}
   async create(createComisionRecetaDto: CreateComisionRecetaDto) {
     const combinacionReceta = await this.combinacionRecetaService.asignarComisionReceta(
@@ -30,16 +38,23 @@ export class ComisionRecetaService {
       return { status: HttpStatus.CREATED };
     }
     throw new NotFoundException()
-  }
+  } 
+
+
 
   async listarComisionReceta(
     precio: string,
     combinacionReceta: Types.ObjectId,
   ) {
-    const comisiones = await this.comisionReceta.find({
-      precio: precio.toUpperCase(),
-      combinacionReceta: new Types.ObjectId(combinacionReceta),
-    });
+    const comisiones = await this.comisionReceta
+      .find(
+        {
+          precio: precio,
+          combinacionReceta: new Types.ObjectId(combinacionReceta),
+        },
+        { monto: 1, precio: 1 },
+      )
+      .lean();
     return comisiones;
   }
 
@@ -71,13 +86,31 @@ export class ComisionRecetaService {
     }
   }
 
-  async actualizarComsion( actualizarComisionReceta: ActualizarComisionReceta) {
-    const comision = await this.comisionReceta.findOne({_id:new Types.ObjectId(actualizarComisionReceta.idComision)})
-    if(!comision) {
-      throw new NotFoundException()
+  async actualizarComsion(actualizarComisionReceta: ActualizarComisionReceta) {
+    const comision = await this.comisionReceta.findOne({
+      _id: new Types.ObjectId(actualizarComisionReceta.idComision),
+    });
+    if (!comision) {
+      throw new NotFoundException();
     }
-    await this.comisionReceta.updateOne({_id:new Types.ObjectId(actualizarComisionReceta.idComision)},{monto:actualizarComisionReceta.monto})
-    return {status:HttpStatus.OK}
+    await this.comisionReceta.updateOne(
+      { _id: new Types.ObjectId(actualizarComisionReceta.idComision) },
+      { monto: actualizarComisionReceta.monto },
+    );
+    return { status: HttpStatus.OK };
+  }
 
+  async eliminarComision(id:Types.ObjectId) {
+    const comision = await this.comisionReceta.findOne({
+      _id: new Types.ObjectId(id),
+    });
+    if (!comision) {
+      throw new NotFoundException();
+    }
+    await this.comisionReceta.updateOne(
+      { _id: new Types.ObjectId(id) },
+      { flag: flag.eliminado },
+    );
+    return { status: HttpStatus.OK };
   }
 }

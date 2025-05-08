@@ -26,19 +26,18 @@ export class CreateComisionRecetaDto {
 }
 
 export class DataComisionRecetaDto {
+
+ /* @IsMongoId()
+  @IsNotEmpty()
+  combinacionReceta: Types.ObjectId;*/
+
   @IsString()
   @IsEnum(PreciosE)
   precio: string;
-
-  @IsString()
-  @IsNotEmpty()
-  nombre: string;
 
   @IsNumber()
   @IsNotEmpty()
   monto: number;
 
- /* @IsNumber()
-  @IsNotEmpty()
-  comision: number;*/
+
 }

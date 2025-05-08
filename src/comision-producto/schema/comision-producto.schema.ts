@@ -1,26 +1,33 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
+import { flag } from 'src/core/enum/flag';
 
 @Schema({ collection: 'ComisionProducto' })
 export class ComisionProducto {
   @Prop()
-  precio:string
+  precio: string;
 
   @Prop()
-  nombre:string
+  nombre: string;
 
   @Prop()
-  monto:number
+  monto: number;
 
-  @Prop({type:Types.ObjectId, ref:'Producto'})
-  producto:Types.ObjectId
-
-  @Prop()
-  diferencia:number
+  @Prop({ type: Types.ObjectId, ref: 'Producto' })
+  producto: Types.ObjectId;
 
   @Prop()
-  comision:number
+  diferencia: number;
 
+  @Prop()
+  comision: number;
 
+  @Prop({ type: Date, default: Date.now() })
+  fecha: Date;
+
+  @Prop({ type: String, enum: flag, default: flag.nuevo })
+  flag: flag;
 }
-export const comisionProductoSchema = SchemaFactory.createForClass(ComisionProducto)
+export const comisionProductoSchema =
+  SchemaFactory.createForClass(ComisionProducto);
+comisionProductoSchema.index({ producto: 1, precio: 1 });

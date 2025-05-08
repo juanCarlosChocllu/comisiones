@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateCombinacionRecetaDto } from './dto/create-combinacion-receta.dto';
 import { UpdateCombinacionRecetaDto } from './dto/update-combinacion-receta.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -27,6 +27,7 @@ import * as ExcelJS from 'exceljs';
 import { calcularPaginas } from 'src/core/utils/paginador';
 import { BuscadorCombinacionDto } from './dto/buscadorCombinacionReceta.dto';
 import { BuscadorCombinacioRecetaI } from './interface/buscadorCombinacion';
+import { CrearCombinacionDto } from './dto/CrearCombinacion.dto';
 @Injectable()
 export class CombinacionRecetaService {
   constructor(
@@ -42,6 +43,79 @@ export class CombinacionRecetaService {
     private readonly preciosService: PreciosService,
     private readonly comisionRecetaService: ComisionRecetaService,
   ) {}
+
+   async crearCombinaciones(crearCombinacionDto : CrearCombinacionDto){
+    const [
+      tratamiento,
+      material,
+      marca,
+      coloLente,
+      rango,
+      tipoLente,
+      tipoColorLente,
+    ] = await Promise.all([
+      this.tratamientoService.guardarTratamiento(crearCombinacionDto.tratamiento),
+      this.materialService.guardarMaterial(crearCombinacionDto.material),
+      this.marcaLenteService.guardarMarcaLente(crearCombinacionDto.marcaLente),
+      this.colorLenteService.guardarColorLente(crearCombinacionDto.colorLente),
+      this.rangoService.guardarRangoLente(crearCombinacionDto.rango),
+      this.tipoLenteService.guardarTipoLente(crearCombinacionDto.tipoLente),
+      this.tipoColorLenteService.guardarTipoColorLente(crearCombinacionDto.tipoColorLente),
+    ]);
+
+    const codigo = this.generarCodigo(
+      tratamiento.nombre,
+      material.nombre,
+      marca.nombre,
+      coloLente.nombre,
+      rango.nombre,
+      tipoLente.nombre,
+      tipoColorLente.nombre,
+    );
+    const combinacion: combinacionReceta = {
+      colorLente: coloLente._id,
+      marcaLente: marca._id,
+      material: material._id,
+      rango: rango._id,
+      tipoLente: tipoLente._id,
+      tratamiento: tratamiento._id,
+      tipoColorLente: tipoColorLente._id,
+
+    };
+
+    const combinacionL = await this.combinacionReceta.findOne(combinacion);
+    console.log(combinacionL);
+    
+    if (combinacionL) {
+      const precios = await this.preciosService.guardarPrecioReceta(
+        crearCombinacionDto.tipoPrecio,
+      );
+      if (precios) {
+        await this.preciosService.guardarDetallePrecio(
+          tipoProductoPrecio.lente,
+          combinacionL._id,
+          precios._id,
+          crearCombinacionDto.importe
+        );
+      }
+    } else {
+      const combinacionLente =
+        await this.combinacionReceta.create({...combinacion, comision:false});
+      const precios = await this.preciosService.guardarPrecioReceta(
+        crearCombinacionDto.tipoPrecio,
+      );
+      if (precios) {
+        await this.preciosService.guardarDetallePrecio(
+          tipoProductoPrecio.lente,
+          combinacionLente._id,
+          precios._id,
+          crearCombinacionDto.importe
+        );
+      }
+    }
+    return {status:HttpStatus.OK}
+   }
+
   async create(createCombinacionRecetaDto: CreateCombinacionRecetaDto) {
     for (const data of createCombinacionRecetaDto.data) {
       const [
@@ -203,8 +277,10 @@ export class CombinacionRecetaService {
       );
     }
   }
+
+
   async listarCombinacionesSinComision(buscadorCombinacionDto:BuscadorCombinacionDto) {
-    const data = await this.combinaciones(false, buscadorCombinacionDto);
+    const data = await this.combinacionesSinComision(buscadorCombinacionDto);
     return { data: data.data, paginas: data.total };
   }
   async descargarCombinaciones() {
@@ -413,14 +489,7 @@ export class CombinacionRecetaService {
       
     const skip = (buscadorCombinacionDto.pagina - 1) * buscadorCombinacionDto.limite;
 
-    /* const docs = await this.combinacionReceta
-      .find({ flag: flag.nuevo , ...comision==false ? {comision:comision} :{}  })
-      .select('_id')
-      .skip(skip)
-      .limit(paginadorDto.limite)
-      .lean();*/
-     
-      
+  
   
     const pipeline: PipelineStage[] = [
       {
@@ -549,16 +618,143 @@ export class CombinacionRecetaService {
     return { data: combinaciones, total };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} combinacionReceta`;
-  }
+  private async combinacionesSinComision( buscadorCombinacionDto:BuscadorCombinacionDto) {      
+    const skip = (buscadorCombinacionDto.pagina - 1) * buscadorCombinacionDto.limite;
+    const pipeline: PipelineStage[] = [
+      {
+        $match:{comision:false}
+      },
+      {
+        $lookup: {
+          from: 'Material',
+          foreignField: '_id',
+          localField: 'material',
+          as: 'material',
+        },
+      },
+      {
+        $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.material) ? [{$match:{'material.nombre': new RegExp(buscadorCombinacionDto.material,'i') }}  ]:[],
+      {
+        $lookup: {
+          from: 'TipoLente',
+          foreignField: '_id',
+          localField: 'tipoLente',
+          as: 'tipoLente',
+        },
+      },
+      {
+        $unwind: { path: '$tipoLente', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.tipoLente) ? [{$match:{'tipoLente.nombre': new RegExp(buscadorCombinacionDto.tipoLente,'i') }}  ]:[],
+      {
+        $lookup: {
+          from: 'Rango',
+          foreignField: '_id',
+          localField: 'rango',
+          as: 'rango',
+        },
+      },
+      {
+        $unwind: { path: '$rango', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.rango) ? [{$match:{'rango.nombre': new RegExp(buscadorCombinacionDto.rango,'i') }}  ]:[],
+      {
+        $lookup: {
+          from: 'ColorLente',
+          foreignField: '_id',
+          localField: 'colorLente',
+          as: 'colorLente',
+        },
+      },
+      {
+        $unwind: { path: '$colorLente', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.colorLente) ? [{$match:{'colorLente.nombre': new RegExp(buscadorCombinacionDto.colorLente,'i') }}]:[],
+      {
+        $lookup: {
+          from: 'MarcaLente',
+          foreignField: '_id',
+          localField: 'marcaLente',
+          as: 'marcaLente',
+        },
+      },
+      {
+        $unwind: { path: '$marcaLente', preserveNullAndEmptyArrays: false },
+      },
 
-  update(id: number, updateCombinacionRecetaDto: UpdateCombinacionRecetaDto) {
-    return `This action updates a #${id} combinacionReceta`;
-  }
+      ...(buscadorCombinacionDto.marcaLente) ? [{$match:{'marcaLente.nombre': new RegExp(buscadorCombinacionDto.marcaLente,'i') }}]:[],
+      {
+        $lookup: {
+          from: 'Tratamiento',
+          foreignField: '_id',
+          localField: 'tratamiento',
+          as: 'tratamiento',
+        },
+      },
+      {
+        $unwind: { path: '$tratamiento', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.tratamiento) ? [{$match:{'tratamiento.nombre': new RegExp(buscadorCombinacionDto.tratamiento,'i') }}]:[],
+      {
+        $lookup: {
+          from: 'TipoColorLente',
+          foreignField: '_id',
+          localField: 'tipoColorLente',
+          as: 'tipoColorLente',
+        },
+      },
+      {
+        $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
+      },
+      ...(buscadorCombinacionDto.tipoColorLente) ? [{$match:{'tipoColorLente.nombre': new RegExp(buscadorCombinacionDto.tipoColorLente,'i') }}]:[],
+     /* {
+        $lookup: {
+          from: 'DetallePrecio',
+          foreignField: 'combinacionReceta',
+          localField: '_id',
+          as: 'detallePrecio',
+        },
+      },
+      {$unwind:{path:'$detallePrecio', preserveNullAndEmptyArrays:false} },
+      {
+        $lookup: {
+          from: 'Precio',
+          foreignField: '_id',
+          localField: 'detallePrecio.precio',
+          as: 'precio',
+        },
+      },
+      {$unwind:{path:'$precio', preserveNullAndEmptyArrays:false} },*/
+      {
+        $project: {
+          codigo: 1,
+          material: '$material.nombre',
+          tipoLente: '$tipoLente.nombre',
+          rango: '$rango.nombre',
+          colorLente: '$colorLente.nombre',
+          marcaLente: '$marcaLente.nombre',
+          tratamiento: '$tratamiento.nombre',
+          tipoColorLente: '$tipoColorLente.nombre',
+          //precio: '$precio.nombre',
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: buscadorCombinacionDto.limite,
+      },
+    ];
 
-  remove(id: number) {
-    return `This action removes a #${id} combinacionReceta`;
+    const countDocuments = await this.combinacionReceta.countDocuments({
+      flag: flag.nuevo, comision:false});
+    const total = calcularPaginas(countDocuments, buscadorCombinacionDto.limite);
+    const combinaciones = await this.combinacionReceta.aggregate(pipeline, {
+      allowDiskUse: true,
+    });
+    return { data: combinaciones, total };
   }
 
   async listarCombinacionPorVenta(combinacionReceta: Types.ObjectId) {

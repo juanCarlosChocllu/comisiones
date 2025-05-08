@@ -10,39 +10,20 @@ import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 export class PreciosController {
   constructor(private readonly preciosService: PreciosService) {}
 
-  @Post()
-  create(@Body() createPrecioDto: CreatePrecioDto) {
-    return this.preciosService.create(createPrecioDto);
-  }
 
   @Get()
-  findAll() {
-    return this.preciosService.findAll();
+  listar() {
+    return this.preciosService.listar();
   }
-  
   @Get('combinacion/:id')
-  listarTiposDePrecioCombinacion(@Param('id', ValidateIdPipe) id:Types.ObjectId ) {
-    return this.preciosService.listarTiposDePrecioCombinacion(id);
+  precioCombinacion(@Param('id') id:Types.ObjectId) {
+    return this.preciosService.precioCombinacion(id);
   }
 
   @Get('producto/:id')
-  listarTiposDePrecioProducto(@Param('id', ValidateIdPipe) id:Types.ObjectId ) {
-    return this.preciosService.listarTiposDePrecioProducto(id);
+  precioProducto(@Param('id') id:Types.ObjectId) {
+    return this.preciosService.precioProducto(id);
   }
-
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.preciosService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePrecioDto: UpdatePrecioDto) {
-    return this.preciosService.update(+id, updatePrecioDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.preciosService.remove(+id);
-  }
+  
+ 
 }

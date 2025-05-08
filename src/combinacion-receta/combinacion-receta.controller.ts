@@ -5,6 +5,7 @@ import { UpdateCombinacionRecetaDto } from './dto/update-combinacion-receta.dto'
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import {Response} from 'express'
 import { BuscadorCombinacionDto } from './dto/buscadorCombinacionReceta.dto';
+import { CrearCombinacionDto } from './dto/CrearCombinacion.dto';
 @Controller('combinacion/receta')
 export class CombinacionRecetaController {
   constructor(private readonly combinacionRecetaService: CombinacionRecetaService) {}
@@ -14,6 +15,13 @@ export class CombinacionRecetaController {
 
 
     return this.combinacionRecetaService.create(createCombinacionRecetaDto);
+  }
+
+  @Post('crear')
+  crearCombinacion(@Body()crearCombinacionDto : CrearCombinacionDto) {
+
+
+    return this.combinacionRecetaService.crearCombinaciones(crearCombinacionDto);
   }
 
   @Get()
@@ -41,18 +49,4 @@ export class CombinacionRecetaController {
     return response.end();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.combinacionRecetaService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCombinacionRecetaDto: UpdateCombinacionRecetaDto) {
-    return this.combinacionRecetaService.update(+id, updateCombinacionRecetaDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.combinacionRecetaService.remove(+id);
-  }
 }

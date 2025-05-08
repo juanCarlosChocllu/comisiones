@@ -229,6 +229,7 @@ export class ProvidersService {
               rubro: data.rubro,
               venta: venta._id,
               marca: producto.marca,
+              descripcion:data.descripcionProducto
             };
             await this.ventaService.tieneProducto(venta._id, true);
             await this.detalleVentaService.guardarDetalleVenta(detalle);
@@ -254,6 +255,7 @@ export class ProvidersService {
             rubro: data.rubro,
             venta: venta._id,
             marca:data.atributo1,
+            descripcion:data.descripcionProducto
           };
           await this.ventaService.tieneProducto(venta._id, true);
           await this.detalleVentaService.guardarDetalleVenta(detalle);
@@ -264,6 +266,7 @@ export class ProvidersService {
             importe: data.importe,
             rubro: data.rubro,
             venta: venta._id,
+            descripcion:data.descripcionProducto
           };
           await this.detalleVentaService.guardarDetalleVenta(detalle);
           await this.ventaService.tipoPrecio(venta._id, data.precio);
