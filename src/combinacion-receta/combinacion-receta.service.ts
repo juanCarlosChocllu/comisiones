@@ -45,6 +45,8 @@ export class CombinacionRecetaService {
   ) {}
 
    async crearCombinaciones(crearCombinacionDto : CrearCombinacionDto){
+    console.log(crearCombinacionDto);
+    
     const [
       tratamiento,
       material,
@@ -84,8 +86,7 @@ export class CombinacionRecetaService {
     };
 
     const combinacionL = await this.combinacionReceta.findOne(combinacion);
-    console.log(combinacionL);
-    
+   
     if (combinacionL) {
       const precios = await this.preciosService.guardarPrecioReceta(
         crearCombinacionDto.tipoPrecio,
