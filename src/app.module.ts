@@ -28,12 +28,11 @@ import { AutenticacionModule } from './autenticacion/autenticacion.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { ServicioModule } from './servicio/servicio.module';
 import { ComisionServicioModule } from './comision-servicio/comision-servicio.module';
+import { databaseConeccion } from './core/config/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      'mongodb://kanna:kanna@localhost:27017/comision4?authSource=admin'
-    ),
+    MongooseModule.forRoot(databaseConeccion),
     EmpresaModule,
     SucursalModule,
     AsesorModule,
