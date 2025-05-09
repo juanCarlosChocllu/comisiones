@@ -1,26 +1,92 @@
 import { Injectable } from '@nestjs/common';
 import { CreateServicioDto } from './dto/create-servicio.dto';
 import { UpdateServicioDto } from './dto/update-servicio.dto';
+import {exceldataServicioI } from './interface/servicio.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import { Servicio } from './schema/servicio.schema';
+import { Model } from 'mongoose';
+import { PreciosService } from 'src/precios/service/precios.service';
+import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
+import { ComisionServicioService } from 'src/comision-servicio/comision-servicio.service';
+import { calcularPaginas, skip } from 'src/core/utils/paginador';
+import { PaginadorDto } from 'src/core/dto/paginadorDto';
 
 @Injectable()
 export class ServicioService {
-  create(createServicioDto: CreateServicioDto) {
-    return 'This action adds a new servicio';
+  constructor(
+    @InjectModel(Servicio.name) private readonly servicio:Model<Servicio>,
+    private readonly preciosService:PreciosService,
+    private readonly comisionServicioService:ComisionServicioService
+  ){}
+
+
+  async listarServicios(paginadorDto:PaginadorDto) {
+    console.log(paginadorDto);
+    
+    const servicio = await this.servicio.aggregate([
+      {
+        $lookup:{
+          from:'ComisionServicio',
+          foreignField:'servicio',
+          localField:'_id',
+          as:'comisonServicio'
+        }
+      },
+
+      {
+        $project:{
+          nombre:1,
+          comisonServicio:1
+        }
+      },
+      {
+        $skip:skip(paginadorDto.pagina, paginadorDto.limite)
+      },
+      {
+        $limit:paginadorDto.limite
+      }
+    ])
+   const countDocuments =  await this.servicio.countDocuments()
+    const paginas = calcularPaginas(countDocuments, paginadorDto.limite)
+    return {data:servicio, paginas:paginas}
   }
 
-  findAll() {
-    return `This action returns all servicio`;
+
+  async buscarServicio (codigoMia:string) {
+    const servicio = await this.servicio.exists({codigoMia:codigoMia})
+    return servicio
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} servicio`;
-  }
+  async guardarServicioConSusCOmisiones(data:exceldataServicioI){
+    const servicioExiste= await this.servicio.exists({codigoMia:data.codigoMia})
+    const precio = await this.preciosService.guardarPrecioReceta(data.tipoPrecio)
+    const {comisiones, tipoPrecio,...data2} = data
+    if(!servicioExiste) {
+       
+        const servicio = await this.servicio.create(data2)
+         await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.servicio, servicio._id,precio._id, data.monto)
+       let contador = 0
+        for (const comision of comisiones) {
+          console.log(comision);
+          
+            contador ++
+            const nombre= `Comison ${contador}`
+            await this.comisionServicioService.guardarComisionServicio(servicio._id,comision.monto.result, comision.comision.result, nombre, data.tipoPrecio)
+          
+ 
+        }
+       
+    }else {
+     
+      await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.servicio, servicioExiste._id,precio._id, data.monto)
+    let contador = 0
+     for (const comision of comisiones) {
+         contador ++
+         const nombre= `Comison ${contador}`
+         await this.comisionServicioService.guardarComisionServicio(servicioExiste._id,comision.monto.result, comision.comision.result, nombre, data.tipoPrecio)
+       
 
-  update(id: number, updateServicioDto: UpdateServicioDto) {
-    return `This action updates a #${id} servicio`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} servicio`;
+     }
+    }
   }
 }

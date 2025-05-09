@@ -486,12 +486,7 @@ export class CombinacionRecetaService {
     return workbook;
   }
   private async combinaciones(comision: boolean, buscadorCombinacionDto:BuscadorCombinacionDto) {
-  
-      
     const skip = (buscadorCombinacionDto.pagina - 1) * buscadorCombinacionDto.limite;
-
-  
-  
     const pipeline: PipelineStage[] = [
       {
         $lookup: {
@@ -710,24 +705,7 @@ export class CombinacionRecetaService {
         $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
       },
       ...(buscadorCombinacionDto.tipoColorLente) ? [{$match:{'tipoColorLente.nombre': new RegExp(buscadorCombinacionDto.tipoColorLente,'i') }}]:[],
-     /* {
-        $lookup: {
-          from: 'DetallePrecio',
-          foreignField: 'combinacionReceta',
-          localField: '_id',
-          as: 'detallePrecio',
-        },
-      },
-      {$unwind:{path:'$detallePrecio', preserveNullAndEmptyArrays:false} },
-      {
-        $lookup: {
-          from: 'Precio',
-          foreignField: '_id',
-          localField: 'detallePrecio.precio',
-          as: 'precio',
-        },
-      },
-      {$unwind:{path:'$precio', preserveNullAndEmptyArrays:false} },*/
+     
       {
         $project: {
           codigo: 1,
@@ -738,8 +716,7 @@ export class CombinacionRecetaService {
           marcaLente: '$marcaLente.nombre',
           tratamiento: '$tratamiento.nombre',
           tipoColorLente: '$tipoColorLente.nombre',
-          //precio: '$precio.nombre',
-        },
+                },
       },
       {
         $skip: skip,

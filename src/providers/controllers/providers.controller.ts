@@ -22,5 +22,9 @@ export class ProvidersController {
     return this.providersService.guardarComisionesProducto()
   }
 
+  @Post('excel/servicio/comisiones')
+  guardarComisionesServicio(){
+    return this.providersService.guardarComisionesServicio()
+  }
  
 }

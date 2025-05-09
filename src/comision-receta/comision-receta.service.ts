@@ -26,12 +26,17 @@ export class ComisionRecetaService {
     const combinacionReceta = await this.combinacionRecetaService.asignarComisionReceta(
       createComisionRecetaDto.combinacionReceta,
     );
+    let contador = 0
     if (combinacionReceta  && combinacionReceta.modifiedCount > 0 ) {
       for (const data of createComisionRecetaDto.data) {
+        contador ++ 
+
         await this.comisionReceta.create({
           ...data,
+          nombre:`comision ${contador}`,
           combinacionReceta: new Types.ObjectId(
             createComisionRecetaDto.combinacionReceta,
+            
           ),
         });
       }

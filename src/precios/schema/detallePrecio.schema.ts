@@ -7,6 +7,9 @@ export class DetallePrecio {
   @Prop({ ref: 'Producto', type: Types.ObjectId })
   producto: Types.ObjectId;
 
+  @Prop({ ref: 'Servicio', type: Types.ObjectId })
+   servicio: Types.ObjectId;
+
   @Prop({ ref: 'CombinacionReceta', type: Types.ObjectId })
   combinacionReceta: Types.ObjectId;
 

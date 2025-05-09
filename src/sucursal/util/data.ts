@@ -29,9 +29,9 @@ export function dataEmpresa() {
           'ECONOPTICA SANTA CRUZ INDANA'
         ],
         'TU OPTICA': ['TU OPTICA', 'TU OPTICA 2'],
-  
+        'OPTISERVICE S.R.L': ['OFEROPTICA'],
         //'ZONA OPTICA': ['ZONA OPTICA 1'],
-        'OPTILAB': ['OPTILAB', 'OPTILAB TARIJA','OPTILAB PARAGUAY'],
+        //'OPTILAB': ['OPTILAB', 'OPTILAB TARIJA','OPTILAB PARAGUAY'],
   
        
        

@@ -5,6 +5,7 @@ export interface detalleVentaI{
       venta: Types.ObjectId;
 
       combinacionReceta?: Types.ObjectId;
+      servicio?: Types.ObjectId;
     
       importe: number;
     

@@ -1,4 +1,5 @@
 export enum tipoProductoPrecio {
     lente='LENTE',
-    producto='PRODUCTO'
+    producto='PRODUCTO',
+    servicio='SERVICIO'
 }

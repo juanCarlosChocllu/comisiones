@@ -41,6 +41,8 @@ import {
 import { ComisionRecetaService } from 'src/comision-receta/comision-receta.service';
 import { ComisionProducto } from 'src/comision-producto/schema/comision-producto.schema';
 import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
+import { exceldataServicioI } from 'src/servicio/interface/servicio.interface';
+import { ServicioService } from 'src/servicio/servicio.service';
 @Injectable()
 export class ProvidersService {
   constructor(
@@ -64,6 +66,7 @@ export class ProvidersService {
     private readonly tipoVentaService: TipoVentaService,
     private readonly comisionRecetaService: ComisionRecetaService,
     private readonly comisionProductoService: ComisionProductoService,
+    private readonly servicioService: ServicioService,
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -95,14 +98,10 @@ export class ProvidersService {
       );
 
       if (sucursal) {
-        const asesor = await this.asesorService.guardarAsesor(
-          data.nombre_vendedor,
-          sucursal._id,
-        );
-        const tipoVenta = await this.tipoVentaService.guardarTipoVenta(
-          data.tipoVenta,
-        );
-
+        const [asesor, tipoVenta] = await Promise.all([
+          this.asesorService.guardarAsesor(data.nombre_vendedor, sucursal._id),
+          this.tipoVentaService.guardarTipoVenta(data.tipoVenta),
+        ]);
         ventaGuardar = {
           asesor: asesor._id,
           comisiona: data.comisiona,
@@ -126,154 +125,199 @@ export class ProvidersService {
         };
         const venta = await this.ventaService.guardarVenta(ventaGuardar);
         if (data.rubro === productoE.lente) {
-          const [
-            coloLente,
-            tipoLente,
-            material,
-            tipoColorLente,
-            marca,
-            tratamiento,
-            rango,
-          ] = await Promise.all([
-            this.colorLenteService.verificarColorLente(data.atributo1),
-            this.tipoLenteService.guardarTipoLente(data.atributo2),
-            this.materialService.guardarMaterial(data.atributo3),
-            this.tipoColorLenteService.verificarTipoColorLente(data.atributo4),
-            this.marcaLenteService.guardarMarcaLente(data.atributo5),
-            this.tratamientoService.guardarTratamiento(data.atributo6),
-            this.rangoService.guardarRangoLente(data.atributo7),
-          ]);
-
-          if (
-            !!coloLente &&
-            !!tipoLente &&
-            !!material &&
-            !!tipoColorLente &&
-            !!marca &&
-            !!rango &&
-            !!tratamiento
-          ) {
-            const recetaCombinacion =
-              await this.combinacionRecetaService.verificarCombinacion(
-                tratamiento._id,
-                material._id,
-                marca._id,
-                coloLente._id,
-                rango._id,
-                tipoLente._id,
-                tipoColorLente._id,
-              );
-
-            if (recetaCombinacion && venta) {
-              //  const comision = await this.comisionRecetaService.listarComisionReceta(data.precio, recetaCombinacion._id)
-
-              const detalle: detalleVentaI = {
-                cantidad: 1,
-                combinacionReceta: recetaCombinacion._id,
-                importe: data.importe,
-                rubro: data.rubro,
-                venta: venta._id,
-                // comision:comision.map((item => item.monto)),
-                descripcion: `${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`,
-              };
-              await this.ventaService.tieneReceta(venta._id, true);
-              await this.detalleVentaService.guardarDetalleVenta(detalle);
-            }  else {
-                const codigo = this.combinacionRecetaService.generarCodigo(tratamiento.nombre, material.nombre, marca.nombre, coloLente.nombre, rango.nombre, tipoColorLente.nombre, tipoColorLente.nombre)
-                const recetaCombinacion = await this.combinacionRecetaService.crearCombinacion(
-                  tratamiento._id,
-                  material._id,
-                  marca._id,
-                  coloLente._id,
-                  rango._id,
-                  tipoLente._id,
-                  tipoColorLente._id,
-                  codigo,
-                  data.precio,
-                  data.importe
-                );
-                if(recetaCombinacion && venta) {
-                  
-                const detalle: detalleVentaI = {
-                  cantidad: 1,
-                  combinacionReceta: recetaCombinacion._id,
-                  importe: data.importe,
-                  rubro: data.rubro,
-                  venta: venta._id,
-                  descripcion:`${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`
-                };
-                await this.ventaService.tieneReceta(venta._id, true);
-                await this.detalleVentaService.guardarDetalleVenta(detalle);
-
-                }
-                
-
-              
-            }
-          }
+          await this.guardarLente(data, venta._id);
         } else if (
-          data.rubro == productoE.gafa ||
-          data.rubro == productoE.lenteDeContacto ||
-          data.rubro == productoE.montura
+          data.rubro === productoE.gafa ||
+          data.rubro === productoE.lenteDeContacto ||
+          data.rubro === productoE.montura
         ) {
-          const producto = await this.productoService.verificarProducto(
-            data.codProducto,
-          );
-
-          if (producto) {
-           
-            const detalle: detalleVentaI = {
-              cantidad: 1,
-              producto: producto._id,
-              importe: data.importe,
-              rubro: data.rubro,
-              venta: venta._id,
-              marca: producto.marca,
-              descripcion:data.descripcionProducto
-            };
-            await this.ventaService.tieneProducto(venta._id, true);
-            await this.detalleVentaService.guardarDetalleVenta(detalle);
-          }else {
-            const dataProducto:productosExcelI= {
-                categoria:data.atributo3,
-                codigoQR:data.atributo6,
-                serie:data.atributo7,
-                codigoMia:data.codProducto,
-                color:data.atributo5,
-                marca:data.atributo1,
-                precio:data.precio,
-                importe:data.importe,
-                tipoProducto:data.rubro,
-                tipoMontura:data.atributo4
-            }
-           const producto=  await this.productoService.guardarProducto(dataProducto)
-            
-           const detalle: detalleVentaI = {
-            cantidad: 1,
-            producto: producto._id,
-            importe: data.importe,
-            rubro: data.rubro,
-            venta: venta._id,
-            marca:data.atributo1,
-            descripcion:data.descripcionProducto
-          };
-          await this.ventaService.tieneProducto(venta._id, true);
-          await this.detalleVentaService.guardarDetalleVenta(detalle);
-          } 
-        } else {
-          const detalle: detalleVentaI = {
-            cantidad: 1,
-            importe: data.importe,
-            rubro: data.rubro,
-            venta: venta._id,
-            descripcion:data.descripcionProducto
-          };
-          await this.detalleVentaService.guardarDetalleVenta(detalle);
-          await this.ventaService.tipoPrecio(venta._id, data.precio);
+          await this.guardarProducto(data, venta._id);
+        } else  if(data.rubro == productoE.servicio) {
+          await this.guardarServicio(data, venta._id);
+        }else{
+          await this.guadarOtroProducto(data, venta._id)
         }
+      } else  {
+          console.log('sin sucursal');
+          
       }
     }
     return { status: HttpStatus.CREATED };
+  }
+
+
+  private async  guadarOtroProducto(data: VentaApiI, venta: Types.ObjectId) {
+
+    const detalle: detalleVentaI = {
+      cantidad: 1,
+      importe: data.importe,
+      rubro: data.rubro,
+      venta: venta._id,
+      descripcion: data.descripcionProducto,
+      
+    
+    };
+    await this.detalleVentaService.guardarDetalleVenta(detalle);
+    await this.ventaService.tipoPrecio(venta._id, data.precio);
+  }
+
+
+
+  private async guardarServicio(data: VentaApiI, venta: Types.ObjectId) {
+    const servicio = await this.servicioService.buscarServicio(data.codProducto)
+    if(servicio){
+      const detalle: detalleVentaI = {
+        cantidad: 1,
+        importe: data.importe,
+        rubro: data.rubro,
+        venta: venta._id,
+        descripcion: data.descripcionProducto,
+        servicio:servicio._id
+      };
+      await this.detalleVentaService.guardarDetalleVenta(detalle);
+      await this.ventaService.tipoPrecio(venta._id, data.precio);
+    }else {
+      console.log('servico no existe', data);
+      
+    }
+  }
+
+  private async guardarProducto(data: VentaApiI, venta: Types.ObjectId) {
+    const producto = await this.productoService.verificarProducto(
+      data.codProducto,
+    );
+
+    if (producto) {
+      const detalle: detalleVentaI = {
+        cantidad: 1,
+        producto: producto._id,
+        importe: data.importe,
+        rubro: data.rubro,
+        venta: venta,
+        marca: producto.marca,
+        descripcion: data.descripcionProducto,
+      };
+      await this.ventaService.tieneProducto(venta, true);
+      await this.detalleVentaService.guardarDetalleVenta(detalle);
+    } else {
+      const dataProducto: productosExcelI = {
+        categoria: data.atributo3,
+        codigoQR: data.atributo6,
+        serie: data.atributo7,
+        codigoMia: data.codProducto,
+        color: data.atributo5,
+        marca: data.atributo1,
+        precio: data.precio,
+        importe: data.importe,
+        tipoProducto: data.rubro,
+        tipoMontura: data.atributo4,
+      };
+      const producto = await this.productoService.guardarProducto(dataProducto);
+
+      const detalle: detalleVentaI = {
+        cantidad: 1,
+        producto: producto._id,
+        importe: data.importe,
+        rubro: data.rubro,
+        venta: venta,
+        marca: data.atributo1,
+        descripcion: data.descripcionProducto,
+      };
+      await this.ventaService.tieneProducto(venta, true);
+      await this.detalleVentaService.guardarDetalleVenta(detalle);
+    }
+  }
+
+  private async guardarLente(data: VentaApiI, venta: Types.ObjectId) {
+    const [
+      coloLente,
+      tipoLente,
+      material,
+      tipoColorLente,
+      marca,
+      tratamiento,
+      rango,
+    ] = await Promise.all([
+      this.colorLenteService.verificarColorLente(data.atributo1),
+      this.tipoLenteService.guardarTipoLente(data.atributo2),
+      this.materialService.guardarMaterial(data.atributo3),
+      this.tipoColorLenteService.verificarTipoColorLente(data.atributo4),
+      this.marcaLenteService.guardarMarcaLente(data.atributo5),
+      this.tratamientoService.guardarTratamiento(data.atributo6),
+      this.rangoService.guardarRangoLente(data.atributo7),
+    ]);
+
+    if (
+      !!coloLente &&
+      !!tipoLente &&
+      !!material &&
+      !!tipoColorLente &&
+      !!marca &&
+      !!rango &&
+      !!tratamiento
+    ) {
+      const recetaCombinacion =
+        await this.combinacionRecetaService.verificarCombinacion(
+          tratamiento._id,
+          material._id,
+          marca._id,
+          coloLente._id,
+          rango._id,
+          tipoLente._id,
+          tipoColorLente._id,
+        );
+
+      if (recetaCombinacion && venta) {
+        //  const comision = await this.comisionRecetaService.listarComisionReceta(data.precio, recetaCombinacion._id)
+
+        const detalle: detalleVentaI = {
+          cantidad: 1,
+          combinacionReceta: recetaCombinacion._id,
+          importe: data.importe,
+          rubro: data.rubro,
+          venta: venta,
+          // comision:comision.map((item => item.monto)),
+          descripcion: `${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`,
+        };
+        await this.ventaService.tieneReceta(venta, true);
+        await this.detalleVentaService.guardarDetalleVenta(detalle);
+      } else {
+        const codigo = this.combinacionRecetaService.generarCodigo(
+          tratamiento.nombre,
+          material.nombre,
+          marca.nombre,
+          coloLente.nombre,
+          rango.nombre,
+          tipoColorLente.nombre,
+          tipoColorLente.nombre,
+        );
+        const recetaCombinacion =
+          await this.combinacionRecetaService.crearCombinacion(
+            tratamiento._id,
+            material._id,
+            marca._id,
+            coloLente._id,
+            rango._id,
+            tipoLente._id,
+            tipoColorLente._id,
+            codigo,
+            data.precio,
+            data.importe,
+          );
+        if (recetaCombinacion && venta) {
+          const detalle: detalleVentaI = {
+            cantidad: 1,
+            combinacionReceta: recetaCombinacion._id,
+            importe: data.importe,
+            rubro: data.rubro,
+            venta: venta,
+            descripcion: `${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`,
+          };
+          await this.ventaService.tieneReceta(venta, true);
+          await this.detalleVentaService.guardarDetalleVenta(detalle);
+        }
+      }
+    }
   }
 
   async guardarComisionesReceta() {
@@ -292,11 +336,10 @@ export class ProvidersService {
 
         const rangos = hoja.getCell(6).value;
         const marca = hoja.getCell(7).value;
-       
-      
+
         const colorLente = hoja.getCell(8).value;
         const precio = hoja.getCell(9).value;
-        const monto = hoja.getCell(10).value
+        const monto = hoja.getCell(10).value;
         const comisiones: comisionesI[] = [
           {
             comision: hoja.getCell(11).value,
@@ -308,7 +351,7 @@ export class ProvidersService {
           },
         ];
         const data: GuardarComisionRecetaI = {
-          codigoMia:String(codigoMia),
+          codigoMia: String(codigoMia),
           colorLente: String(colorLente).toUpperCase().trim(),
           comisiones: comisiones,
           marcaLente: String(marca).toUpperCase().trim(),
@@ -318,10 +361,10 @@ export class ProvidersService {
           tipoLente: String(tipoLente).toUpperCase().trim(),
           tratamiento: String(tratamiento).toUpperCase().trim(),
           precio: String(precio).toUpperCase().trim(),
-          monto:Number(monto)
+          monto: Number(monto),
         };
         console.log(data.monto);
-        
+
         await this.combinacionRecetaService.guardarComisionrecetaCombinacion(
           data,
         );
@@ -419,7 +462,44 @@ export class ProvidersService {
       }
     }
   }
+  async guardarComisionesServicio() {
+    const workbook = this.hojaDeTrabajo('./upload/servicio.xlsx');
+    let contador: number = 0;
+    for await (const hojas of workbook) {
+      for await (const hoja of hojas) {
+        contador++;
+        if (contador == 1) {
+          continue;
+        }
+        const codigoMia = hoja.getCell(1).value;
+        const nombre = hoja.getCell(2).value;
+        const descripcion = hoja.getCell(3).value;
+        const tipoPrecio = hoja.getCell(4).value;
+        const monto = hoja.getCell(5).value;
 
+        const comisiones: comisionesI[] = [
+          {
+            comision: hoja.getCell(6).value,
+            monto: hoja.getCell(7).value,
+          },
+          {
+            comision: hoja.getCell(8).value,
+            monto: hoja.getCell(9).value,
+          },
+        ];
+        const data: exceldataServicioI = {
+          codigoMia: String(codigoMia),
+          comisiones: comisiones,
+          descripcion: String(descripcion),
+          nombre: String(nombre),
+          tipoPrecio: String(tipoPrecio),
+          monto: Number(monto),
+        };
+
+        await this.servicioService.guardarServicioConSusCOmisiones(data);
+      }
+    }
+  }
   private hojaDeTrabajo(ruta: string) {
     const workbook = new ExcelJS.stream.xlsx.WorkbookReader(ruta, {
       entries: 'emit',

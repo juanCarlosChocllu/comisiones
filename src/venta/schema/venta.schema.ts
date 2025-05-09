@@ -67,6 +67,7 @@ export class Venta {
 export const ventaSchema = SchemaFactory.createForClass(Venta);
 ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, flag:1 });
 ventaSchema.index({ asesor: 1, fechaFinalizacion: 1 , tipoVenta:1, flag:1});
+ventaSchema.index({ id_venta: 1});
 
 
 @Schema({ collection: 'DetalleVenta' })
@@ -94,6 +95,10 @@ export class DetalleVenta {
 
   @Prop({ type: Types.ObjectId, ref: 'Producto' })
   producto: Types.ObjectId;
+
+
+  @Prop({ type: Types.ObjectId, ref: 'Servicio' })
+  servicio: Types.ObjectId;
 
   @Prop()
   rubro: string;

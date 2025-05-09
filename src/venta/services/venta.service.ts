@@ -4,7 +4,12 @@ import { UpdateVentaDto } from '../dto/update-venta.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { DetalleVenta, Venta } from '../schema/venta.schema';
 import { Model, Types } from 'mongoose';
-import { FiltroI, RegistroVentas, VentaAsesor, VentaI } from '../interface/venta';
+import {
+  FiltroI,
+  RegistroVentas,
+  VentaAsesor,
+  VentaI,
+} from '../interface/venta';
 import { AsesorService } from 'src/asesor/asesor.service';
 import { DetalleVentaService } from './detallleVenta.service';
 import { CombinacionReceta } from 'src/combinacion-receta/schema/combinacion-receta.schema';
@@ -18,7 +23,7 @@ import { MetasProductoVipService } from 'src/metas-producto-vip/metas-producto-v
 import { PreciosService } from 'src/precios/service/precios.service';
 import { BuscadorVentaDto } from '../dto/buscadorVenta.dto,';
 import { flagVenta } from '../enum/flagVenta';
-
+import { ComisionServicioService } from 'src/comision-servicio/comision-servicio.service';
 
 @Injectable()
 export class VentaService {
@@ -27,137 +32,165 @@ export class VentaService {
     @InjectModel(DetalleVenta.name) private readonly DetalleVenta: Model<Venta>,
     private readonly asesorService: AsesorService,
     private readonly detalleVentaService: DetalleVentaService,
-    private combinacionRecetaService: CombinacionRecetaService,
-    private comisionRecetaService: ComisionRecetaService,
-    private productoService: ProductoService,
-    private comisionProductoService: ComisionProductoService,
-    private metasProductoVipService: MetasProductoVipService,
-    private preciosService: PreciosService,
+    private readonly combinacionRecetaService: CombinacionRecetaService,
+    private readonly comisionRecetaService: ComisionRecetaService,
+    private readonly productoService: ProductoService,
+    private readonly comisionProductoService: ComisionProductoService,
+    private readonly metasProductoVipService: MetasProductoVipService,
+    private readonly preciosService: PreciosService,
+    private readonly comisionServicioService: ComisionServicioService,
   ) {}
   create(createVentaDto: CreateVentaDto) {
     return 'This action adds a new venta';
   }
 
   async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
-    
-    const asesores = await this.asesorService.listarAsesor(buscadorVentaDto.sucursal);
-    const asesoresProcesados = await Promise.all(asesores.map(async (asesor) => {
-      const [metas, ventas] = await Promise.all([
-        this.metasProductoVipService.listarMetasProductosVipPorSucursal(asesor.idSucursal),
-        this.listarVentasPorAsesor(asesor._id, buscadorVentaDto.fechaInicio,buscadorVentaDto.fechaFin, buscadorVentaDto.tipoVenta)
-      ]); 
-      const ventaAsesor: RegistroVentas = {
-        metaProductosVip: metas,
-        sucursal: asesor.sucursalNombre,
-        asesor: asesor.nombre,
-        empresa: asesor.empresa,
-        
-        gafaVip: 0,
-        monturaVip: 0,
-        lenteDeContacto: 0,
-        montoTotal: 0,
-        totalDescuento: 0,
-        ventas: [],
+    const asesores = await this.asesorService.listarAsesor(
+      buscadorVentaDto.sucursal,
+    );
+    const asesoresProcesados = await Promise.all(
+      asesores.map(async (asesor) => {
+        const [metas, ventas] = await Promise.all([
+          this.metasProductoVipService.listarMetasProductosVipPorSucursal(
+            asesor.idSucursal,
+          ),
+          this.listarVentasPorAsesor(
+            asesor._id,
+            buscadorVentaDto.fechaInicio,
+            buscadorVentaDto.fechaFin,
+            buscadorVentaDto.tipoVenta,
+          ),
+        ]);
+        const ventaAsesor: RegistroVentas = {
+          metaProductosVip: metas,
+          sucursal: asesor.sucursalNombre,
+          asesor: asesor.nombre,
+          empresa: asesor.empresa,
 
-      };
-  
-      
-
-      const ventasProcesadas = await Promise.all(ventas.map(async (venta) => {
-     
-        
-        const detalleProcesado = await Promise.all( venta.detalleVenta.map(async (detalle) => {
-
-          
-          if (detalle.rubro === productoE.lente) {
-            const  comisiones =await this.comisionRecetaService.listarComisionReceta(venta.precio, detalle.combinacionReceta)
-
-            
-            return {
-              combinacion: {
-
-                descripcion:detalle.descripcion,
-                id:detalle.combinacionReceta
-              },
-              importe: detalle.importe,
-              comisiones: comisiones.map((com) => ({
-                monto: com.monto,
-                precio: com.precio,
-              })),
-            };
-          } else if (
-            detalle.rubro === productoE.montura ||
-            detalle.rubro === productoE.lenteDeContacto ||
-            detalle.rubro === productoE.gafa
-          ) {
-            const  comisiones =  await this.comisionProductoService.listarComosionPorProducto(detalle.producto, venta.precio)
-        
-
-            return {
-              producto: {
-                id: detalle._id,
-                tipo: detalle.rubro,
-                marca: detalle.marca,
-                descripcion:detalle.descripcion
-              },
-              importe: detalle.importe,
-              comisiones: comisiones.map((com) => ({
-                monto: com.monto,
-                precio: com.precio,
-              })),
-            };
-          } else {
-            return {
-              servicios: {
-                id: detalle._id,
-                tipo: detalle.rubro,
-                descripcion:detalle.descripcion
-              },
-              importe: detalle.importe,
-            };
-          }
-        }));        
-        return {
-          idVenta: venta.id_venta,
-          descuento: venta.descuento,
-          montoTotal: venta.montoTotal,
-          precio: venta.precio,
-          comisiona: venta.comisiona,
-          tipo: venta.tipo,
-          tipo2: venta.tipo2,
-          nombrePromocion: venta.nombrePromocion,
-          tipoDescuento: venta.tipoDescuento,
-          descuentoPromocion: venta.descuentoPromocion,
-          descuentoPromocion2: venta.descuentoPromocion2,
-          detalle: detalleProcesado,
+          gafaVip: 0,
+          monturaVip: 0,
+          lenteDeContacto: 0,
+          montoTotal: 0,
+          totalDescuento: 0,
+          ventas: [],
         };
-      }));
-   
-      
-      ventaAsesor.ventas = ventasProcesadas;
 
-      const { gafaVip, monturavip, lenteDeContacto } = this.monturasYgafasVip(ventaAsesor);
-      ventaAsesor.gafaVip = gafaVip;
-      ventaAsesor.monturaVip = monturavip;
-      ventaAsesor.lenteDeContacto = lenteDeContacto;
-      ventaAsesor.totalDescuento = ventaAsesor.ventas.reduce(
-        (acc, item) => acc + item.descuento,
-        0,
-      );
-      ventaAsesor.montoTotal = ventaAsesor.ventas.reduce(
-        (acc, item) => acc + item.montoTotal,
-        0,
-      );
+        const ventasProcesadas = await Promise.all(
+          ventas.map(async (venta) => {
+            const detalleProcesado = await Promise.all(
+              venta.detalleVenta.map(async (detalle) => {
+                if (detalle.rubro === productoE.lente) {
+                  const comisiones =
+                    await this.comisionRecetaService.listarComisionReceta(
+                      venta.precio,
+                      detalle.combinacionReceta,
+                    );
 
-      return ventaAsesor;
-    }));
-   
-    
+                  return {
+                    combinacion: {
+                      descripcion: detalle.descripcion,
+                      id: detalle.combinacionReceta,
+                    },
+                    importe: detalle.importe,
+                    comisiones: comisiones.map((com) => ({
+                      monto: com.monto,
+                      precio: com.precio,
+                    })),
+                  };
+                } else if (
+                  detalle.rubro === productoE.montura ||
+                  detalle.rubro === productoE.lenteDeContacto ||
+                  detalle.rubro === productoE.gafa
+                ) {
+                  const comisiones =
+                    await this.comisionProductoService.listarComosionPorProducto(
+                      detalle.producto,
+                      venta.precio,
+                    );
+                  return {
+                    producto: {
+                      id: detalle._id,
+                      tipo: detalle.rubro,
+                      marca: detalle.marca,
+                      descripcion: detalle.descripcion,
+                    },
+                    importe: detalle.importe,
+                    comisiones: comisiones.map((com) => ({
+                      monto: com.monto,
+                      precio: com.precio,
+                    })),
+                  };
+                } else if (detalle.rubro === productoE.servicio) {
+                  const comisiones =
+                    await this.comisionServicioService.listarComosionPoraServicio(
+                      detalle.servicio,
+                      venta.precio,
+                    );
 
-  return asesoresProcesados;
-}
+                  return {
+                    servicios: {
+                      id: detalle._id,
+                      tipo: detalle.rubro,
+                      descripcion: detalle.descripcion,
+                    },
+                    importe: detalle.importe,
+                    comisiones: comisiones.map((com) => ({
+                      monto: com.monto,
+                      precio: com.precio,
+                    })),
+                  };
+                } else {
+                  return {
+                    otros: {
+                      id: detalle._id,
+                      tipo: detalle.rubro,
+                      descripcion: detalle.descripcion,
+                    },
+                    importe: detalle.importe,
+                  };
+                }
+              }),
+            );
+            return {
+              idVenta: venta.id_venta,
+              descuento: venta.descuento,
+              montoTotal: venta.montoTotal,
+              precio: venta.precio,
+              comisiona: venta.comisiona,
+              tipo: venta.tipo,
+              tipo2: venta.tipo2,
+              nombrePromocion: venta.nombrePromocion,
+              tipoDescuento: venta.tipoDescuento,
+              descuentoPromocion: venta.descuentoPromocion,
+              descuentoPromocion2: venta.descuentoPromocion2,
+              detalle: detalleProcesado,
+            };
+          }),
+        );
 
-  
+        ventaAsesor.ventas = ventasProcesadas;
+
+        const { gafaVip, monturavip, lenteDeContacto } =
+          this.monturasYgafasVip(ventaAsesor);
+        ventaAsesor.gafaVip = gafaVip;
+        ventaAsesor.monturaVip = monturavip;
+        ventaAsesor.lenteDeContacto = lenteDeContacto;
+        ventaAsesor.totalDescuento = ventaAsesor.ventas.reduce(
+          (acc, item) => acc + item.descuento,
+          0,
+        );
+        ventaAsesor.montoTotal = ventaAsesor.ventas.reduce(
+          (acc, item) => acc + item.montoTotal,
+          0,
+        );
+
+        return ventaAsesor;
+      }),
+    );
+
+    return asesoresProcesados;
+  }
+
   /*async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const detalles = await this.DetalleVenta.aggregate([
       {
@@ -233,7 +266,7 @@ export class VentaService {
     return detalles;
   }*/
 
- /* async ventaConSusComiones(
+  /* async ventaConSusComiones(
     asesor: Types.ObjectId,
     fechaInicio: string,
     fechaFin: string,
@@ -355,106 +388,99 @@ export class VentaService {
      
     };
   }*/
- 
+
   private monturasYgafasVip(venta: any) {
     let monturavip: number = 0;
     let gafaVip: number = 0;
     let lenteDeContacto: number = 0;
 
     for (const vent of venta.ventas) {
-   
-        if(Array.isArray(vent.detalle)){
-          for (const detalle of vent.detalle) {
-            if (detalle.producto && detalle.producto.tipo == productoE.montura) {
-              if (venta.sucursal == 'SUCRE  CENTRAL') {
-                if (
-                  detalle.producto.marca == 'PRADA' ||
-                  detalle.producto.marca == 'GUCCI' ||
-                  detalle.producto.marca == 'TOM FORD' ||
-                  detalle.producto.marca == 'BURBERRY' ||
-                  detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-                  detalle.producto.marca == 'FRED' ||
-                  detalle.producto.marca == 'LOEWE' ||
-                  detalle.producto.marca == 'PORSHE DESIGN' ||
-                  detalle.producto.marca == 'RINOWA' ||
-                  detalle.producto.marca == 'MONTBLANC' ||
-                  detalle.producto.marca == 'TIFFANY'
-                ) {
-                  monturavip++;
-                }
-              } else if (
-                detalle.producto &&
-                detalle.producto.tipo == productoE.montura &&
-                detalle.importe >= 700
+      if (Array.isArray(vent.detalle)) {
+        for (const detalle of vent.detalle) {
+          if (detalle.producto && detalle.producto.tipo == productoE.montura) {
+            if (venta.sucursal == 'SUCRE  CENTRAL') {
+              if (
+                detalle.producto.marca == 'PRADA' ||
+                detalle.producto.marca == 'GUCCI' ||
+                detalle.producto.marca == 'TOM FORD' ||
+                detalle.producto.marca == 'BURBERRY' ||
+                detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
+                detalle.producto.marca == 'FRED' ||
+                detalle.producto.marca == 'LOEWE' ||
+                detalle.producto.marca == 'PORSHE DESIGN' ||
+                detalle.producto.marca == 'RINOWA' ||
+                detalle.producto.marca == 'MONTBLANC' ||
+                detalle.producto.marca == 'TIFFANY'
               ) {
                 monturavip++;
               }
+            } else if (
+              detalle.producto &&
+              detalle.producto.tipo == productoE.montura &&
+              detalle.importe >= 700
+            ) {
+              monturavip++;
             }
-    
-            if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
-              if (venta.sucursal == 'SUCRE  CENTRAL') {
-                if (
-                  detalle.producto.marca == 'PRADA' ||
-                  detalle.producto.marca == 'GUCCI' ||
-                  detalle.producto.marca == 'TOM FORD' ||
-                  detalle.producto.marca == 'BURBERRY' ||
-                  detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-                  detalle.producto.marca == 'FRED' ||
-                  detalle.producto.marca == 'LOEWE' ||
-                  detalle.producto.marca == 'PORSHE DESIGN' ||
-                  detalle.producto.marca == 'RINOWA' ||
-                  detalle.producto.marca == 'MONTBLANC' ||
-                  detalle.producto.marca == 'TIFFANY'
-                ) {
-                  gafaVip++;
-                }
-              } else if (
-                detalle.producto &&
-                detalle.producto.tipo == productoE.gafa &&
-                detalle.importe >= 700
+          }
+
+          if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
+            if (venta.sucursal == 'SUCRE  CENTRAL') {
+              if (
+                detalle.producto.marca == 'PRADA' ||
+                detalle.producto.marca == 'GUCCI' ||
+                detalle.producto.marca == 'TOM FORD' ||
+                detalle.producto.marca == 'BURBERRY' ||
+                detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
+                detalle.producto.marca == 'FRED' ||
+                detalle.producto.marca == 'LOEWE' ||
+                detalle.producto.marca == 'PORSHE DESIGN' ||
+                detalle.producto.marca == 'RINOWA' ||
+                detalle.producto.marca == 'MONTBLANC' ||
+                detalle.producto.marca == 'TIFFANY'
               ) {
                 gafaVip++;
               }
-            }
-    
-            if (
+            } else if (
               detalle.producto &&
-              detalle.producto.tipo == productoE.lenteDeContacto
+              detalle.producto.tipo == productoE.gafa &&
+              detalle.importe >= 700
             ) {
-              if (venta.sucursal == 'SUCRE  CENTRAL') {
-                if (
-                  detalle.producto.marca == 'PRADA' ||
-                  detalle.producto.marca == 'GUCCI' ||
-                  detalle.producto.marca == 'TOM FORD' ||
-                  detalle.producto.marca == 'BURBERRY' ||
-                  detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-                  detalle.producto.marca == 'FRED' ||
-                  detalle.producto.marca == 'LOEWE' ||
-                  detalle.producto.marca == 'PORSHE DESIGN' ||
-                  detalle.producto.marca == 'RINOWA' ||
-                  detalle.producto.marca == 'MONTBLANC' ||
-                  detalle.producto.marca == 'TIFFANY'
-                ) {
-                  lenteDeContacto++;
-                }
-              } else if (
-                detalle.producto &&
-                detalle.producto.tipo == productoE.lenteDeContacto &&
-                detalle.importe >= 700
+              gafaVip++;
+            }
+          }
+
+          if (
+            detalle.producto &&
+            detalle.producto.tipo == productoE.lenteDeContacto
+          ) {
+            if (venta.sucursal == 'SUCRE  CENTRAL') {
+              if (
+                detalle.producto.marca == 'PRADA' ||
+                detalle.producto.marca == 'GUCCI' ||
+                detalle.producto.marca == 'TOM FORD' ||
+                detalle.producto.marca == 'BURBERRY' ||
+                detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
+                detalle.producto.marca == 'FRED' ||
+                detalle.producto.marca == 'LOEWE' ||
+                detalle.producto.marca == 'PORSHE DESIGN' ||
+                detalle.producto.marca == 'RINOWA' ||
+                detalle.producto.marca == 'MONTBLANC' ||
+                detalle.producto.marca == 'TIFFANY'
               ) {
                 lenteDeContacto++;
               }
+            } else if (
+              detalle.producto &&
+              detalle.producto.tipo == productoE.lenteDeContacto &&
+              detalle.importe >= 700
+            ) {
+              lenteDeContacto++;
             }
           }
-          
-        }else {
-          console.log(
-            vent
-          );
-          
         }
-
-      
+      } else {
+        console.log(vent);
+      }
     }
 
     return { monturavip, gafaVip, lenteDeContacto };
@@ -464,36 +490,35 @@ export class VentaService {
     asesor: Types.ObjectId,
     fechaInicio: string,
     fechaFin: string,
-    tipoVenta:Types.ObjectId[]
+    tipoVenta: Types.ObjectId[],
   ) {
-  
-    const filter:FiltroI={
-      fechaFinalizacion:{
-        $gte:new Date(fechaInicio),
-        $lte:new Date(fechaFin)
-
+    const filter: FiltroI = {
+      fechaFinalizacion: {
+        $gte: new Date(fechaInicio),
+        $lte: new Date(fechaFin),
       },
-      comisiona:true,
-      flag:flagVenta.finalizado,
+      comisiona: true,
+      flag: flagVenta.finalizado,
       asesor: new Types.ObjectId(asesor),
-    
+    };
 
-    }
+    tipoVenta.length > 0
+      ? (filter.tipoVenta = {
+          $in: tipoVenta.map((item) => new Types.ObjectId(item)),
+        })
+      : filter;
 
-    tipoVenta.length > 0 ? filter.tipoVenta ={$in: tipoVenta.map((item)=> new Types.ObjectId(item))}: filter
- 
-    
     const ventas = await this.venta.aggregate([
       {
-        $match: filter
+        $match: filter,
       },
       {
-        $lookup:{
-          from:'DetalleVenta',
-          foreignField:'venta',
-          localField:'_id',
-          as:'detalleVenta'
-        }
+        $lookup: {
+          from: 'DetalleVenta',
+          foreignField: 'venta',
+          localField: '_id',
+          as: 'detalleVenta',
+        },
       },
       {
         $project: {
@@ -504,47 +529,45 @@ export class VentaService {
           tipoDescuento: 1,
           descuento: 1,
           precio: 1,
-          detalleVenta:1
+          detalleVenta: 1,
         },
       },
     ]);
     return ventas;
   }
 
-   async listarDetalleVentas (
+  async listarDetalleVentas(
     asesor: Types.ObjectId,
     fechaInicio: string,
     fechaFin: string,
-    tipoVenta:Types.ObjectId[]){
+    tipoVenta: Types.ObjectId[],
+  ) {
     const detalle = await this.DetalleVenta.aggregate([
       {
-        $lookup:{
-          from:'Venta',
-          foreignField:'_id',
-          localField:'venta',
-          as:'venta'
-        }
+        $lookup: {
+          from: 'Venta',
+          foreignField: '_id',
+          localField: 'venta',
+          as: 'venta',
+        },
       },
       {
-        $unwind:{path:'$venta', preserveNullAndEmptyArrays:false}
+        $unwind: { path: '$venta', preserveNullAndEmptyArrays: false },
       },
       {
-          $match:{
-            'venta.asesor': new Types.ObjectId(asesor),
-            'venta.fechaFinalizacion':{
-              $gte:new Date(fechaInicio),
-               $lte:new Date(fechaFin)
-            },
-            'venta.flag':flagVenta.finalizado
-          }
-      }
-
-    ])
-    return detalle
-    
+        $match: {
+          'venta.asesor': new Types.ObjectId(asesor),
+          'venta.fechaFinalizacion': {
+            $gte: new Date(fechaInicio),
+            $lte: new Date(fechaFin),
+          },
+          'venta.flag': flagVenta.finalizado,
+        },
+      },
+    ]);
+    return detalle;
   }
-  
- 
+
   findOne(id: number) {
     return `This action returns a #${id} venta`;
   }
@@ -592,10 +615,7 @@ export class VentaService {
     const v = await this.venta.findOne({ _id: id });
 
     if (v) {
-      return await this.venta.updateOne(
-        { _id: id },
-        { precio: precio },
-      );
+      return await this.venta.updateOne({ _id: id }, { precio: precio });
     }
   }
 }

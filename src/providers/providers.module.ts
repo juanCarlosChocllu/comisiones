@@ -21,6 +21,7 @@ import { ProductoModule } from 'src/producto/producto.module';
 import { TipoVentaModule } from 'src/tipo-venta/tipo-venta.module';
 import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
 import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module';
+import { ServicioModule } from 'src/servicio/servicio.module';
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module
     ProductoModule,
     TipoVentaModule,
     ComisionProductoModule,
-    ComisionRecetaModule
+    ComisionRecetaModule,
+    ServicioModule
   ],
   controllers: [ProvidersController],
   providers: [ProvidersService],

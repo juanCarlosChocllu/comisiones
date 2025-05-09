@@ -12,6 +12,7 @@ import { ProductoModule } from 'src/producto/producto.module';
 import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
 import { MetasProductoVipModule } from 'src/metas-producto-vip/metas-producto-vip.module';
 import { PreciosModule } from 'src/precios/precios.module';
+import { ComisionServicioModule } from 'src/comision-servicio/comision-servicio.module';
 
 @Module({
     imports:[
@@ -29,7 +30,8 @@ import { PreciosModule } from 'src/precios/precios.module';
       ProductoModule,
       ComisionProductoModule,
       MetasProductoVipModule,
-      PreciosModule
+      PreciosModule,
+      ComisionServicioModule
     ],
   controllers: [VentaController],
   providers: [VentaService, DetalleVentaService],
