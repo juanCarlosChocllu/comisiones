@@ -252,7 +252,7 @@ export class CombinacionRecetaService {
       comision: false,
     });
     const precioEcontrado =
-      await this.preciosService.buscarPrecioPorNombre(precio);
+    await this.preciosService.buscarPrecioPorNombre(precio);
     await this.preciosService.guardarDetallePrecio(
       tipoProductoPrecio.lente,
       combinacion._id,

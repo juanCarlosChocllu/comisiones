@@ -52,8 +52,11 @@ export class ComisionServicioService {
          monto: monto|0,
          nombre: nombre,
          precio: precio,
+        
        });
      }
    }
 
+
+     
   }

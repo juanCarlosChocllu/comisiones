@@ -16,8 +16,8 @@ export class ComisionRecetaController {
   }
 
   @Patch()
-  actualizarComsion(@Body() actualizarComisionReceta: ActualizarComisionReceta) {
-    return this.comisionRecetaService.actualizarComsion(actualizarComisionReceta);
+  actualizarComision(@Body() actualizarComisionReceta: ActualizarComisionReceta) {
+    return this.comisionRecetaService.actualizarComision(actualizarComisionReceta);
   }
 
   

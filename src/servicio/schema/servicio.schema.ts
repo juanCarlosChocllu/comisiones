@@ -11,6 +11,9 @@ export class Servicio {
   nombre: string;
 
   @Prop()
+  comision: boolean;
+
+  @Prop()
   descripcion: string;
 
   @Prop({ type: Date, default: () => Date.now() })

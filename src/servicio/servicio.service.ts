@@ -63,7 +63,7 @@ export class ServicioService {
     const {comisiones, tipoPrecio,...data2} = data
     if(!servicioExiste) {
        
-        const servicio = await this.servicio.create(data2)
+        const servicio = await this.servicio.create({...data2, comision:true})
          await this.preciosService.guardarDetallePrecio(tipoProductoPrecio.servicio, servicio._id,precio._id, data.monto)
        let contador = 0
         for (const comision of comisiones) {
@@ -89,4 +89,29 @@ export class ServicioService {
      }
     }
   }
+
+  async crearServicio(
+          descripcion:string,
+          codigoMia:string,
+          precio: string,
+          importe: number,
+          nombre:string
+        ) {
+          const servicio = await this.servicio.create({
+            codigoMia:codigoMia,
+            comision: false,
+            descripcion:descripcion,
+            nombre:nombre
+
+          });
+          const precioEcontrado =
+          await this.preciosService.buscarPrecioPorNombre(precio);
+          await this.preciosService.guardarDetallePrecio(
+            tipoProductoPrecio.servicio,
+            servicio._id,
+            precioEcontrado._id,
+            importe,
+          );
+          return servicio;
+        }
 }

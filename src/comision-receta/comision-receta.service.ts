@@ -91,7 +91,7 @@ export class ComisionRecetaService {
     }
   }
 
-  async actualizarComsion(actualizarComisionReceta: ActualizarComisionReceta) {
+  async actualizarComision(actualizarComisionReceta: ActualizarComisionReceta) {
     const comision = await this.comisionReceta.findOne({
       _id: new Types.ObjectId(actualizarComisionReceta.idComision),
     });

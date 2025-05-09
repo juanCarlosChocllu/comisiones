@@ -57,7 +57,7 @@ export class PreciosService {
         await this.detallePrecio.create({
           servicio: new Types.ObjectId(producto),
           precio: new Types.ObjectId(precio),
-          tipo: tipoProductoPrecio.producto,
+          tipo: tipoProductoPrecio.servicio,
           monto: monto,
         });
       }

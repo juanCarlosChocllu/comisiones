@@ -177,7 +177,17 @@ export class ProvidersService {
       await this.detalleVentaService.guardarDetalleVenta(detalle);
       await this.ventaService.tipoPrecio(venta._id, data.precio);
     }else {
-      console.log('servico no existe', data);
+      const servicio = await this.servicioService.crearServicio(data.descripcionProducto, data.codProducto, data.precio, data.importe, data.descripcionProducto)
+      const detalle: detalleVentaI = {
+        cantidad: 1,
+        importe: data.importe,
+        rubro: data.rubro,
+        venta: venta._id,
+        descripcion: data.descripcionProducto,
+        servicio:servicio._id
+      };
+      await this.detalleVentaService.guardarDetalleVenta(detalle);
+      await this.ventaService.tipoPrecio(venta._id, data.precio);
       
     }
   }
@@ -499,6 +509,7 @@ export class ProvidersService {
         await this.servicioService.guardarServicioConSusCOmisiones(data);
       }
     }
+    return {status:HttpStatus.OK}
   }
   private hojaDeTrabajo(ruta: string) {
     const workbook = new ExcelJS.stream.xlsx.WorkbookReader(ruta, {
