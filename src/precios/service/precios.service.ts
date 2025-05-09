@@ -201,4 +201,34 @@ export class PreciosService {
     ]);
     return detalle;
   }
+
+
+  async precioServicio(id:Types.ObjectId) {
+    const detalle = await this.detallePrecio.aggregate([
+      {
+        $match: { servicio: new Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: 'Precio',
+          foreignField: '_id',
+          localField: 'precio',
+          as: 'precio',
+        },
+      },
+      {
+        $group: {
+          _id: { $arrayElemAt: ['$precio.nombre', 0] },
+          nombre: { $first: { $arrayElemAt: ['$precio.nombre', 0] } },
+        },
+      },
+      {
+        $project: {
+          nombre: 1,
+          //monto:1
+        },
+      },
+    ]);
+    return detalle;
+  }
 }

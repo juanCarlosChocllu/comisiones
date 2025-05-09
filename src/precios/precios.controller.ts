@@ -24,6 +24,10 @@ export class PreciosController {
   precioProducto(@Param('id') id:Types.ObjectId) {
     return this.preciosService.precioProducto(id);
   }
+  @Get('servicio/:id')
+  precioServicio(@Param('id') id:Types.ObjectId) {
+    return this.preciosService.precioServicio(id);
+  }
   
  
 }
