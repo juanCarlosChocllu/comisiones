@@ -29,6 +29,8 @@ import { UsuarioModule } from './usuario/usuario.module';
 import { ServicioModule } from './servicio/servicio.module';
 import { ComisionServicioModule } from './comision-servicio/comision-servicio.module';
 import { databaseConeccion } from './core/config/config';
+import { APP_GUARD } from '@nestjs/core';
+import { TokenGuard } from './autenticacion/guards/token/token.guard';
 
 @Module({
   imports: [
@@ -64,10 +66,10 @@ import { databaseConeccion } from './core/config/config';
   ],
   controllers: [],
   providers: [
-    /*{
+    {
       provide:APP_GUARD,
       useClass:TokenGuard
-    }*/
+    }
   ],
 })
 export class AppModule {}
