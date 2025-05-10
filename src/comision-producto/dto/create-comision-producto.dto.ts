@@ -27,7 +27,7 @@ export class CreateComisionProductoDto {
 
 class DataComisionProducto {
   @IsString()
-    @IsEnum(PreciosE)
+    @IsNotEmpty()
     precio: string;
   
     @IsString()

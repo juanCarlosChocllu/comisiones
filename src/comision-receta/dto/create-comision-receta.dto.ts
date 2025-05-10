@@ -32,7 +32,7 @@ export class DataComisionRecetaDto {
   combinacionReceta: Types.ObjectId;*/
 
   @IsString()
-  @IsEnum(PreciosE)
+  @IsNotEmpty()
   precio: string;
 
   @IsNumber()
