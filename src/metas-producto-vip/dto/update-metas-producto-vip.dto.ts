@@ -1,4 +1,12 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateMetasProductoVipDto } from './create-metas-producto-vip.dto';
+import { IsMongoId, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { Types } from 'mongoose';
 
-export class UpdateMetasProductoVipDto extends PartialType(CreateMetasProductoVipDto) {}
+export class UpdateMetasProductoVipDto {
+  @IsNumber()
+  @IsOptional()
+  monturaMasGafa: number;
+
+  @IsNumber()
+  @IsOptional()
+  lenteDeContacto: number;
+}

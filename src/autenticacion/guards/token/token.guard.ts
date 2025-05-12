@@ -27,7 +27,7 @@ export class TokenGuard implements CanActivate {
         return true
     }
     const request:Request = context.switchToHttp().getRequest()
-    const header:string = request.headers.authorization  
+    const header:string = request.headers.authorization       
     try {
       const token = header.split(' ')[1];  
 

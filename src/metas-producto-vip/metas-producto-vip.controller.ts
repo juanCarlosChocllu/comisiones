@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { MetasProductoVipService } from './metas-producto-vip.service';
 import { CreateMetasProductoVipDto } from './dto/create-metas-producto-vip.dto';
 import { UpdateMetasProductoVipDto } from './dto/update-metas-producto-vip.dto';
+import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
+import { Types } from 'mongoose';
 
 @Controller('metas/producto/vip')
 export class MetasProductoVipController {
@@ -13,22 +15,22 @@ export class MetasProductoVipController {
   }
 
   @Get()
-  findAll() {
-    return this.metasProductoVipService.findAll();
+  listar() {
+    return this.metasProductoVipService.listar();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.metasProductoVipService.findOne(+id);
+  findOne(@Param('id', ValidateIdPipe) id: Types.ObjectId) {
+    return this.metasProductoVipService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMetasProductoVipDto: UpdateMetasProductoVipDto) {
-    return this.metasProductoVipService.update(+id, updateMetasProductoVipDto);
+  actulizar(@Param('id', ValidateIdPipe) id: Types.ObjectId, @Body() updateMetasProductoVipDto: UpdateMetasProductoVipDto) {
+    return this.metasProductoVipService.actulizar(id, updateMetasProductoVipDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.metasProductoVipService.remove(+id);
+  softDelete(@Param('id',ValidateIdPipe) id: Types.ObjectId) {
+    return this.metasProductoVipService.softDelete(id);
   }
 }
