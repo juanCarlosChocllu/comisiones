@@ -378,22 +378,41 @@ export class CombinacionRecetaService {
           as: 'comisionReceta',
         },
       },
+      {
+        $unwind:{path:'$comisionReceta'}
+      },
 
       {
+        $group:{
+          _id:{
+            precio:'$comisionReceta.precio',
+            combinacion:'$comisionReceta.combinacionReceta'
+          },
+          material: {$first:'$material.nombre'},
+          tipoLente:{$first: '$tipoLente.nombre'},
+          rango:{$first: '$rango.nombre'},
+          colorLente:{$first: '$colorLente.nombre'},
+          marcaLente:{$first: '$marcaLente.nombre'},
+          tratamiento:{$first: '$tratamiento.nombre'},
+          tipoColorLente:{$first: '$tipoColorLente.nombre'},
+          comisionReceta: {$push:'$comisionReceta'  },
+        }
+      },
+     {
         $project: {
-          codigo: 1,
-          monto: 1,
-          material: '$material.nombre',
-          tipoLente: '$tipoLente.nombre',
-          rango: '$rango.nombre',
-          colorLente: '$colorLente.nombre',
-          marcaLente: '$marcaLente.nombre',
-          tratamiento: '$tratamiento.nombre',
-          tipoColorLente: '$tipoColorLente.nombre',
+          _id:'$_id.combinacion',
+          material:1,
+          tipoLente:1,
+          rango:1,
+          colorLente: 1,
+          marcaLente:1,
+          tratamiento: 1,
+          tipoColorLente: 1,
           comisionReceta: 1,
         },
       },
     ]);
+   
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
     worksheet.columns = [
@@ -414,9 +433,8 @@ export class CombinacionRecetaService {
     ];
 
     for (const comb of combinacion) {
-      console.log(comb.comisionReceta);
-      //  console.log(comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision > max.comision ? actual.comision : max.comision ) :0);
-
+ 
+        
       /* worksheet.addRow({
         id:comb._id,
         material:comb.material,
@@ -428,9 +446,9 @@ export class CombinacionRecetaService {
         color:comb.colorLente,
         tipoPrecio:comb.comisionReceta.length > 0 ? comb.comisionReceta[0].precio :'',
         monto:comb.monto,
-        comision1:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision > max.comision ? actual.comision : max.comision ) :0,
+        comision1:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto > max.monto ? actual.monto : max.monto ) :0,
         comisionFija1:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto > max.monto ? actual.monto : max.monto) :0,
-        comision_2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.comision<  max.comision ? actual.comision : max.comision ) :0,
+        comision_2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto<  max.monto ? actual.monto : max.monto ) :0,
         comisionFija2:comb.comisionReceta.length > 0 ? comb.comisionReceta.reduce((max, actual) =>  actual.monto < max.monto ? actual.monto : max.monto) :0,  
       })*/
     }
