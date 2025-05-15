@@ -6,6 +6,7 @@ import { ComisionProducto } from './schema/comision-producto.schema';
 import { Model, Types } from 'mongoose';
 import { ProductoService } from 'src/producto/producto.service';
 import { ActualizarProductoComisionDto } from './dto/ActualizarComisionProducto.dto';
+import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class ComisionProductoService {
@@ -79,6 +80,15 @@ export class ComisionProductoService {
     await this.comisionProducto.updateOne({_id:new Types.ObjectId(actualizarProductoComisionDto.idComision)},{monto:actualizarProductoComisionDto.monto})
     return {status:HttpStatus.OK}
 
+  }
+
+  async softDelete(id:Types.ObjectId) {
+          const comision = await this.comisionProducto.findOne({_id:new Types.ObjectId(id)})
+    if(!comision) {
+      throw new NotFoundException()
+    }
+    await this.comisionProducto.updateOne({_id:new Types.ObjectId(id)},{flag:flag.eliminado})
+    return {status:HttpStatus.OK}
   }
   
 }

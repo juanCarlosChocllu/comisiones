@@ -26,6 +26,8 @@ export class ProductoController {
     return this.productoService.listarProductos(paginadorDto, productoE.lenteDeContacto)
   }
 
+  
+
   @Get('sinComision')
   listarProductosSinComision(@Query() paginadorDto:PaginadorDto ){
     return this.productoService.listarProductosSinComision(paginadorDto)

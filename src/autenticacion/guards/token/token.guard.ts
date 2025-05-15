@@ -30,10 +30,6 @@ export class TokenGuard implements CanActivate {
     const header:string = request.headers.authorization       
     try {
       const token = header.split(' ')[1];  
-
-
-      
-          
       const tokenVerificada = await this.jwtService.verify(token,{
         secret:jwtConstants.secret
       })     
