@@ -14,4 +14,15 @@ export class BuscadorProductoDto  extends PaginadorDto {
   @IsString()
   @IsOptional()
   color: string;
+
+    @IsString()
+  @IsOptional()
+  tipoProducto: string;
+
+  
+    @IsString()
+  @IsOptional()
+  categoria: string;
+
 }
+

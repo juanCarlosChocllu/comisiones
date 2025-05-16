@@ -171,7 +171,13 @@ export class ProductoService {
     const match = {flag:flag.nuevo,  ...(comision === false) ? {  comision:comision}:{},    ...(rubro) ? {  tipoProducto:rubro}:{}}
     const producto = await this.producto.aggregate([
       {
-        $match: {...match, ...(BuscadorProductoDto.serie) ? {serie:new RegExp(BuscadorProductoDto.serie, 'i')}:{} , ...(BuscadorProductoDto.codigoQr) ? {serie:new RegExp(BuscadorProductoDto.codigoQr, 'i')}:{}}
+        $match: {...match,
+           ...(BuscadorProductoDto.serie) ? {serie:new RegExp(BuscadorProductoDto.serie, 'i')}:{} ,
+         ...(BuscadorProductoDto.codigoQr) ? {codigoQr:new RegExp(BuscadorProductoDto.codigoQr, 'i')}:{},
+         ...(BuscadorProductoDto.tipoProducto) ? {tipoProducto:new RegExp(BuscadorProductoDto.tipoProducto, 'i')}:{},
+
+        
+        }
       },
       {
         $lookup: {
