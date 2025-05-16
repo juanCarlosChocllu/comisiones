@@ -18,6 +18,7 @@ import { log } from 'console';
 import { flag } from 'src/core/enum/flag';
 import { calcularPaginas, skip } from 'src/core/utils/paginador';
 import { BuscadorVentaDto } from 'src/venta/dto/buscadorVenta.dto,';
+import { BuscadorProductoDto } from './dto/BuscadorProducto.dto';
 
 @Injectable()
 export class ProductoService {
@@ -157,19 +158,20 @@ export class ProductoService {
 
     return productos[0];
   }
-  async listarProductosSinComision(paginadorDto: PaginadorDto) {
-    const {data,paginas} = await this.productoListar(paginadorDto, false)
+  async listarProductosSinComision(BuscadorProductoDto: BuscadorProductoDto) {
+    const {data,paginas} = await this.productoListar(BuscadorProductoDto, false)
     return { data: data , paginas:paginas };
   }
-  async listarProductos(paginadorDto: PaginadorDto, rubro:productoE) {
-   const {data,paginas} = await this.productoListar(paginadorDto, true, rubro)
+  async listarProductos(BuscadorProductoDto: BuscadorProductoDto, rubro:productoE) {
+    
+   const {data,paginas} = await this.productoListar(BuscadorProductoDto, true, rubro)
     return { data: data , paginas:paginas };
   }
-  private async productoListar (paginadorDto: PaginadorDto, comision:boolean, rubro?:string|null) {
+  private async productoListar (BuscadorProductoDto: BuscadorProductoDto, comision:boolean, rubro?:string|null) {
     const match = {flag:flag.nuevo,  ...(comision === false) ? {  comision:comision}:{},    ...(rubro) ? {  tipoProducto:rubro}:{}}
     const producto = await this.producto.aggregate([
       {
-        $match: match
+        $match: {...match, ...(BuscadorProductoDto.serie) ? {serie:new RegExp(BuscadorProductoDto.serie, 'i')}:{} , ...(BuscadorProductoDto.codigoQr) ? {serie:new RegExp(BuscadorProductoDto.codigoQr, 'i')}:{}}
       },
       {
         $lookup: {
@@ -182,6 +184,8 @@ export class ProductoService {
       {
         $unwind: { path: '$marca', preserveNullAndEmptyArrays: true },
       },
+      ...(BuscadorProductoDto.marca) ? [ { $match:{'marca.nombre': new RegExp(BuscadorProductoDto.marca, 'i') }} ]:[],
+
       {
         $lookup: {
           from: 'Color',
@@ -193,7 +197,7 @@ export class ProductoService {
       {
         $unwind: { path: '$color', preserveNullAndEmptyArrays: true },
       },
-
+       ...(BuscadorProductoDto.color) ? [ { $match:{'color.nombre': new RegExp(BuscadorProductoDto.color, 'i') }} ]:[],
       {
         $lookup: {
           from: 'ComisionProducto',
@@ -217,14 +221,14 @@ export class ProductoService {
         },
       },
      {
-      $skip:skip(paginadorDto.pagina, paginadorDto.limite)
+      $skip:skip(BuscadorProductoDto.pagina, BuscadorProductoDto.limite)
      },
      {
-      $limit:paginadorDto.limite
+      $limit:BuscadorProductoDto.limite
      }
     ]);
     const total = await this.producto.countDocuments(match)
-    const pagina = calcularPaginas(total, paginadorDto.limite)
+    const pagina = calcularPaginas(total, BuscadorProductoDto.limite)
     return { data: producto , paginas:pagina };
   }
 

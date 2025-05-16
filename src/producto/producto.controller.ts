@@ -4,6 +4,7 @@ import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import { productoE } from 'src/providers/enum/productos';
+import { BuscadorProductoDto } from './dto/BuscadorProducto.dto';
 
 @Controller('producto')
 export class ProductoController {
@@ -14,22 +15,21 @@ export class ProductoController {
     return this.productoService.create(createProductoDto);
   }
   @Get('montura')
-  listarMontura(@Query() paginadorDto:PaginadorDto ){
-    return this.productoService.listarProductos(paginadorDto, productoE.montura)
+  listarMontura(@Query() BuscadorProductoDto:BuscadorProductoDto ){
+    return this.productoService.listarProductos(BuscadorProductoDto, productoE.montura)
   }
   @Get('gafa')
-  listarGafa(@Query() paginadorDto:PaginadorDto ){
-    return this.productoService.listarProductos(paginadorDto, productoE.gafa)
+  listarGafa(@Query() BuscadorProductoDto:BuscadorProductoDto){
+    return this.productoService.listarProductos(BuscadorProductoDto, productoE.gafa)
   }
   @Get('lente/contacto')
-  listarDeContato(@Query() paginadorDto:PaginadorDto ){
-    return this.productoService.listarProductos(paginadorDto, productoE.lenteDeContacto)
+  listarDeContato(@Query() BuscadorProductoDto:BuscadorProductoDto){
+    return this.productoService.listarProductos(BuscadorProductoDto, productoE.lenteDeContacto)
   }
 
-  
 
   @Get('sinComision')
-  listarProductosSinComision(@Query() paginadorDto:PaginadorDto ){
-    return this.productoService.listarProductosSinComision(paginadorDto)
+  listarProductosSinComision(@Query()BuscadorProductoDto:BuscadorProductoDto){
+    return this.productoService.listarProductosSinComision(BuscadorProductoDto)
   }
 } 
