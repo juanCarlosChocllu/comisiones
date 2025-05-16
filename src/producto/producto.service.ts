@@ -172,8 +172,8 @@ export class ProductoService {
     const producto = await this.producto.aggregate([
       {
         $match: {...match,
-           ...(BuscadorProductoDto.serie) ? {serie:new RegExp(BuscadorProductoDto.serie, 'i')}:{} ,
-         ...(BuscadorProductoDto.codigoQr) ? {codigoQr:new RegExp(BuscadorProductoDto.codigoQr, 'i')}:{},
+        ...(BuscadorProductoDto.serie) ? {serie:new RegExp(BuscadorProductoDto.serie, 'i')}:{} ,
+         ...(BuscadorProductoDto.codigoQr) ? {codigoQR:new RegExp(BuscadorProductoDto.codigoQr, 'i')}:{},
          ...(BuscadorProductoDto.tipoProducto) ? {tipoProducto:new RegExp(BuscadorProductoDto.tipoProducto, 'i')}:{},
 
         
