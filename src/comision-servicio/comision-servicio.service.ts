@@ -69,7 +69,7 @@ export class ComisionServicioService {
         contador ++ 
         await this.comisionServicio.create({
           ...data,
-          nombre:`comision ${contador}`,
+          nombre: data.nombre ? data.nombre : `comision ${contador}`,
           servicio: new Types.ObjectId(
             createComisionServicioDto.servicio,
           ),

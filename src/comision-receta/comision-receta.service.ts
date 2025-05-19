@@ -33,7 +33,7 @@ export class ComisionRecetaService {
 
         await this.comisionReceta.create({
           ...data,
-          nombre:`comision ${contador}`,
+          nombre: data.nombre ? data.nombre:  `comision ${contador}`,
           combinacionReceta: new Types.ObjectId(
             createComisionRecetaDto.combinacionReceta,
             

@@ -39,5 +39,11 @@ export class DataComisionRecetaDto {
   @IsNotEmpty()
   monto: number;
 
+  
+     @IsString()
+     @IsNotEmpty()
+     nombre: string;
+
+
 
 }
