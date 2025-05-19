@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateVentaDto } from '../dto/create-venta.dto';
 import { UpdateVentaDto } from '../dto/update-venta.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -24,6 +24,11 @@ import { PreciosService } from 'src/precios/service/precios.service';
 import { BuscadorVentaDto } from '../dto/buscadorVenta.dto,';
 import { flagVenta } from '../enum/flagVenta';
 import { ComisionServicioService } from 'src/comision-servicio/comision-servicio.service';
+import { from } from 'form-data';
+import { formaterFechaHora } from 'src/core/utils/formaterFechaHora';
+import { FinalizarVentaDto } from '../dto/FinalizarVentaDto';
+
+
 
 @Injectable()
 export class VentaService {
@@ -44,7 +49,7 @@ export class VentaService {
     return 'This action adds a new venta';
   }
 
-  async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
+ async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const asesores = await this.asesorService.listarAsesor(
       buscadorVentaDto.sucursal,
     );
@@ -191,203 +196,6 @@ export class VentaService {
     return asesoresProcesados;
   }
 
-  /*async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
-    const detalles = await this.DetalleVenta.aggregate([
-      {
-        $lookup: {
-          from: 'Venta',
-          foreignField: '_id',
-          localField: 'venta',
-          as: 'venta',
-        },
-      },
-      { $unwind: { path: '$venta', preserveNullAndEmptyArrays: false } },
-      {
-        $match: {
-          'venta.sucursal': {
-            $in: buscadorVentaDto.sucursal.map(
-              (item) => new Types.ObjectId(item),
-            ),
-          },
-          'venta.fecha': {
-            $gte: new Date(buscadorVentaDto.fechaInicio),
-            $lte: new Date(buscadorVentaDto.fechaFin),
-          },
-          'venta.flag': flagVenta.finalizado,
-        },
-      },
-      {
-        $lookup: {
-          from: 'Asesor',
-          foreignField: '_id',
-          localField: 'venta.asesor',
-          as: 'asesor',
-        },
-      },
-      {
-        $unwind: { path: '$asesor', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'Sucursal',
-          foreignField: '_id',
-          localField: 'venta.sucursal',
-          as: 'sucursal',
-        },
-      },
-      {
-        $unwind: { path: '$asesor', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $group: {
-          _id: '$asesor._id',
-          sucursal: { $first: '$sucursal.nombre' },
-          asesor: { $first: '$asesor.nombre' },
-          descuento: { $sum: '$venta.descuento' },
-          importe: { $sum: '$importe' },
-          montoTotal: { $sum: '$venta.montoTotal' },
-          tickets:{$addToSet:'$producto'},
-    
-         
-        },
-      },
-
-      {
-        $project: {
-         sucursal:1,
-          asesor: 1,
-          descuento: 1,
-          importe: 1,
-          montoTotal: 1,
-          tickets: { $size: '$tickets' }, 
-        },
-      }
-    ]);
-    return detalles;
-  }*/
-
-  /* async ventaConSusComiones(
-    asesor: Types.ObjectId,
-    fechaInicio: string,
-    fechaFin: string,
-  ) {
-    const dataAsesor =await  this.asesorService.asesorEmpresa(asesor)
-   const metas=await   this.metasProductoVipService.listarMetasProductosVipPorSucursal(dataAsesor.sucursal)
-    const ventas = await this.venta.aggregate([
-      {
-        $match: {
-          asesor: new Types.ObjectId(asesor),
-          fecha: {
-            $gte: new Date(fechaInicio),
-            $lte: new Date(fechaFin),
-          },
-          flag: flagVenta.finalizado,
-        },
-      },
-      {
-        $lookup:{
-          from:'Sucursal',
-           foreignField:'_id',
-           localField:'sucursal',
-           as:'sucursal'
-        }
-      },
-     
-      {
-        $project: {
-          sucursal: { $arrayElemAt: ["$sucursal.nombre", 0]},
-          id_venta: 1,
-          montoTotal: 1,
-          tipo: 1,
-          tipo2: 1,
-          tipoDescuento: 1,
-          descuento: 1,
-          precio: 1,
-        },
-      },
-    ]);
-   
-    
-    const data = await Promise.all(
-      ventas.map(async (venta) => {
-        const dataventa = {
-          sucursal:venta.sucursal,
-          id_venta: venta.id_venta,
-          descuento: venta.descuento,
-          detalle: [],
-        };
-        const detalles = await this.detalleVentaService.listarDetalleVenta(venta._id);
-        const detalleConComisiones = await Promise.all(
-          detalles.map(async (detalle) => {
-            if (detalle.rubro === productoE.lente) {
-              const comisiones = await this.comisionRecetaService.listarComisionReceta(
-                venta.precio,
-                detalle.combinacionReceta,
-              );
-              return {
-                combinacion: {
-                  descripcion: detalle.descripcion,
-                  id: detalle.combinacionReceta,
-                },
-                importe: detalle.importe,
-                comisiones: comisiones.map((com) => ({
-                  id: com._id,
-                  nombre: com.nombre,
-                  monto: com.monto,
-                  precio: com.precio,
-                })),
-              };
-            } else if (
-              detalle.rubro === productoE.montura ||
-              detalle.rubro === productoE.lenteDeContacto ||
-              detalle.rubro === productoE.gafa
-            ) {
-              const comisiones = await this.comisionProductoService.listarComosionPorProducto(
-                detalle.producto,
-                venta.precio,
-              );
-              return {
-                producto: {
-                  id: detalle._id,
-                  tipo: detalle.rubro,
-                  marca: detalle.marca,
-                },
-                importe: detalle.importe,
-                comisiones: comisiones.map((com) => ({
-                  id: com._id,
-                  nombre: com.nombre,
-                  monto: com.monto,
-                  precio: com.precio,
-                })),
-              };
-            } else {
-              return {
-                servicios: {
-                  id: detalle._id,
-                  tipo: detalle.rubro,
-                },
-                importe: detalle.importe,
-              };
-            }
-          })
-        );
-  
-        dataventa.detalle = detalleConComisiones;
-        return dataventa;
-      })
-    );
-    const { gafaVip, lenteDeContacto, monturavip } = this.monturasYgafasVip2(data);
-
-    return {
-      metaProductosVip:metas,
-      empresa:dataAsesor.empresa,
-      gafaVip,
-      lenteDeContacto,
-      monturavip,
-      data,
-     
-    };
-  }*/
 
   private monturasYgafasVip(venta: any) {
     let monturavip: number = 0;
@@ -492,10 +300,11 @@ export class VentaService {
     fechaFin: string,
     tipoVenta: Types.ObjectId[],
   ) {
+    const {f1,f2} = formaterFechaHora(fechaInicio, fechaFin)
     const filter: FiltroI = {
       fechaFinalizacion: {
-        $gte: new Date(fechaInicio),
-        $lte: new Date(fechaFin),
+        $gte:f1,
+        $lte: f2,
       },
       comisiona: true,
       flag: flagVenta.finalizado,
@@ -617,5 +426,20 @@ export class VentaService {
     if (v) {
       return await this.venta.updateOne({ _id: id }, { precio: precio });
     }
+  }
+
+
+  async finalizarVentas(finalizarVentaDto:FinalizarVentaDto) {
+    try {
+      const venta = await this.venta.findOne({id_venta:finalizarVentaDto.idVenta.toUpperCase().trim()})
+      if(venta) {
+         await this.venta.updateMany({id_venta:finalizarVentaDto.idVenta.toUpperCase().trim()}, { fecha:new Date(finalizarVentaDto.fecha), estadoTracking:finalizarVentaDto.tracking,  flagVenta:finalizarVentaDto.flag})
+         return {status:HttpStatus.OK}
+      }
+      return {status:HttpStatus.NOT_FOUND}
+    } catch (error) {
+      throw new BadRequestException()
+    }
+
   }
 }

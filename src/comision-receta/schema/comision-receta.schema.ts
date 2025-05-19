@@ -30,4 +30,4 @@ export class ComisionReceta {
 
 export const comisionRecetaSchema =
   SchemaFactory.createForClass(ComisionReceta);
-comisionRecetaSchema.index({ combinacionReceta: 1, precio: 1 });
+comisionRecetaSchema.index({ combinacionReceta: 1, precio: 1 , flag:1});

@@ -56,8 +56,10 @@ export class ComisionRecetaService {
         {
           precio: precio,
           combinacionReceta: new Types.ObjectId(combinacionReceta),
+          flag:flag.nuevo
         },
         { monto: 1, precio: 1 },
+        
       )
       .lean();
     return comisiones;

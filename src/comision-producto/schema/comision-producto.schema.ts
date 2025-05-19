@@ -30,4 +30,4 @@ export class ComisionProducto {
 }
 export const comisionProductoSchema =
   SchemaFactory.createForClass(ComisionProducto);
-comisionProductoSchema.index({ producto: 1, precio: 1 });
+comisionProductoSchema.index({ producto: 1, precio: 1 , flag:1});

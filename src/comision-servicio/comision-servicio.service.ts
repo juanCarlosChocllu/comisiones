@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ComisionServicio } from './schema/comision-servicio.schema';
 import { Model, Types } from 'mongoose';
 import { ServicioService } from 'src/servicio/servicio.service';
+import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class ComisionServicioService {
@@ -20,6 +21,7 @@ export class ComisionServicioService {
       {
         precio: precio,
         servicio: new Types.ObjectId(servicio),
+        flag:flag.nuevo
       },
       { monto: 1, precio: 1 },
     )

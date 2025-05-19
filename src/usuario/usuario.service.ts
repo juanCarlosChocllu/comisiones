@@ -1,4 +1,4 @@
-import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -45,15 +45,29 @@ export class UsuarioService {
     return  usuario;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} usuario`;
+  async findOne(id: Types.ObjectId) {
+  const usuario = await this.usuario.findOne({_id:new Types.ObjectId(id), flag:flag.nuevo} )
+    if(!usuario) {
+      throw new NotFoundException()
+    }
+    return usuario
   }
 
-  update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
-    return `This action updates a #${id} usuario`;
+  async actulizar(id: Types.ObjectId, updateUsuarioDto: UpdateUsuarioDto) {
+  const usuario = await this.usuario.findOne({_id:new Types.ObjectId(id), flag:flag.nuevo} )
+    if(!usuario) {
+      throw new NotFoundException()
+    }
+    await this.usuario.updateOne({_id:new Types.ObjectId(id)},updateUsuarioDto)
+    return {status:HttpStatus.OK}
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} usuario`;
+  async softDelete(id: Types.ObjectId) {
+    const usuario = await this.usuario.findOne({_id:new Types.ObjectId(id), flag:flag.nuevo} )
+    if(!usuario) {
+      throw new NotFoundException()
+    }
+    await this.usuario.updateOne({_id:new Types.ObjectId(id)},{flag:flag.eliminado})
+    return {status:HttpStatus.OK}
   }
 }

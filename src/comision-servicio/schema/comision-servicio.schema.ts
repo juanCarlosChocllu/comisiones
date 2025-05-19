@@ -29,4 +29,4 @@ export class ComisionServicio {
     
 }
 export const comisionServicioSchema = SchemaFactory.createForClass(ComisionServicio)
-comisionServicioSchema.index({precio:1, servicio:1})
+comisionServicioSchema.index({precio:1, servicio:1, flag:1})

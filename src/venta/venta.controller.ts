@@ -5,6 +5,8 @@ import { UpdateVentaDto } from './dto/update-venta.dto';
 import { BuscadorVentaDto } from './dto/buscadorVenta.dto,';
 import { Types } from 'mongoose';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
+import { Publico } from 'src/autenticacion/decorators/publico';
+import { FinalizarVentaDto } from './dto/FinalizarVentaDto';
 
 @Controller('venta')
 export class VentaController {
@@ -35,7 +37,11 @@ export class VentaController {
     return this.ventaService.remove(+id);
   }
 
-
+   @Publico()
+  @Post('finalizar')
+   async finalizarVentas(@Body() finalizarVentaDto: FinalizarVentaDto){
+    return this.ventaService.finalizarVentas(finalizarVentaDto)
+   }
 
   guardarVenta() {
     

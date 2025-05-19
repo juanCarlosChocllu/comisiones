@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
+import { Types } from 'mongoose';
 
 @Controller('usuario')
 export class UsuarioController {
@@ -18,17 +20,17 @@ export class UsuarioController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usuarioService.findOne(+id);
+  findOne(@Param('id', ValidateIdPipe) id: Types.ObjectId) {
+    return this.usuarioService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto) {
-    return this.usuarioService.update(+id, updateUsuarioDto);
+  actulizar(@Param('id', ValidateIdPipe) id: Types.ObjectId, @Body() updateUsuarioDto: UpdateUsuarioDto) {
+    return this.usuarioService.actulizar(id, updateUsuarioDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usuarioService.remove(+id);
+  softDelete(@Param('id', ValidateIdPipe) id: Types.ObjectId) {
+    return this.usuarioService.softDelete(id);
   }
 }
