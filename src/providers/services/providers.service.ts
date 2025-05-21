@@ -80,8 +80,8 @@ export class ProvidersService {
 
       const ventas = await firstValueFrom(
         this.httpService.post<VentaApiI[]>(
-         // 'https://comercial.opticentro.com.bo/api/ventas',
-                   'http://localhost/opticentro/web/app_dev.php/api/ventas',
+          'https://comercial.opticentro.com.bo/api/ventas',
+                   //'http://localhost/opticentro/web/app_dev.php/api/ventas',
           data,
         ),
       );

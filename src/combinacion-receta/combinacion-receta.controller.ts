@@ -18,7 +18,7 @@ export class CombinacionRecetaController {
     
     return this.combinacionRecetaService.create(createCombinacionRecetaDto);
   }
-
+  @Publico()
   @Post('crear')
   crearCombinacion(@Body()crearCombinacionDto : CrearCombinacionDto) {
     return this.combinacionRecetaService.crearCombinaciones(crearCombinacionDto);

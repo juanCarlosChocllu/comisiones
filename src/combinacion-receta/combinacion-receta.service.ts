@@ -153,7 +153,7 @@ export class CombinacionRecetaService {
       );
       const combinacion: combinacionReceta = {
         // codigoMia:data.codigoMia,
-        codigo: codigo,
+        //codigo: codigo,
         colorLente: coloLente._id,
         marcaLente: marca._id,
         material: material._id,
@@ -161,7 +161,7 @@ export class CombinacionRecetaService {
         tipoLente: tipoLente._id,
         tratamiento: tratamiento._id,
         tipoColorLente: tipoColorLente._id,
-        monto: 0,
+        //monto: 0,
       };
       const combinacionL = await this.combinacionReceta.findOne(combinacion);
       if (combinacionL) {
@@ -173,6 +173,7 @@ export class CombinacionRecetaService {
             tipoProductoPrecio.lente,
             combinacionL._id,
             precios._id,
+            data.monto
           );
         }
       } else {
@@ -186,6 +187,8 @@ export class CombinacionRecetaService {
             tipoProductoPrecio.lente,
             combinacionLente._id,
             precios._id,
+            data.monto
+            
           );
         }
       }
@@ -310,7 +313,7 @@ export class CombinacionRecetaService {
       });
       const precioEcontrado =
         await this.preciosService.buscarPrecioPorNombre(precio);
-      await this.preciosService.guardarDetallePrecio(
+        await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.lente,
         combinacion._id,
         precioEcontrado._id,
@@ -320,7 +323,7 @@ export class CombinacionRecetaService {
     } else {
       const precioEcontrado =
         await this.preciosService.buscarPrecioPorNombre(precio);
-        await this.preciosService.guardarDetallePrecio(
+      await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.lente,
         combinacionExiste._id,
         precioEcontrado._id,
@@ -948,8 +951,9 @@ export class CombinacionRecetaService {
 
     const countDocuments = await this.combinacionReceta.countDocuments({
       flag: flag.nuevo,
-      ...(comision == false ? { comision: comision } : {}),
+     // ...(comision == false ? { comision: comision } : {}),
     });
+  
     const total = calcularPaginas(
       countDocuments,
       buscadorCombinacionDto.limite,
@@ -957,6 +961,8 @@ export class CombinacionRecetaService {
     const combinaciones = await this.combinacionReceta.aggregate(pipeline, {
       allowDiskUse: true,
     });
+    console.log(total);
+    
     return { data: combinaciones, total };
   }
 
@@ -1164,6 +1170,7 @@ export class CombinacionRecetaService {
     const countDocuments = await this.combinacionReceta.countDocuments({
       flag: flag.nuevo,
     });
+
     const total = calcularPaginas(
       countDocuments,
       buscadorCombinacionDto.limite,
@@ -1171,7 +1178,8 @@ export class CombinacionRecetaService {
     const combinaciones = await this.combinacionReceta.aggregate(pipeline, {
       allowDiskUse: true,
     });
-
+    
+    
     return { data: combinaciones, total };
   }
 
