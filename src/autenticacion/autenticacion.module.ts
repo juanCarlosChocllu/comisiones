@@ -10,7 +10,7 @@ import { UsuarioModule } from 'src/usuario/usuario.module';
     JwtModule.register(({
       global: true,
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '5h' },
+      signOptions: { expiresIn: '4h' },
     })),
     UsuarioModule
   ],

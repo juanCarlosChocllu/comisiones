@@ -13,6 +13,7 @@ import { Model, Types } from 'mongoose';
 import { CombinacionRecetaService } from 'src/combinacion-receta/combinacion-receta.service';
 import { ActualizarComisionReceta } from './dto/actulizarComisionReceta';
 import { flag } from 'src/core/enum/flag';
+import { GuardarComisionRecetaI } from 'src/combinacion-receta/interface/combinacionReceta';
 
 @Injectable()
 export class ComisionRecetaService {
@@ -20,32 +21,25 @@ export class ComisionRecetaService {
     @InjectModel(ComisionReceta.name)
     private readonly comisionReceta: Model<ComisionReceta>,
     @Inject(forwardRef(() => CombinacionRecetaService))
-    private readonly combinacionRecetaService: CombinacionRecetaService
+    private readonly combinacionRecetaService: CombinacionRecetaService,
   ) {}
   async create(createComisionRecetaDto: CreateComisionRecetaDto) {
-    const combinacionReceta = await this.combinacionRecetaService.asignarComisionReceta(
-      createComisionRecetaDto.combinacionReceta,
-    );
-    let contador = 0
-    if (combinacionReceta  && combinacionReceta.modifiedCount > 0 ) {
+    let contador=0
       for (const data of createComisionRecetaDto.data) {
-        contador ++ 
+        contador++;
 
         await this.comisionReceta.create({
           ...data,
-          nombre: data.nombre ? data.nombre:  `comision ${contador}`,
+          nombre: data.nombre ? data.nombre : `comision ${contador}`,
           combinacionReceta: new Types.ObjectId(
             createComisionRecetaDto.combinacionReceta,
-            
           ),
         });
-      }
+      }      
       return { status: HttpStatus.CREATED };
-    }
-    throw new NotFoundException()
-  } 
-
-
+    
+    
+  }
 
   async listarComisionReceta(
     precio: string,
@@ -56,10 +50,9 @@ export class ComisionRecetaService {
         {
           precio: precio,
           combinacionReceta: new Types.ObjectId(combinacionReceta),
-          flag:flag.nuevo
+          flag: flag.nuevo,
         },
         { monto: 1, precio: 1 },
-        
       )
       .lean();
     return comisiones;
@@ -68,15 +61,13 @@ export class ComisionRecetaService {
   async guardarComisionReceta(
     combinacionReceta: Types.ObjectId,
     monto: number,
-    comision: number,
+    comision: number = 0,
     nombre: string,
     precio: string,
   ) {
-    const diferencia = comision - monto;
     const data = await this.comisionReceta.exists({
       combinacionReceta: new Types.ObjectId(combinacionReceta),
       comision: comision,
-      diferencia: diferencia,
       monto: monto,
       nombre: nombre,
       precio: precio,
@@ -85,7 +76,6 @@ export class ComisionRecetaService {
       await this.comisionReceta.create({
         combinacionReceta: new Types.ObjectId(combinacionReceta),
         comision: comision,
-        diferencia: diferencia,
         monto: monto,
         nombre: nombre,
         precio: precio,
@@ -107,17 +97,37 @@ export class ComisionRecetaService {
     return { status: HttpStatus.OK };
   }
 
-  async eliminarComision(id:Types.ObjectId) {
+  async eliminarComision(id: Types.ObjectId) {
     const comision = await this.comisionReceta.findOne({
       _id: new Types.ObjectId(id),
     });
     if (!comision) {
       throw new NotFoundException();
     }
+
     await this.comisionReceta.updateOne(
       { _id: new Types.ObjectId(id) },
       { flag: flag.eliminado },
     );
     return { status: HttpStatus.OK };
+  }
+
+  async actulizarComisiones(data: GuardarComisionRecetaI) {
+    await this.comisionReceta.deleteMany({
+      combinacionReceta: new Types.ObjectId(data.codigoMia),
+      precio: data.precio,
+    });
+    let contador = 0;
+    for (const com of data.comisiones) {
+      if (com.monto > 0) {
+        contador++;
+        await this.comisionReceta.create({
+          nombre: `comision ${contador}`,
+          combinacionReceta: new Types.ObjectId(data.codigoMia),
+          monto: com.monto,
+          precio: data.precio,
+        });
+      }
+    }
   }
 }

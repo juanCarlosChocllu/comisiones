@@ -23,6 +23,7 @@ export class ComisionProductoService {
     const producto = await this.productoService.asignaComisionProducto(
       createComisionProductoDto.producto,
     );
+    
     if (producto && producto.modifiedCount > 0) {
       for (const data of createComisionProductoDto.data) {
         await this.comisionProducto.create({...data, producto:createComisionProductoDto.producto});

@@ -43,5 +43,5 @@ export interface GuardarComisionRecetaI {
 export interface  comisionesI {
   
         monto:any
-        comision:any
+        comision?:any
 }

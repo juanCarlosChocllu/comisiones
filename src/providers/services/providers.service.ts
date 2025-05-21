@@ -43,6 +43,7 @@ import { ComisionProducto } from 'src/comision-producto/schema/comision-producto
 import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
 import { exceldataServicioI } from 'src/servicio/interface/servicio.interface';
 import { ServicioService } from 'src/servicio/servicio.service';
+import * as path from 'path';
 @Injectable()
 export class ProvidersService {
   constructor(
@@ -79,7 +80,8 @@ export class ProvidersService {
 
       const ventas = await firstValueFrom(
         this.httpService.post<VentaApiI[]>(
-          'https://comercial.opticentro.com.bo/api/ventas',
+         // 'https://comercial.opticentro.com.bo/api/ventas',
+                   'http://localhost/opticentro/web/app_dev.php/api/ventas',
           data,
         ),
       );
@@ -132,63 +134,63 @@ export class ProvidersService {
           data.rubro === productoE.montura
         ) {
           await this.guardarProducto(data, venta._id);
-        } else  if(data.rubro == productoE.servicio) {
+        } else if (data.rubro == productoE.servicio) {
           await this.guardarServicio(data, venta._id);
-        }else{
-          await this.guadarOtroProducto(data, venta._id)
+        } else {
+          await this.guadarOtroProducto(data, venta._id);
         }
-      } else  {
-          console.log('sin sucursal');
-          
+      } else {
+        console.log('sin sucursal');
       }
     }
     return { status: HttpStatus.CREATED };
   }
 
-
-  private async  guadarOtroProducto(data: VentaApiI, venta: Types.ObjectId) {
-
+  private async guadarOtroProducto(data: VentaApiI, venta: Types.ObjectId) {
     const detalle: detalleVentaI = {
       cantidad: 1,
       importe: data.importe,
       rubro: data.rubro,
       venta: venta._id,
       descripcion: data.descripcionProducto,
-      
-    
     };
     await this.detalleVentaService.guardarDetalleVenta(detalle);
     await this.ventaService.tipoPrecio(venta._id, data.precio);
   }
 
-
-
   private async guardarServicio(data: VentaApiI, venta: Types.ObjectId) {
-    const servicio = await this.servicioService.buscarServicio(data.codProducto)
-    if(servicio){
+    const servicio = await this.servicioService.buscarServicio(
+      data.codProducto,
+    );
+    if (servicio) {
       const detalle: detalleVentaI = {
         cantidad: 1,
         importe: data.importe,
         rubro: data.rubro,
         venta: venta._id,
         descripcion: data.descripcionProducto,
-        servicio:servicio._id
+        servicio: servicio._id,
       };
       await this.detalleVentaService.guardarDetalleVenta(detalle);
       await this.ventaService.tipoPrecio(venta._id, data.precio);
-    }else {
-      const servicio = await this.servicioService.crearServicio(data.descripcionProducto, data.codProducto, data.precio, data.importe, data.descripcionProducto)
+    } else {
+      const servicio = await this.servicioService.crearServicio(
+        data.descripcionProducto,
+        data.codProducto,
+        data.precio,
+        data.importe,
+        data.descripcionProducto,
+      );
       const detalle: detalleVentaI = {
         cantidad: 1,
         importe: data.importe,
         rubro: data.rubro,
         venta: venta._id,
         descripcion: data.descripcionProducto,
-        servicio:servicio._id
+        servicio: servicio._id,
       };
       await this.detalleVentaService.guardarDetalleVenta(detalle);
       await this.ventaService.tipoPrecio(venta._id, data.precio);
-      
     }
   }
 
@@ -275,6 +277,7 @@ export class ProvidersService {
           rango._id,
           tipoLente._id,
           tipoColorLente._id,
+          data.precio
         );
 
       if (recetaCombinacion && venta) {
@@ -313,8 +316,9 @@ export class ProvidersService {
             codigo,
             data.precio,
             data.importe,
+            
           );
-        if (recetaCombinacion && venta) {
+        if (recetaCombinacion._id && venta) {
           const detalle: detalleVentaI = {
             cantidad: 1,
             combinacionReceta: recetaCombinacion._id,
@@ -331,7 +335,7 @@ export class ProvidersService {
   }
 
   async guardarComisionesReceta() {
-    const workbook = this.hojaDeTrabajo('./upload/RECETAS.xlsx');
+    const workbook = this.hojaDeTrabajo('./upload/recetas_precio.xlsx');
     let contador = 0;
     for await (const hojas of workbook) {
       for await (const hoja of hojas) {
@@ -352,12 +356,12 @@ export class ProvidersService {
         const monto = hoja.getCell(10).value;
         const comisiones: comisionesI[] = [
           {
-            comision: hoja.getCell(11).value,
-            monto: hoja.getCell(12).value,
+            //comision: hoja.getCell(11).value,
+            monto: hoja.getCell(11).value ? hoja.getCell(11).value :0,
           },
           {
-            comision: hoja.getCell(13).value,
-            monto: hoja.getCell(14).value,
+            //comision: hoja.getCell(13).value,
+            monto: hoja.getCell(12).value ? hoja.getCell(12).value :0,
           },
         ];
         const data: GuardarComisionRecetaI = {
@@ -373,8 +377,9 @@ export class ProvidersService {
           precio: String(precio).toUpperCase().trim(),
           monto: Number(monto),
         };
-        console.log(data.monto);
-
+     
+        console.log(data);
+        
         await this.combinacionRecetaService.guardarComisionrecetaCombinacion(
           data,
         );
@@ -509,12 +514,68 @@ export class ProvidersService {
         await this.servicioService.guardarServicioConSusCOmisiones(data);
       }
     }
-    return {status:HttpStatus.OK}
+    return { status: HttpStatus.OK };
   }
   private hojaDeTrabajo(ruta: string) {
     const workbook = new ExcelJS.stream.xlsx.WorkbookReader(ruta, {
       entries: 'emit',
     });
     return workbook;
+  }
+
+  async actulizaComisiones(nombreArchivo: string) {
+    let ruta: string = path.join(
+      __dirname,
+      `../../../upload/${nombreArchivo}`,
+    );
+    const workbook = this.hojaDeTrabajo(ruta);
+    let contador = 0;
+    for await (const hojas of workbook) {
+      for await (const hoja of hojas) {
+        contador++;
+        if (contador === 1) continue;
+        const codigoMia = hoja.getCell(1).value;
+        const meterial = hoja.getCell(2).value;
+        const tipoLente = hoja.getCell(3).value;
+        const tipoColor = hoja.getCell(4).value;
+
+        const tratamiento = hoja.getCell(5).value;
+
+        const rangos = hoja.getCell(6).value;
+        const marca = hoja.getCell(7).value;
+
+        const colorLente = hoja.getCell(8).value;
+        const precio = hoja.getCell(9).value;
+        const monto = hoja.getCell(10).value;
+        const comisiones: comisionesI[] = [
+          {
+          
+            monto: hoja.getCell(11).value,
+          },
+          {
+           
+            monto: hoja.getCell(12).value,
+          },
+        ];
+        const data: GuardarComisionRecetaI = {
+          codigoMia: String(codigoMia),
+          colorLente: String(colorLente).toUpperCase().trim(),
+          comisiones: comisiones,
+          marcaLente: String(marca).toUpperCase().trim(),
+          material: String(meterial).toUpperCase().trim(),
+          rango: String(rangos).toUpperCase().trim(),
+          tipoColorLente: String(tipoColor).toUpperCase().trim(),
+          tipoLente: String(tipoLente).toUpperCase().trim(),
+          tratamiento: String(tratamiento).toUpperCase().trim(),
+          precio: String(precio).toUpperCase().trim(),
+          monto: Number(monto),
+        };
+        await this.comisionRecetaService.actulizarComisiones(data)
+    
+      }
+
+      break;
+    }
+    return {status:HttpStatus.OK}
   }
 }
