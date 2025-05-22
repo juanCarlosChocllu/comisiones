@@ -1,5 +1,4 @@
 import { IsBoolean, IsEmpty, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Types } from 'mongoose';
 
 export class dataProductoDto {
   @IsString()

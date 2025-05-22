@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer"
-import { IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { IsNotEmpty, IsNumber, IsString, IsUUID } from "class-validator"
 
 export class CrearCombinacionDto{
             @IsString()
@@ -45,6 +45,10 @@ export class CrearCombinacionDto{
             @IsNotEmpty()
             tipoPrecio:string
 
+            @IsString()
+            @IsNotEmpty()
+            @IsUUID("4",{message:'Formato invalido'} )
+            key:string
            /* @IsString()
             @IsNotEmpty()
             codigoMia:string*/

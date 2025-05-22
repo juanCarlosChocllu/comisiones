@@ -80,8 +80,8 @@ export class ProvidersService {
 
       const ventas = await firstValueFrom(
         this.httpService.post<VentaApiI[]>(
-          'https://comercial.opticentro.com.bo/api/ventas',
-                   //'http://localhost/opticentro/web/app_dev.php/api/ventas',
+          //'https://comercial.opticentro.com.bo/api/ventas',
+                   'http://localhost/opticentro/web/app_dev.php/api/ventas',
           data,
         ),
       );
@@ -334,8 +334,9 @@ export class ProvidersService {
     }
   }
 
-  async guardarComisionesReceta() {
-    const workbook = this.hojaDeTrabajo('./upload/recetas_precio.xlsx');
+  async guardarComisionesReceta(archivo:string) {
+    const ruta=  this.rutaArchivoUpload(archivo)
+    const workbook = this.hojaDeTrabajo(ruta);
     let contador = 0;
     for await (const hojas of workbook) {
       for await (const hoja of hojas) {
@@ -387,6 +388,7 @@ export class ProvidersService {
 
       break;
     }
+    return {status:HttpStatus.CREATED}
   }
 
   async guardarComisionesProducto() {
@@ -524,10 +526,7 @@ export class ProvidersService {
   }
 
   async actulizaComisiones(nombreArchivo: string) {
-    let ruta: string = path.join(
-      __dirname,
-      `../../../upload/${nombreArchivo}`,
-    );
+    let ruta: string =this.rutaArchivoUpload(nombreArchivo)
     const workbook = this.hojaDeTrabajo(ruta);
     let contador = 0;
     for await (const hojas of workbook) {
@@ -577,5 +576,13 @@ export class ProvidersService {
       break;
     }
     return {status:HttpStatus.OK}
+  }
+
+  private rutaArchivoUpload(archivo:string) {
+     let ruta: string = path.join(
+      __dirname,
+      `../../../upload/${archivo}`,
+    );
+    return ruta
   }
 }

@@ -37,13 +37,11 @@ export class VentaController {
     return this.ventaService.remove(+id);
   }
 
-   @Publico()
+  @Publico()
   @Post('finalizar')
    async finalizarVentas(@Body() finalizarVentaDto: FinalizarVentaDto){
     return this.ventaService.finalizarVentas(finalizarVentaDto)
    }
 
-  guardarVenta() {
-    
-  }
+  
 }

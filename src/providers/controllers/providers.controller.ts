@@ -16,8 +16,9 @@ export class ProvidersController {
   }
  
   @Post('excel/combinaciones/comisiones')
-  guardarComisionesReceta(){
-    return this.providersService.guardarComisionesReceta()
+  @UseInterceptors(FileInterceptor('file',multerConfig))
+  guardarComisionesReceta(@UploadedFile() file: Express.Multer.File){
+    return this.providersService.guardarComisionesReceta(file.filename)
   }
 
   @Post('excel/producto/comisiones')

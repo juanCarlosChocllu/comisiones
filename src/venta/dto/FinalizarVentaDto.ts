@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsString } from "class-validator"
+import { IsDateString, IsNotEmpty, IsString, IsUUID } from "class-validator"
 
 export class FinalizarVentaDto {
     
@@ -9,14 +9,14 @@ export class FinalizarVentaDto {
 
     @IsString()
     @IsNotEmpty()
-    tracking:string
-
-    @IsString()
-    @IsNotEmpty()
     flag:string
 
 
     @IsDateString()
     @IsNotEmpty()
     fecha:string
+
+    @IsUUID()
+    @IsNotEmpty()
+    key:string
 }

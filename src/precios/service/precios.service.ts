@@ -43,7 +43,7 @@ export class PreciosService {
           combinacionReceta: new Types.ObjectId(producto),
           precio: new Types.ObjectId(precio),
           tipo: tipo,
-          monto: monto,
+          monto: monto | 0,
         });
       }
     } else if (tipo === tipoProductoPrecio.servicio) {
@@ -58,7 +58,7 @@ export class PreciosService {
           servicio: new Types.ObjectId(producto),
           precio: new Types.ObjectId(precio),
           tipo: tipoProductoPrecio.servicio,
-          monto: monto,
+          monto: monto | 0,
         });
       }
     } else {
@@ -73,7 +73,7 @@ export class PreciosService {
           producto: new Types.ObjectId(producto),
           precio: new Types.ObjectId(precio),
           tipo: tipoProductoPrecio.producto,
-          monto: monto,
+          monto: monto|0,
         });
       }
     }

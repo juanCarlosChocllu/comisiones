@@ -19,6 +19,7 @@ import { flag } from 'src/core/enum/flag';
 import { calcularPaginas, skip } from 'src/core/utils/paginador';
 import { BuscadorVentaDto } from 'src/venta/dto/buscadorVenta.dto,';
 import { BuscadorProductoDto } from './dto/BuscadorProducto.dto';
+import { CrearProductoDto } from './dto/crearProduto.dto';
 
 @Injectable()
 export class ProductoService {
@@ -30,7 +31,8 @@ export class ProductoService {
     private readonly precioService: PreciosService,
 
     private readonly preciosService: PreciosService,
-   @Inject(forwardRef(()=> ComisionProductoService))  private readonly comisionProductoService: ComisionProductoService,
+    @Inject(forwardRef(() => ComisionProductoService))
+    private readonly comisionProductoService: ComisionProductoService,
   ) {}
   async create(createProductoDto: CreateProductoDto) {
     for (const data of createProductoDto.data) {
@@ -68,10 +70,11 @@ export class ProductoService {
     return { status: HttpStatus.CREATED };
   }
 
-  async guardarProducto (data:productosExcelI){//datal color
+  async guardarProducto(data: productosExcelI) {
+    //datal color
     const color = await this.colorService.guardarColor(data.color);
     const marca = await this.marcaService.guardarMarca(data.color);
- 
+
     const dataProducto: DataProductoI = {
       codigoMia: data.codigoMia,
       tipoProducto: data.tipoProducto,
@@ -80,27 +83,28 @@ export class ProductoService {
       serie: data.serie,
       categoria: data.categoria,
       codigoQR: data.codigoQR,
-      comision:false
-   
+      comision: false,
     };
     if (data.tipoProducto == productoE.montura) {
       const tipoMontura = await this.tipoMonturaService.guardarTipoMontura(
-        data.tipoMontura
+        data.tipoMontura,
       );
       dataProducto.tipoMontura = tipoMontura._id;
     }
     const producto = await this.producto.create(dataProducto);
-    const precioEcontrado = await this.preciosService.buscarPrecioPorNombre(data.precio);
+    const precioEcontrado = await this.preciosService.buscarPrecioPorNombre(
+      data.precio,
+    );
     await this.preciosService.guardarDetallePrecio(
       tipoProductoPrecio.producto,
       producto._id,
       precioEcontrado._id,
       data.importe,
     );
-    return producto
+    return producto;
   }
 
-  async verificarProducto(codigoMia:string) {
+  async verificarProducto(codigoMia: string) {
     const producto = await this.producto.aggregate([
       {
         $match: {
@@ -123,8 +127,7 @@ export class ProductoService {
       },
     ]);
 
- 
-    return producto[0]
+    return producto[0];
   }
 
   async verificarProductoventa(
@@ -159,25 +162,49 @@ export class ProductoService {
     return productos[0];
   }
   async listarProductosSinComision(BuscadorProductoDto: BuscadorProductoDto) {
-    const {data,paginas} = await this.productoListar(BuscadorProductoDto, false)
-    return { data: data , paginas:paginas };
+    const { data, paginas } = await this.productoListar(
+      BuscadorProductoDto,
+      false,
+    );
+    return { data: data, paginas: paginas };
   }
-  async listarProductos(BuscadorProductoDto: BuscadorProductoDto, rubro:productoE) {
-    
-   const {data,paginas} = await this.productoListar(BuscadorProductoDto, true, rubro)
-    return { data: data , paginas:paginas };
+  async listarProductos(
+    BuscadorProductoDto: BuscadorProductoDto,
+    rubro: productoE,
+  ) {
+    const { data, paginas } = await this.productoListar(
+      BuscadorProductoDto,
+      true,
+      rubro,
+    );
+    return { data: data, paginas: paginas };
   }
-  private async productoListar (BuscadorProductoDto: BuscadorProductoDto, comision:boolean, rubro?:string|null) {
-    const match = {flag:flag.nuevo,  ...(comision === false) ? {  comision:comision}:{},    ...(rubro) ? {  tipoProducto:rubro}:{}}
+  private async productoListar(
+    BuscadorProductoDto: BuscadorProductoDto,
+    comision: boolean,
+    rubro?: string | null,
+  ) {
+    const match = {
+      flag: flag.nuevo,
+      ...(comision === false ? { comision: comision } : {}),
+      ...(rubro ? { tipoProducto: rubro } : {}),
+    };
     const producto = await this.producto.aggregate([
       {
-        $match: {...match,
-        ...(BuscadorProductoDto.serie) ? {serie:new RegExp(BuscadorProductoDto.serie, 'i')}:{} ,
-         ...(BuscadorProductoDto.codigoQr) ? {codigoQR:new RegExp(BuscadorProductoDto.codigoQr, 'i')}:{},
-         ...(BuscadorProductoDto.tipoProducto) ? {tipoProducto:new RegExp(BuscadorProductoDto.tipoProducto, 'i')}:{},
-
-        
-        }
+        $match: {
+          ...match,
+          ...(BuscadorProductoDto.serie
+            ? { serie: new RegExp(BuscadorProductoDto.serie, 'i') }
+            : {}),
+          ...(BuscadorProductoDto.codigoQr
+            ? { codigoQR: new RegExp(BuscadorProductoDto.codigoQr, 'i') }
+            : {}),
+          ...(BuscadorProductoDto.tipoProducto
+            ? {
+                tipoProducto: new RegExp(BuscadorProductoDto.tipoProducto, 'i'),
+              }
+            : {}),
+        },
       },
       {
         $lookup: {
@@ -190,7 +217,15 @@ export class ProductoService {
       {
         $unwind: { path: '$marca', preserveNullAndEmptyArrays: true },
       },
-      ...(BuscadorProductoDto.marca) ? [ { $match:{'marca.nombre': new RegExp(BuscadorProductoDto.marca, 'i') }} ]:[],
+      ...(BuscadorProductoDto.marca
+        ? [
+            {
+              $match: {
+                'marca.nombre': new RegExp(BuscadorProductoDto.marca, 'i'),
+              },
+            },
+          ]
+        : []),
 
       {
         $lookup: {
@@ -203,7 +238,15 @@ export class ProductoService {
       {
         $unwind: { path: '$color', preserveNullAndEmptyArrays: true },
       },
-       ...(BuscadorProductoDto.color) ? [ { $match:{'color.nombre': new RegExp(BuscadorProductoDto.color, 'i') }} ]:[],
+      ...(BuscadorProductoDto.color
+        ? [
+            {
+              $match: {
+                'color.nombre': new RegExp(BuscadorProductoDto.color, 'i'),
+              },
+            },
+          ]
+        : []),
       {
         $lookup: {
           from: 'ComisionProducto',
@@ -212,7 +255,6 @@ export class ProductoService {
           as: 'comisionProducto',
         },
       },
-     
 
       {
         $project: {
@@ -223,36 +265,40 @@ export class ProductoService {
           color: '$color.nombre',
           categoria: 1,
           codigoQR: 1,
-          comisionProducto:1
+          comisionProducto: 1,
         },
       },
-     {
-      $skip:skip(BuscadorProductoDto.pagina, BuscadorProductoDto.limite)
-     },
-     {
-      $limit:BuscadorProductoDto.limite
-     }
+      {
+        $skip: skip(BuscadorProductoDto.pagina, BuscadorProductoDto.limite),
+      },
+      {
+        $limit: BuscadorProductoDto.limite,
+      },
     ]);
-    const total = await this.producto.countDocuments(match)
-    const pagina = calcularPaginas(total, BuscadorProductoDto.limite)
-    return { data: producto , paginas:pagina };
+    const total = await this.producto.countDocuments(match);
+    const pagina = calcularPaginas(total, BuscadorProductoDto.limite);
+    return { data: producto, paginas: pagina };
   }
 
-  async asignaComisionProducto(id:Types.ObjectId) {
-      const producto = await this.producto.findOne({_id:new Types.ObjectId(id), comision:false})
+  async asignaComisionProducto(id: Types.ObjectId) {
+    const producto = await this.producto.findOne({
+      _id: new Types.ObjectId(id),
+      comision: false,
+    });
 
-      
-      if(producto){
-        console.log(producto);
-        return await this.producto.updateOne({_id:new Types.ObjectId(id)}, {comision:true})
-      }
+    if (producto) {
+      console.log(producto);
+      return await this.producto.updateOne(
+        { _id: new Types.ObjectId(id) },
+        { comision: true },
+      );
+    }
   }
 
   async guardaProductoComisiones(data: productosExcelI) {
     const producto = await this.producto.findOne({ codigoMia: data.codigoMia });
-    
+
     if (!producto) {
-    
       const [color, marca] = await Promise.all([
         this.colorService.guardarColor(data.color),
         this.marcaService.guardarMarca(data.marca),
@@ -280,7 +326,6 @@ export class ProductoService {
         tipoProductoPrecio.producto,
         producto._id,
         precio._id,
-   
       );
 
       if (data.precio === precio.nombre) {
@@ -299,7 +344,12 @@ export class ProductoService {
         }
       }
     } else {
-      console.log('existe prodcuto',data.codigoMia, data.tipoProducto, data.precio);
+      console.log(
+        'existe prodcuto',
+        data.codigoMia,
+        data.tipoProducto,
+        data.precio,
+      );
       const precio = await this.preciosService.guardarPrecioReceta(data.precio);
 
       await this.preciosService.guardarDetallePrecio(
@@ -362,6 +412,59 @@ export class ProductoService {
         producto._id,
         precio._id,
       );
+    }
+  }
+
+  async crearProducto(crearProductoDto: CrearProductoDto) {
+    console.log(crearProductoDto);
+    
+    const producto = await this.producto.findOne({
+      codigoMia: crearProductoDto.codigoMia,
+    });
+    if (producto) {
+      for (const data of crearProductoDto.precios) {
+        const precio = await this.precioService.buscarPrecioPorNombre(
+          data.tipoPrecio,
+        );
+        await this.precioService.guardarDetallePrecio(
+          tipoProductoPrecio.producto,
+          producto._id,
+          precio._id,
+          data.precio,
+        );
+      }
+    } else {
+      const [color, marca] = await Promise.all([
+        this.colorService.guardarColor(crearProductoDto.color),
+        this.marcaService.guardarMarca(crearProductoDto.marca),
+      ]);
+      const dataProducto: DataProductoI = {
+        codigoMia: crearProductoDto.codigoMia,
+        tipoProducto: crearProductoDto.tipoProducto,
+        marca: marca._id,
+        color: color._id,
+        serie: crearProductoDto.serie,
+        codigoQR: crearProductoDto.codigoQR,
+      };
+      if (crearProductoDto.tipoProducto == productoE.montura) {
+        const tipoMontura = await this.tipoMonturaService.guardarTipoMontura(
+          crearProductoDto.tipoMontura,
+        );
+        dataProducto.tipoMontura = tipoMontura._id;
+      }
+      const producto = await this.producto.create(dataProducto);
+
+      for (const data of crearProductoDto.precios) {
+        const precio = await this.precioService.buscarPrecioPorNombre(
+          data.tipoPrecio,
+        );
+        await this.precioService.guardarDetallePrecio(
+          tipoProductoPrecio.producto,
+          producto._id,
+          precio._id,
+          data.precio,
+        );
+      }
     }
   }
 }

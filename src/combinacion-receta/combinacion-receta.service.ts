@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateCombinacionRecetaDto } from './dto/create-combinacion-receta.dto';
 import { UpdateCombinacionRecetaDto } from './dto/update-combinacion-receta.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -28,6 +28,7 @@ import { calcularPaginas } from 'src/core/utils/paginador';
 import { BuscadorCombinacionDto } from './dto/buscadorCombinacionReceta.dto';
 import { BuscadorCombinacioRecetaI } from './interface/buscadorCombinacion';
 import { CrearCombinacionDto } from './dto/CrearCombinacion.dto';
+import { key } from 'src/core/config/config';
 @Injectable()
 export class CombinacionRecetaService {
   constructor(
@@ -45,8 +46,9 @@ export class CombinacionRecetaService {
   ) {}
 
   async crearCombinaciones(crearCombinacionDto: CrearCombinacionDto) {
-    console.log(crearCombinacionDto);
-
+    if(crearCombinacionDto.key != key){
+      throw new UnauthorizedException()
+    }
     const [
       tratamiento,
       material,
@@ -124,6 +126,9 @@ export class CombinacionRecetaService {
 
   async create(createCombinacionRecetaDto: CreateCombinacionRecetaDto) {
     for (const data of createCombinacionRecetaDto.data) {
+      if(data.key != key){
+        throw new UnauthorizedException()
+      }
       const [
         tratamiento,
         material,

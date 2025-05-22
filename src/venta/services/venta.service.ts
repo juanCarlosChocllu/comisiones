@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateVentaDto } from '../dto/create-venta.dto';
 import { UpdateVentaDto } from '../dto/update-venta.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -27,6 +27,7 @@ import { ComisionServicioService } from 'src/comision-servicio/comision-servicio
 import { from } from 'form-data';
 import { formaterFechaHora } from 'src/core/utils/formaterFechaHora';
 import { FinalizarVentaDto } from '../dto/FinalizarVentaDto';
+import { key } from 'src/core/config/config';
 
 
 
@@ -431,9 +432,12 @@ export class VentaService {
 
   async finalizarVentas(finalizarVentaDto:FinalizarVentaDto) {
     try {
+      if(finalizarVentaDto.key != key) {
+        throw new UnauthorizedException()
+      }
       const venta = await this.venta.findOne({id_venta:finalizarVentaDto.idVenta.toUpperCase().trim()})
       if(venta) {
-         await this.venta.updateMany({id_venta:finalizarVentaDto.idVenta.toUpperCase().trim()}, { fecha:new Date(finalizarVentaDto.fecha), estadoTracking:finalizarVentaDto.tracking,  flagVenta:finalizarVentaDto.flag})
+         await this.venta.updateMany({id_venta:finalizarVentaDto.idVenta.toUpperCase().trim()}, { fechaFinalizacion:new Date(finalizarVentaDto.fecha), flag:finalizarVentaDto.flag})
          return {status:HttpStatus.OK}
       }
       return {status:HttpStatus.NOT_FOUND}

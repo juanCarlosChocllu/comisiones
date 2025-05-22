@@ -12,9 +12,8 @@ export class CombinacionRecetaController {
   constructor(private readonly combinacionRecetaService: CombinacionRecetaService) {}
 
   @Post()
+  @Publico()
   create(@Body() createCombinacionRecetaDto: CreateCombinacionRecetaDto) {
-
-    console.log(createCombinacionRecetaDto);
     
     return this.combinacionRecetaService.create(createCombinacionRecetaDto);
   }
