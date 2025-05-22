@@ -44,6 +44,7 @@ import { ComisionProductoService } from 'src/comision-producto/comision-producto
 import { exceldataServicioI } from 'src/servicio/interface/servicio.interface';
 import { ServicioService } from 'src/servicio/servicio.service';
 import * as path from 'path';
+import { apiMia, tokenMia } from 'src/core/config/config';
 @Injectable()
 export class ProvidersService {
   constructor(
@@ -74,14 +75,12 @@ export class ProvidersService {
       const data: DescargarProviderDto = {
         fechaFin: createProviderDto.fechaFin,
         fechaInicio: createProviderDto.fechaInicio,
-        token:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NzIyYTEyMTU5ZmZmMzAzYWY3ODkxNjYiLCJ1c2VybmFtZSI6Imthbm5hMiIsImlhdCI6MTczMzE0NTM0NCwiZXhwIjoxNzMzMTYzMzQ0fQ.p1wF-qQ_xLOjQ85vMFfxXCJBYEHgOqCcjmZ3YpU5Y2g',
-      };
+        token: tokenMia
+           };
 
       const ventas = await firstValueFrom(
         this.httpService.post<VentaApiI[]>(
-          //'https://comercial.opticentro.com.bo/api/ventas',
-                   'http://localhost/opticentro/web/app_dev.php/api/ventas',
+          apiMia,
           data,
         ),
       );
