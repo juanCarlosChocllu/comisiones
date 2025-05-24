@@ -32,7 +32,7 @@ export class CombinacionRecetaController {
   listarCombinacionesSinComision(@Query () buscadorCombinacionDto:BuscadorCombinacionDto) {
     return this.combinacionRecetaService.listarCombinacionesSinComision(buscadorCombinacionDto);
   }
-  @Publico()
+  
   @Get('descargar')
   async descargarCombinaciones(@Res() response: Response) {
     const  workbook =await this.combinacionRecetaService.descargarCombinaciones();

@@ -524,6 +524,7 @@ export class CombinacionRecetaService {
       {
         $match: {
           flag: flag.nuevo,
+          comision:false
         },
       },
       {
@@ -627,6 +628,9 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$precio', preserveNullAndEmptyArrays: false },
       },
+      /*{$match:{
+        'precio.nombre': { $nin: ['PRECIO 1', 'PRECIO 2', 'ECO 1' , ''] }
+      }},*/
 
       {
         $project: {

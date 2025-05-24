@@ -194,8 +194,11 @@ export class ProvidersService {
   }
 
   private async guardarProducto(data: VentaApiI, venta: Types.ObjectId) {
+    console.log(data);
+    
     const producto = await this.productoService.verificarProducto(
       data.codProducto,
+      data.precio
     );
 
     if (producto) {
@@ -205,7 +208,7 @@ export class ProvidersService {
         importe: data.importe,
         rubro: data.rubro,
         venta: venta,
-        marca: producto.marca,
+        marca: data.atributo1,
         descripcion: data.descripcionProducto,
       };
       await this.ventaService.tieneProducto(venta, true);

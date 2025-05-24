@@ -32,6 +32,7 @@ import { databaseConeccion } from './core/config/config';
 import { APP_GUARD } from '@nestjs/core';
 import { TokenGuard } from './autenticacion/guards/token/token.guard';
 
+
 @Module({
   imports: [
     MongooseModule.forRoot(databaseConeccion),
@@ -72,4 +73,6 @@ import { TokenGuard } from './autenticacion/guards/token/token.guard';
     }
   ],
 })
-export class AppModule {}
+export class AppModule {
+
+}

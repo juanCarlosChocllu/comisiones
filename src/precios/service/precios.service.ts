@@ -131,6 +131,8 @@ export class PreciosService {
   }
 
   async buscarPrecioPorNombre(nombre: string) {
+    console.log(nombre);
+    
     const precio = await this.precio.findOne({ nombre: nombre.toUpperCase() });
     if (!precio) {
       return await this.precio.create({ nombre: nombre.toUpperCase() });

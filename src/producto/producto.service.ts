@@ -20,7 +20,7 @@ import { calcularPaginas, skip } from 'src/core/utils/paginador';
 import { BuscadorVentaDto } from 'src/venta/dto/buscadorVenta.dto,';
 import { BuscadorProductoDto } from './dto/BuscadorProducto.dto';
 import { CrearProductoDto } from './dto/crearProduto.dto';
-
+import * as ExcelJs from 'exceljs';
 @Injectable()
 export class ProductoService {
   constructor(
@@ -71,58 +71,88 @@ export class ProductoService {
   }
 
   async guardarProducto(data: productosExcelI) {
+    console.log(data);
+    
     //datal color
-    const color = await this.colorService.guardarColor(data.color);
-    const marca = await this.marcaService.guardarMarca(data.color);
-
-    const dataProducto: DataProductoI = {
-      codigoMia: data.codigoMia,
-      tipoProducto: data.tipoProducto,
-      marca: marca._id,
-      color: color._id,
-      serie: data.serie,
-      categoria: data.categoria,
-      codigoQR: data.codigoQR,
-      comision: false,
-    };
-    if (data.tipoProducto == productoE.montura) {
-      const tipoMontura = await this.tipoMonturaService.guardarTipoMontura(
-        data.tipoMontura,
-      );
-      dataProducto.tipoMontura = tipoMontura._id;
-    }
-    const producto = await this.producto.create(dataProducto);
+    const producto = await this.producto.findOne({ codigoMia: data.codigoMia });
     const precioEcontrado = await this.preciosService.buscarPrecioPorNombre(
       data.precio,
     );
-    await this.preciosService.guardarDetallePrecio(
-      tipoProductoPrecio.producto,
-      producto._id,
-      precioEcontrado._id,
-      data.importe,
-    );
+    if (!producto) {
+      const  [color, marca] = await Promise.all( [ this.colorService.guardarColor(data.color), this.marcaService.guardarMarca(data.color)])
+
+      const dataProducto: DataProductoI = {
+        codigoMia: data.codigoMia,
+        tipoProducto: data.tipoProducto,
+        marca: marca._id,
+        color: color._id,
+        serie: data.serie,
+        categoria: data.categoria,
+        codigoQR: data.codigoQR,
+        comision: false,
+      };
+      if (data.tipoProducto == productoE.montura) {
+        const tipoMontura = await this.tipoMonturaService.guardarTipoMontura(
+          data.tipoMontura,
+        );
+        dataProducto.tipoMontura = tipoMontura._id;
+      }
+      const producto = await this.producto.create(dataProducto);
+
+      await this.preciosService.guardarDetallePrecio(
+        tipoProductoPrecio.producto,
+        producto._id,
+        precioEcontrado._id,
+        data.importe,
+      );
+      return producto;
+    } else {
+      await this.preciosService.guardarDetallePrecio(
+        tipoProductoPrecio.producto,
+        producto._id,
+        precioEcontrado._id,
+        data.importe,
+      );
+    }
     return producto;
   }
 
-  async verificarProducto(codigoMia: string) {
+  async verificarProducto(codigoMia: string, tipoPrecio: string) {
     const producto = await this.producto.aggregate([
       {
         $match: {
           codigoMia: codigoMia,
         },
       },
+
       {
         $lookup: {
-          from: 'Marca',
+          from: 'DetallePrecio',
           foreignField: '_id',
-          localField: 'marca',
-          as: 'marca',
+          localField: 'producto',
+          as: 'detallePrecio',
+        },
+      },
+      {
+        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'Precio',
+          foreignField: '_id',
+          localField: 'detallePrecio.precio',
+          as: 'precio',
+        },
+      },
+      { $unwind: { path: '$precio', preserveNullAndEmptyArrays: false } },
+      {
+        $match: {
+          'precio.nombre': tipoPrecio,
         },
       },
       {
         $project: {
           tipoProducto: 1,
-          marca: { $arrayElemAt: ['$marca.nombre', 0] },
         },
       },
     ]);
@@ -416,8 +446,6 @@ export class ProductoService {
   }
 
   async crearProducto(crearProductoDto: CrearProductoDto) {
-    console.log(crearProductoDto);
-    
     const producto = await this.producto.findOne({
       codigoMia: crearProductoDto.codigoMia,
     });
@@ -466,5 +494,138 @@ export class ProductoService {
         );
       }
     }
+  }
+
+  async descargarProductos(tipoProducto: string) {
+    const workbook = new ExcelJs.Workbook();
+    const worksheet = workbook.addWorksheet('hoja 1');
+    const producto = await this.producto.aggregate([
+      {
+        $match: {
+          tipoProducto: tipoProducto,
+        },
+      },
+      {
+        $lookup: {
+          from: 'DetallePrecio',
+          foreignField: 'producto',
+          localField: '_id',
+          as: 'detallePrecio',
+        },
+      },
+      {
+        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'Precio',
+          foreignField: '_id',
+          localField: 'detallePrecio.precio',
+          as: 'precio',
+        },
+      },
+
+      { $unwind: { path: '$precio', preserveNullAndEmptyArrays: false } },
+
+      {
+        $lookup: {
+          from: 'Marca',
+          localField: 'marca',
+          foreignField: '_id',
+          as: 'marca',
+        },
+      },
+      { $unwind: { path: '$marca', preserveNullAndEmptyArrays: false } },
+
+      {
+        $lookup: {
+          from: 'Color',
+          localField: 'color',
+          foreignField: '_id',
+          as: 'color',
+        },
+      },
+      { $unwind: { path: '$color', preserveNullAndEmptyArrays: false } },
+
+      {
+        $lookup: {
+          from: 'TipoMontura',
+          localField: 'tipoMontura',
+          foreignField: '_id',
+          as: 'tipoMontura',
+        },
+      },
+      { $unwind: { path: '$tipoMontura', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          codigoQR: 1,
+          tipoProducto: 1,
+          marca: '$marca.nombre',
+          serie: 1,
+          color: '$color.nombre',
+          precio: '$precio.nombre',
+          tipoMontura: '$tipoMontura.nombre',
+        },
+      },
+    ]);
+    const data = await Promise.all(
+      producto.map(async (p) => {
+        const comision =
+          await this.comisionProductoService.listarComosionPorProducto(
+            p._id,
+            p.precio,
+          );
+
+        return {
+          _id: p._id,
+          tipoProducto: p.tipoProducto,
+          marca: p.marca,
+          serie: p.serie,
+          color: p.color,
+          precio: p.precio,
+          codigoQR: p.codigoQR,
+          tipoMontura: p.tipoMontura,
+          comision,
+        };
+      }),
+    );
+
+    worksheet.columns = [
+      { header: 'id', key: 'id', width: 30 },
+      { header: 'codigoQR', key: 'codigoQR', width: 30 },
+      { header: 'producto', key: 'producto', width: 30 },
+      { header: 'marca', key: 'marca', width: 30 },
+      { header: 'color', key: 'color', width: 30 },
+      { header: 'serie', key: 'serie', width: 60 },
+      { header: 'tipoMontura', key: 'tipoMontura', width: 30 },
+      { header: 'tipoPrecio', key: 'tipoPrecio', width: 30 },
+      { header: 'monto', key: 'monto', width: 15 },
+      { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
+      { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
+    ];
+    for (const comb of data) {
+      let mayor = 0;
+      let menor = 0;
+      if (comb.comision.length > 0) {
+        const montos = comb.comision.map((c) => c.monto);
+        mayor = Math.max(...montos);
+        menor = Math.min(...montos);
+      }
+
+      worksheet.addRow({
+        id: String(comb._id),
+        codigoQR: comb.codigoQR,
+        producto: comb.tipoProducto,
+        marca: comb.marca,
+        color: comb.color,
+        serie: comb.serie,
+        tipoMontura: comb.tipoMontura,
+        tipoPrecio: comb.precio,
+        monto: 0,
+        comisionFija1: mayor,
+        comisionFija2: menor,
+      });
+    }
+    return workbook;
   }
 }
