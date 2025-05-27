@@ -49,4 +49,21 @@ export class CombinacionRecetaController {
     return response.end();
   }
 
+   @Get('descargar/sinComision')
+   @Publico()
+  async descargarCombinacionesSinComision(@Res() response: Response) {
+    const  workbook =await this.combinacionRecetaService.descargarCombinacionesSinComision();
+    
+    response.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="export.xlsx"',
+    );
+    await workbook.xlsx.write(response);
+    return response.end();
+  }
+
 }

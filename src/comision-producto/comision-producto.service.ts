@@ -47,26 +47,19 @@ export class ComisionProductoService {
   async guardarComisionProducto(
     producto: Types.ObjectId,
     monto: number,
-    comision: number,
     nombre: string,
     precio: string,
   ) {
-    comision = comision ? comision : 0;
-    monto = monto ? monto : 0;
-    const diferencia = comision - monto;
-    const comisionProducto = await this.comisionProducto.findOne({
+  
+    const comisionProducto = await this.comisionProducto.exists({
       producto: new Types.ObjectId(producto),
-      comision: comision,
-      diferencia: diferencia,
       monto: monto,
       nombre: nombre,
       precio: precio,
-    });
+    }).lean();
     if (!comisionProducto) {
       await this.comisionProducto.create({
         producto: new Types.ObjectId(producto),
-        comision: comision,
-        diferencia: diferencia,
         monto: monto,
         nombre: nombre,
         precio: precio,

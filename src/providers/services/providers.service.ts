@@ -283,15 +283,14 @@ export class ProvidersService {
         );
 
       if (recetaCombinacion && venta) {
-        //  const comision = await this.comisionRecetaService.listarComisionReceta(data.precio, recetaCombinacion._id)
-
+      
         const detalle: detalleVentaI = {
           cantidad: 1,
           combinacionReceta: recetaCombinacion._id,
           importe: data.importe,
           rubro: data.rubro,
           venta: venta,
-          // comision:comision.map((item => item.monto)),
+       
           descripcion: `${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`,
         };
         await this.ventaService.tieneReceta(venta, true);
@@ -378,14 +377,12 @@ export class ProvidersService {
           tipoLente: String(tipoLente).toUpperCase().trim(),
           tratamiento: String(tratamiento).toUpperCase().trim(),
           precio: String(precio).toUpperCase().trim(),
-          monto: Number(monto),
+          monto: monto  ? Number(monto) : 0,
         };
      
         console.log(data);
         
-        await this.combinacionRecetaService.guardarComisionrecetaCombinacion(
-          data,
-        );
+        await this.combinacionRecetaService.guardarComisionrecetaCombinacion(data);
       }
 
       break;
@@ -394,7 +391,7 @@ export class ProvidersService {
   }
 
   async guardarComisionesProducto() {
-    const workbook = this.hojaDeTrabajo('./upload/3.xlsx');
+    const workbook = this.hojaDeTrabajo('./upload/sinComsionP.xlsx');
     let contador: number = 0;
     for await (const hojas of workbook) {
       for await (const hoja of hojas) {
@@ -408,35 +405,36 @@ export class ProvidersService {
         const marca = hoja.getCell(4).value;
         const color = hoja.getCell(5).value;
         const serie = hoja.getCell(6).value;
-        const genero = hoja.getCell(7).value;
-        const tipoMontura = hoja.getCell(8).value;
-        const categoria = hoja.getCell(9).value;
-        const precio = hoja.getCell(10).value;
+        //const genero = hoja.getCell(7).value;
+        const tipoMontura = hoja.getCell(7).value;
+       // const categoria = hoja.getCell(9).value;
+        const precio = hoja.getCell(8).value;
+         const monto = hoja.getCell(9).value;
 
         const comisiones: comisionesI[] = [
           {
-            comision: hoja.getCell(12).value,
-            monto: hoja.getCell(13).value,
+            //comision: hoja.getCell(12).value,
+            monto: hoja.getCell(10).value,
           },
           {
-            comision: hoja.getCell(14).value,
-            monto: hoja.getCell(15).value,
+            //comision: hoja.getCell(14).value,
+            monto: hoja.getCell(11).value,
           },
         ];
 
         const data: productosExcelI = {
           codigoMia: String(codigoMia),
-          categoria: String(categoria),
+         
           color: String(color),
           marca: String(marca),
           serie: String(serie),
           comisiones: comisiones,
           codigoQR: String(codigoQr),
           tipoProducto: String(producto),
+          importe:Number(monto),
           precio: String(precio),
           tipoMontura: String(tipoMontura),
         };
-
         await this.productoService.guardaProductoComisiones(data);
       }
       break;

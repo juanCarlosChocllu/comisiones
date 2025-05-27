@@ -524,7 +524,7 @@ export class CombinacionRecetaService {
       {
         $match: {
           flag: flag.nuevo,
-          comision:false
+
         },
       },
       {
@@ -1384,5 +1384,245 @@ export class CombinacionRecetaService {
         }
       }
     }
+  }
+
+  async descargarCombinacionesSinComision() {
+      const combinacion = await this.combinacionReceta.aggregate([
+      {
+        $match: {
+          flag: flag.nuevo,
+
+        },
+      },
+      {
+        $lookup: {
+          from: 'Material',
+          foreignField: '_id',
+          localField: 'material',
+          as: 'material',
+        },
+      },
+      {
+        $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'TipoLente',
+          foreignField: '_id',
+          localField: 'tipoLente',
+          as: 'tipoLente',
+        },
+      },
+      {
+        $unwind: { path: '$tipoLente', preserveNullAndEmptyArrays: false },
+      },
+
+      {
+        $lookup: {
+          from: 'Rango',
+          foreignField: '_id',
+          localField: 'rango',
+          as: 'rango',
+        },
+      },
+      {
+        $unwind: { path: '$rango', preserveNullAndEmptyArrays: false },
+      },
+
+      {
+        $lookup: {
+          from: 'ColorLente',
+          foreignField: '_id',
+          localField: 'colorLente',
+          as: 'colorLente',
+        },
+      },
+      {
+        $unwind: { path: '$colorLente', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'MarcaLente',
+          foreignField: '_id',
+          localField: 'marcaLente',
+          as: 'marcaLente',
+        },
+      },
+      {
+        $unwind: { path: '$marcaLente', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'Tratamiento',
+          foreignField: '_id',
+          localField: 'tratamiento',
+          as: 'tratamiento',
+        },
+      },
+      {
+        $unwind: { path: '$tratamiento', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'TipoColorLente',
+          foreignField: '_id',
+          localField: 'tipoColorLente',
+          as: 'tipoColorLente',
+        },
+      },
+      {
+        $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'DetallePrecio',
+          foreignField: 'combinacionReceta',
+          localField: '_id',
+          as: 'detallePrecio',
+        },
+      },
+      {
+        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
+      },
+      {
+        $lookup: {
+          from: 'Precio',
+          foreignField: '_id',
+          localField: 'detallePrecio.precio',
+          as: 'precio',
+        },
+      },
+      {
+        $unwind: { path: '$precio', preserveNullAndEmptyArrays: false },
+      },
+    
+     
+      {
+        $project: {
+          material: '$material.nombre',
+          tipoLente: '$tipoLente.nombre',
+          rango: '$rango.nombre',
+          colorLente: '$colorLente.nombre',
+          marcaLente: '$marcaLente.nombre',
+          tratamiento: '$tratamiento.nombre',
+          tipoColorLente: '$tipoColorLente.nombre',
+          monto: '$detallePrecio.monto',
+          tipoPrecio: '$precio.nombre',
+        },
+      },
+    ]);
+    const combinaciones = [];
+    for (const comb of combinacion) {
+      const comision = await this.comisionRecetaService.listarComisionReceta(
+        comb.tipoPrecio,
+        comb._id,
+      );
+      
+      if(comision.length <= 0){
+        console.log(comision);
+        
+        const data = {
+        _id: comb._id,
+        material: comb.material,
+        tipoLente: comb.tipoLente,
+        rango: comb.rango,
+        colorLente: comb.colorLente,
+        marcaLente: comb.marcaLente,
+        tratamiento: comb.tratamiento,
+        tipoColorLente: comb.tipoColorLente,
+        monto: comb.monto,
+        tipoPrecio: comb.tipoPrecio,
+        comisionReceta: comision,
+      };
+      combinaciones.push(data);
+      }
+    }
+
+    console.log(combinaciones);
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('hoja 1');
+    worksheet.columns = [
+      { header: 'id', key: 'id', width: 30 },
+      { header: 'material', key: 'material', width: 30 },
+      { header: 'tipoLente', key: 'tipoLente', width: 30 },
+      { header: 'tipoColor', key: 'tipoColor', width: 30 },
+      { header: 'tratamiento', key: 'tratamiento', width: 30 },
+      { header: 'rangos', key: 'rangos', width: 60 },
+      { header: 'marca', key: 'marca', width: 30 },
+      { header: 'color', key: 'color', width: 30 },
+      { header: 'tipoPrecio', key: 'tipoPrecio', width: 30 },
+      { header: 'monto', key: 'monto', width: 15 },
+      { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
+      { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
+    ];
+
+    for (const comb of combinaciones) {
+    
+
+      worksheet.addRow({
+        id: String(comb._id),
+        material: comb.material,
+        tipoLente: comb.tipoLente,
+        tipoColor: comb.tipoColorLente,
+        tratamiento: comb.tratamiento,
+        rangos: comb.rango,
+        marca: comb.marcaLente,
+        color: comb.colorLente,
+        tipoPrecio: comb.tipoPrecio,
+        monto: comb.monto,
+        comisionFija1: 0,
+        comisionFija2: 0,
+      });
+    }
+    /*   worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.protection = { locked: false };
+      });
+    });
+
+    for (let index = 0; index < 9; index++) {
+      worksheet.getColumn(index + 1).eachCell((cell, rowNumber) => {
+        if (rowNumber > 1) {
+          cell.protection = { locked: true };
+        }
+      });
+    }
+
+    await worksheet.protect('gay el que lo adivina', {
+      selectLockedCells: true,
+      selectUnlockedCells: true,
+    });
+
+    worksheet.getColumn(10).eachCell((cell, rowNumber) => {
+      if (rowNumber > 1) {
+        cell.protection = { locked: false };
+      }
+    });
+
+    worksheet.getColumn(11).eachCell((cell, rowNumber) => {
+      if (rowNumber > 1) {
+        cell.protection = { locked: false };
+      }
+    });
+
+    worksheet.getColumn(12).eachCell((cell, rowNumber) => {
+      if (rowNumber > 1) {
+        cell.protection = { locked: false };
+      }
+    });
+
+    worksheet.getColumn(13).eachCell((cell, rowNumber) => {
+      if (rowNumber > 1) {
+        cell.protection = { locked: false };
+      }
+    });
+
+    worksheet.getColumn(14).eachCell((cell, rowNumber) => {
+      if (rowNumber > 1) {
+        cell.protection = { locked: false };
+      }
+    });*/
+    return workbook;
   }
 }

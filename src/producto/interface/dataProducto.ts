@@ -22,7 +22,7 @@ export interface DataProductoI {
      marca: string;       
      color: string;        
      serie: string;
-     categoria: string;
+     categoria?: string;
      codigoQR: string;
      precio: string;
      importe?: number;

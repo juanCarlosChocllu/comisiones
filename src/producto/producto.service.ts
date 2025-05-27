@@ -72,14 +72,17 @@ export class ProductoService {
 
   async guardarProducto(data: productosExcelI) {
     console.log(data);
-    
+
     //datal color
     const producto = await this.producto.findOne({ codigoMia: data.codigoMia });
     const precioEcontrado = await this.preciosService.buscarPrecioPorNombre(
       data.precio,
     );
     if (!producto) {
-      const  [color, marca] = await Promise.all( [ this.colorService.guardarColor(data.color), this.marcaService.guardarMarca(data.color)])
+      const [color, marca] = await Promise.all([
+        this.colorService.guardarColor(data.color),
+        this.marcaService.guardarMarca(data.color),
+      ]);
 
       const dataProducto: DataProductoI = {
         codigoMia: data.codigoMia,
@@ -356,50 +359,49 @@ export class ProductoService {
         tipoProductoPrecio.producto,
         producto._id,
         precio._id,
+        data.importe,
       );
 
       if (data.precio === precio.nombre) {
         let contador: number = 0;
         for (const com of data.comisiones) {
-          contador++;
-          const nombre = `Comision ${contador}`;
+          if (com.monto > 0) {
+            contador++;
+            const nombre = `Comision ${contador}`;
 
-          await this.comisionProductoService.guardarComisionProducto(
-            producto._id,
-            com.monto.result,
-            com.comision.result,
-            nombre,
-            data.precio,
-          );
+            await this.comisionProductoService.guardarComisionProducto(
+              producto._id,
+              com.monto,
+              nombre,
+              data.precio,
+            );
+          }
         }
       }
     } else {
-      console.log(
-        'existe prodcuto',
-        data.codigoMia,
-        data.tipoProducto,
-        data.precio,
-      );
+     
       const precio = await this.preciosService.guardarPrecioReceta(data.precio);
 
       await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.producto,
         producto._id,
         precio._id,
+        data.importe,
       );
 
       if (data.precio === precio.nombre) {
         let contador: number = 0;
         for (const com of data.comisiones) {
-          contador++;
-          const nombre = `Comision ${contador}`;
-          await this.comisionProductoService.guardarComisionProducto(
-            producto._id,
-            com.monto.result,
-            com.comision.result,
-            nombre,
-            data.precio,
-          );
+          if (com.monto > 0) {
+            contador++;
+            const nombre = `Comision ${contador}`;
+            await this.comisionProductoService.guardarComisionProducto(
+              producto._id,
+              com.monto,
+              nombre,
+              data.precio,
+            );
+          }
         }
       }
     }
@@ -502,7 +504,8 @@ export class ProductoService {
     const producto = await this.producto.aggregate([
       {
         $match: {
-          tipoProducto: tipoProducto,
+          // tipoProducto: tipoProducto,
+          comision: false,
         },
       },
       {
@@ -558,12 +561,14 @@ export class ProductoService {
       { $unwind: { path: '$tipoMontura', preserveNullAndEmptyArrays: true } },
       {
         $project: {
+          codigoMia: 1,
           codigoQR: 1,
           tipoProducto: 1,
           marca: '$marca.nombre',
           serie: 1,
           color: '$color.nombre',
           precio: '$precio.nombre',
+          monto: '$detallePrecio.monto',
           tipoMontura: '$tipoMontura.nombre',
         },
       },
@@ -577,11 +582,12 @@ export class ProductoService {
           );
 
         return {
-          _id: p._id,
+          _id: p.codigoMia,
           tipoProducto: p.tipoProducto,
           marca: p.marca,
           serie: p.serie,
           color: p.color,
+          monto: p.monto,
           precio: p.precio,
           codigoQR: p.codigoQR,
           tipoMontura: p.tipoMontura,
@@ -603,6 +609,8 @@ export class ProductoService {
       { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
     ];
+    console.log(data);
+
     for (const comb of data) {
       let mayor = 0;
       let menor = 0;
@@ -621,7 +629,7 @@ export class ProductoService {
         serie: comb.serie,
         tipoMontura: comb.tipoMontura,
         tipoPrecio: comb.precio,
-        monto: 0,
+        monto: comb.monto ? comb.monto : 0,
         comisionFija1: mayor,
         comisionFija2: menor,
       });
