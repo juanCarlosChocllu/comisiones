@@ -50,7 +50,6 @@ export class CombinacionRecetaController {
   }
 
    @Get('descargar/sinComision')
-   @Publico()
   async descargarCombinacionesSinComision(@Res() response: Response) {
     const  workbook =await this.combinacionRecetaService.descargarCombinacionesSinComision();
     
