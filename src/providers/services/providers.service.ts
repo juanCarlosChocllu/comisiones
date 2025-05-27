@@ -75,14 +75,11 @@ export class ProvidersService {
       const data: DescargarProviderDto = {
         fechaFin: createProviderDto.fechaFin,
         fechaInicio: createProviderDto.fechaInicio,
-        token: tokenMia
-           };
+        token: tokenMia,
+      };
 
       const ventas = await firstValueFrom(
-        this.httpService.post<VentaApiI[]>(
-          apiMia,
-          data,
-        ),
+        this.httpService.post<VentaApiI[]>(apiMia, data),
       );
 
       return await this.guardardataVenta(ventas.data);
@@ -195,10 +192,10 @@ export class ProvidersService {
 
   private async guardarProducto(data: VentaApiI, venta: Types.ObjectId) {
     console.log(data);
-    
+
     const producto = await this.productoService.verificarProducto(
       data.codProducto,
-      data.precio
+      data.precio,
     );
 
     if (producto) {
@@ -279,18 +276,17 @@ export class ProvidersService {
           rango._id,
           tipoLente._id,
           tipoColorLente._id,
-          data.precio
+          data.precio,
         );
 
       if (recetaCombinacion && venta) {
-      
         const detalle: detalleVentaI = {
           cantidad: 1,
           combinacionReceta: recetaCombinacion._id,
           importe: data.importe,
           rubro: data.rubro,
           venta: venta,
-       
+
           descripcion: `${material.nombre}/${tipoLente.nombre}/${tipoColorLente.nombre}/${tratamiento.nombre}/${rango.nombre}/${marca.nombre}/${coloLente.nombre}`,
         };
         await this.ventaService.tieneReceta(venta, true);
@@ -317,7 +313,6 @@ export class ProvidersService {
             codigo,
             data.precio,
             data.importe,
-            
           );
         if (recetaCombinacion._id && venta) {
           const detalle: detalleVentaI = {
@@ -335,8 +330,8 @@ export class ProvidersService {
     }
   }
 
-  async guardarComisionesReceta(archivo:string) {
-    const ruta=  this.rutaArchivoUpload(archivo)
+  async guardarComisionesReceta(archivo: string) {
+    const ruta = this.rutaArchivoUpload(archivo);
     const workbook = this.hojaDeTrabajo(ruta);
     let contador = 0;
     for await (const hojas of workbook) {
@@ -359,11 +354,11 @@ export class ProvidersService {
         const comisiones: comisionesI[] = [
           {
             //comision: hoja.getCell(11).value,
-            monto: hoja.getCell(11).value ? hoja.getCell(11).value :0,
+            monto: hoja.getCell(11).value ? hoja.getCell(11).value : 0,
           },
           {
             //comision: hoja.getCell(13).value,
-            monto: hoja.getCell(12).value ? hoja.getCell(12).value :0,
+            monto: hoja.getCell(12).value ? hoja.getCell(12).value : 0,
           },
         ];
         const data: GuardarComisionRecetaI = {
@@ -377,21 +372,24 @@ export class ProvidersService {
           tipoLente: String(tipoLente).toUpperCase().trim(),
           tratamiento: String(tratamiento).toUpperCase().trim(),
           precio: String(precio).toUpperCase().trim(),
-          monto: monto  ? Number(monto) : 0,
+          monto: monto ? Number(monto) : 0,
         };
-     
+
         console.log(data);
-        
-        await this.combinacionRecetaService.guardarComisionrecetaCombinacion(data);
+
+        await this.combinacionRecetaService.guardarComisionrecetaCombinacion(
+          data,
+        );
       }
 
       break;
     }
-    return {status:HttpStatus.CREATED}
+    return { status: HttpStatus.CREATED };
   }
 
-  async guardarComisionesProducto() {
-    const workbook = this.hojaDeTrabajo('./upload/sinComsionP.xlsx');
+  async guardarComisionesProducto(archivo: string) {
+    const ruta = this.rutaArchivoUpload(archivo);
+    const workbook = this.hojaDeTrabajo(ruta);
     let contador: number = 0;
     for await (const hojas of workbook) {
       for await (const hoja of hojas) {
@@ -407,9 +405,9 @@ export class ProvidersService {
         const serie = hoja.getCell(6).value;
         //const genero = hoja.getCell(7).value;
         const tipoMontura = hoja.getCell(7).value;
-       // const categoria = hoja.getCell(9).value;
+        // const categoria = hoja.getCell(9).value;
         const precio = hoja.getCell(8).value;
-         const monto = hoja.getCell(9).value;
+        const monto = hoja.getCell(9).value;
 
         const comisiones: comisionesI[] = [
           {
@@ -424,17 +422,18 @@ export class ProvidersService {
 
         const data: productosExcelI = {
           codigoMia: String(codigoMia),
-         
           color: String(color),
           marca: String(marca),
           serie: String(serie),
           comisiones: comisiones,
           codigoQR: String(codigoQr),
           tipoProducto: String(producto),
-          importe:Number(monto),
+          importe: Number(monto),
           precio: String(precio),
           tipoMontura: String(tipoMontura),
         };
+        console.log(data);
+
         await this.productoService.guardaProductoComisiones(data);
       }
       break;
@@ -526,7 +525,7 @@ export class ProvidersService {
   }
 
   async actulizaComisiones(nombreArchivo: string) {
-    let ruta: string =this.rutaArchivoUpload(nombreArchivo)
+    let ruta: string = this.rutaArchivoUpload(nombreArchivo);
     const workbook = this.hojaDeTrabajo(ruta);
     let contador = 0;
     for await (const hojas of workbook) {
@@ -548,11 +547,9 @@ export class ProvidersService {
         const monto = hoja.getCell(10).value;
         const comisiones: comisionesI[] = [
           {
-          
             monto: hoja.getCell(11).value,
           },
           {
-           
             monto: hoja.getCell(12).value,
           },
         ];
@@ -569,20 +566,16 @@ export class ProvidersService {
           precio: String(precio).toUpperCase().trim(),
           monto: Number(monto),
         };
-        await this.comisionRecetaService.actulizarComisiones(data)
-    
+        await this.comisionRecetaService.actulizarComisiones(data);
       }
 
       break;
     }
-    return {status:HttpStatus.OK}
+    return { status: HttpStatus.OK };
   }
 
-  private rutaArchivoUpload(archivo:string) {
-     let ruta: string = path.join(
-      __dirname,
-      `../../../upload/${archivo}`,
-    );
-    return ruta
+  private rutaArchivoUpload(archivo: string) {
+    let ruta: string = path.join(__dirname, `../../../upload/${archivo}`);
+    return ruta;
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ProvidersService } from '../services/providers.service';
 import { DescargarProviderDto } from '../dto/create-provider.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,12 +18,20 @@ export class ProvidersController {
   @Post('excel/combinaciones/comisiones')
   @UseInterceptors(FileInterceptor('file',multerConfig))
   guardarComisionesReceta(@UploadedFile() file: Express.Multer.File){
+    if(!file){
+      throw new BadRequestException(); 
+    }
     return this.providersService.guardarComisionesReceta(file.filename)
   }
 
   @Post('excel/producto/comisiones')
-  guardarComisionesProducto(){
-    return this.providersService.guardarComisionesProducto()
+  @UseInterceptors(FileInterceptor('file',multerConfig))
+  guardarComisionesProducto(@UploadedFile() file: Express.Multer.File){
+    if(!file){
+      throw new BadRequestException(); 
+    }
+    
+    return this.providersService.guardarComisionesProducto(file.filename)
   }
 
   @Post('excel/servicio/comisiones')
@@ -34,6 +42,14 @@ export class ProvidersController {
     @Post('excel/combinaciones/comisiones/actualizar')
     @UseInterceptors(FileInterceptor('file',multerConfig))
     actulizaComisiones(@UploadedFile() file: Express.Multer.File){
-    return this.providersService.actulizaComisiones(file.filename)
+    try {      
+      if(!file){
+      throw new BadRequestException(); 
+    } 
+      return this.providersService.actulizaComisiones(file.filename)
+    } catch (error) {
+      throw new BadRequestException()
+    }
+    
   }
 }

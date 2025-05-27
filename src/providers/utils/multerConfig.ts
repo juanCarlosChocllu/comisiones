@@ -4,7 +4,7 @@ import { diskStorage } from 'multer';
 import * as path from 'path';
 
 export const multerConfig: MulterOptions = {
-  fileFilter(req, file, callback) {
+  fileFilter(req, file, callback) {     
     const extencion = path.extname(file.originalname);
     if (extencion !== '.xlsx') {
       return callback(new UnprocessableEntityException(), false);
