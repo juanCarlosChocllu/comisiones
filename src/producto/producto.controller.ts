@@ -58,6 +58,22 @@ export class ProductoController {
   ) {
     return this.productoService.listarProductosSinComision(BuscadorProductoDto);
   }
+  @Publico()
+   @Get('descargar/producto/sinComsion')
+  async descargarProductoSinComision(@Res() response: Response) {
+    const workbook = await this.productoService.descargarProductoSinComision();
+
+    response.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="export.xlsx"',
+    );
+    await workbook.xlsx.write(response);
+    return response.end();
+  }
 
   @Get('descargar/montura')
   async descargarMontura(@Res() response: Response) {
