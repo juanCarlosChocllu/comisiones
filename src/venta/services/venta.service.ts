@@ -96,11 +96,13 @@ export class VentaService {
                     combinacion: {
                       descripcion: detalle.descripcion,
                       id: detalle.combinacionReceta,
+                      tipo: detalle.rubro,
                     },
-                    importe: detalle.importe,
-                    comisiones: comisiones.map((com) => ({
+                      importe: detalle.importe,
+                      comisiones: comisiones.map((com) => ({
                       monto: com.monto,
                       precio: com.precio,
+             
                     })),
                   };
                 } else if (
@@ -119,11 +121,13 @@ export class VentaService {
                       tipo: detalle.rubro,
                       marca: detalle.marca,
                       descripcion: detalle.descripcion,
+                      
                     },
-                    importe: detalle.importe,
-                    comisiones: comisiones.map((com) => ({
+                     importe: detalle.importe,
+                      comisiones: comisiones.map((com) => ({
                       monto: com.monto,
                       precio: com.precio,
+               
                     })),
                   };
                 } else if (detalle.rubro === productoE.servicio) {
@@ -138,11 +142,13 @@ export class VentaService {
                       id: detalle._id,
                       tipo: detalle.rubro,
                       descripcion: detalle.descripcion,
+                   
                     },
                     importe: detalle.importe,
                     comisiones: comisiones.map((com) => ({
                       monto: com.monto,
                       precio: com.precio,
+                       
                     })),
                   };
                 } else {
@@ -151,13 +157,18 @@ export class VentaService {
                       id: detalle._id,
                       tipo: detalle.rubro,
                       descripcion: detalle.descripcion,
+                    
                     },
+                   
                     importe: detalle.importe,
                   };
                 }
               }),
             );
+            
+            
             return {
+              fechaFinalizacion:venta.fechaFinalizacion,
               idVenta: venta.id_venta,
               descuento: venta.descuento,
               montoTotal: venta.montoTotal,
@@ -189,11 +200,12 @@ export class VentaService {
           (acc, item) => acc + item.montoTotal,
           0,
         );
-
+       
         return ventaAsesor;
       }),
     );
-
+   
+    
     return asesoresProcesados;
   }
 
@@ -338,8 +350,13 @@ export class VentaService {
           tipo2: 1,
           tipoDescuento: 1,
           descuento: 1,
+          nombrePromocion:1,
+          descuentoPromocion2:1,
+          descuentoPromocion:1,
           precio: 1,
+          comisiona:1,
           detalleVenta: 1,
+          fechaFinalizacion:1
         },
       },
     ]);
@@ -378,17 +395,7 @@ export class VentaService {
     return detalle;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} venta`;
-  }
 
-  update(id: number, updateVentaDto: UpdateVentaDto) {
-    return `This action updates a #${id} venta`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} venta`;
-  }
 
   async guardarVenta(venta: VentaI) {
     const v = await this.venta.findOne({
