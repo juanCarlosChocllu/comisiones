@@ -71,7 +71,7 @@ export class ProductoService {
   }
 
   async guardarProducto(data: productosExcelI) {
-    console.log(data);
+ 
 
     //datal color
     const producto = await this.producto.findOne({ codigoMia: data.codigoMia });
@@ -320,7 +320,7 @@ export class ProductoService {
     });
 
     if (producto) {
-      console.log(producto);
+     
       return await this.producto.updateOne(
         { _id: new Types.ObjectId(id) },
         { comision: true },
@@ -619,7 +619,7 @@ export class ProductoService {
       { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
     ];
-    console.log(data);
+   
 
     for (const comb of data) {
       let mayor = 0;

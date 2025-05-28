@@ -16,6 +16,7 @@ import { ColorLenteModule } from 'src/color-lente/color-lente.module';
 import { PreciosModule } from 'src/precios/precios.module';
 import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
 import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module';
+import { Precio, PrecioSchema } from 'src/precios/schema/precio.schema';
 
 
 @Module({
@@ -24,6 +25,10 @@ import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module
       {
         name: CombinacionReceta.name,
         schema: combinacionRecetaSchema,
+      },
+       {
+        name: Precio.name,
+        schema: PrecioSchema,
       },
     ]),
     TratamientoModule,

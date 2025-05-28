@@ -191,7 +191,7 @@ export class ProvidersService {
   }
 
   private async guardarProducto(data: VentaApiI, venta: Types.ObjectId) {
-    console.log(data);
+    
 
     const producto = await this.productoService.verificarProducto(
       data.codProducto,
@@ -266,7 +266,7 @@ export class ProvidersService {
       !!marca &&
       !!rango &&
       !!tratamiento
-    ) {
+     ) {
       const recetaCombinacion =
         await this.combinacionRecetaService.verificarCombinacion(
           tratamiento._id,

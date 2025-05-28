@@ -29,11 +29,14 @@ import { BuscadorCombinacionDto } from './dto/buscadorCombinacionReceta.dto';
 import { BuscadorCombinacioRecetaI } from './interface/buscadorCombinacion';
 import { CrearCombinacionDto } from './dto/CrearCombinacion.dto';
 import { key } from 'src/core/config/config';
+import { Precio } from 'src/precios/schema/precio.schema';
 @Injectable()
 export class CombinacionRecetaService {
   constructor(
     @InjectModel(CombinacionReceta.name)
     private readonly combinacionReceta: Model<CombinacionReceta>,
+        @InjectModel(Precio.name)
+    private readonly precio: Model<Precio>,
     private readonly tratamientoService: TratamientoService,
     private readonly materialService: MaterialService,
     private readonly colorLenteService: ColorLenteService,
@@ -277,7 +280,6 @@ export class CombinacionRecetaService {
         },
       },
     ]);
-
     return combinacionEncontarda[0];
   }
 
@@ -301,8 +303,6 @@ export class CombinacionRecetaService {
       tipoColorLente: tipoColorLente,
       rango: rango,
       tratamiento: tratamiento,
-      codigo: codigo,
-      comision: false,
     });
     if (!combinacionExiste) {
       const combinacion = await this.combinacionReceta.create({
@@ -668,8 +668,7 @@ export class CombinacionRecetaService {
       combinaciones.push(data);
     }
 
-    console.log(combinaciones);
-
+  
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
     worksheet.columns = [
