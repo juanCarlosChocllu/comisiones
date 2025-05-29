@@ -598,9 +598,8 @@ export class ProvidersService {
     const fecha: DescargarProviderDto = {
       fechaInicio: `${año}-${mes}-${dia}`,
       fechaFin: `${año}-${mes}-${dia}`,
-    
     }; 
     this.logger.debug('Iniciando la descarga');   
-    await this.descargarVentasMia(fecha)
+    await this.descargarVentasMia(fecha)  
   }
 }

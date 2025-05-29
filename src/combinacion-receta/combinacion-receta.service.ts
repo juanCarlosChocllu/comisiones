@@ -1161,11 +1161,9 @@ export class CombinacionRecetaService {
       tratamiento: tratamiento._id,
       tipoColorLente: tipoColorLente._id,
     };
-    const combinacionL = await this.combinacionReceta
-      .findOne(combinacion)
+    const combinacionL = await this.combinacionReceta.findOne(combinacion).lean()
     if (combinacionL) {
       const precio = await this.preciosService.guardarPrecioReceta(data.precio);
-
       if (precio) {
         await this.preciosService.guardarDetallePrecio(
           tipoProductoPrecio.lente,
@@ -1174,6 +1172,7 @@ export class CombinacionRecetaService {
           data.monto,
         );
       }
+      await this.comisionRecetaService.eliminarComisionRegistrado(combinacionL._id, precio.nombre)
       let contador: number = 0;
       for (const com of data.comisiones) {
         if (com.monto > 0) {

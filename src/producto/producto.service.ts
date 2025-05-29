@@ -390,10 +390,11 @@ export class ProductoService {
         precio._id,
         data.importe,
       );
-     
-
+      
+      
       if (data.precio === precio.nombre) {
         let contador: number = 0;
+        await this.comisionProductoService.eliminarComsionRegistrada(producto._id, precio.nombre)
         for (const com of data.comisiones) {
           if (com.monto > 0) {
             if(producto.comision === false){
@@ -514,8 +515,8 @@ export class ProductoService {
     const producto = await this.producto.aggregate([
       {
         $match: {
-          // tipoProducto: tipoProducto,
-          comision: false,
+           tipoProducto: tipoProducto,
+      
         },
       },
       {

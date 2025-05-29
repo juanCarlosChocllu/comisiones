@@ -112,6 +112,14 @@ export class ComisionRecetaService {
     return { status: HttpStatus.OK };
   }
 
+  async eliminarComisionRegistrado(combinacion:Types.ObjectId, precio:string){
+    return  await this.comisionReceta.deleteMany({
+      combinacionReceta: new Types.ObjectId(combinacion),
+      precio:precio,
+    });
+    
+  }
+
   async actulizarComisiones(data: GuardarComisionRecetaI) {
     await this.comisionReceta.deleteMany({
       combinacionReceta: new Types.ObjectId(data.codigoMia),

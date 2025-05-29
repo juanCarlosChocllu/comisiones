@@ -78,6 +78,10 @@ export class ComisionProductoService {
     return {status:HttpStatus.OK}
 
   }
+   async eliminarComsionRegistrada(producto:Types.ObjectId, precio:string) {
+    await this.comisionProducto.deleteMany({producto:new Types.ObjectId(producto), precio:precio})
+    return
+   }
 
   async softDelete(id:Types.ObjectId) {
           const comision = await this.comisionProducto.findOne({_id:new Types.ObjectId(id)})
