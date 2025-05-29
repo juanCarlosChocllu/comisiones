@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { DescargarProviderDto } from '../dto/create-provider.dto';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, iif } from 'rxjs';
@@ -45,9 +45,13 @@ import { exceldataServicioI } from 'src/servicio/interface/servicio.interface';
 import { ServicioService } from 'src/servicio/servicio.service';
 import * as path from 'path';
 import { apiMia, tokenMia } from 'src/core/config/config';
+import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class ProvidersService {
+    private readonly logger = new Logger(ProductoService.name);
+
   constructor(
+    
     private readonly httpService: HttpService,
     private readonly tratamientoService: TratamientoService,
     private readonly materialService: MaterialService,
@@ -351,6 +355,9 @@ export class ProvidersService {
         const colorLente = hoja.getCell(8).value;
         const precio = hoja.getCell(9).value;
         const monto = hoja.getCell(10).value;
+
+        if (!codigoMia && !meterial && !tipoLente && !tipoColor && !tratamiento && !rangos && !marca && !colorLente) continue;
+
         const comisiones: comisionesI[] = [
           {
             //comision: hoja.getCell(11).value,
@@ -577,5 +584,23 @@ export class ProvidersService {
   private rutaArchivoUpload(archivo: string) {
     let ruta: string = path.join(__dirname, `../../../upload/${archivo}`);
     return ruta;
+  }
+
+
+   @Cron(CronExpression.EVERY_DAY_AT_4AM)
+   async handleCron  () {
+     const date = new Date();
+    const [año, mes, dia] = [
+      date.getFullYear(),
+      (date.getMonth() + 1).toString().padStart(2, '0'),
+      (date.getDate() - 1).toString().padStart(2, '0'),
+    ];
+    const fecha: DescargarProviderDto = {
+      fechaInicio: `${año}-${mes}-${dia}`,
+      fechaFin: `${año}-${mes}-${dia}`,
+    
+    }; 
+    this.logger.debug('Iniciando la descarga');   
+    await this.descargarVentasMia(fecha)
   }
 }

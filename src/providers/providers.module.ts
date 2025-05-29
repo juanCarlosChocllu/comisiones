@@ -22,9 +22,11 @@ import { TipoVentaModule } from 'src/tipo-venta/tipo-venta.module';
 import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
 import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module';
 import { ServicioModule } from 'src/servicio/servicio.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     HttpModule,
     TratamientoModule,
     MarcaLenteModule,

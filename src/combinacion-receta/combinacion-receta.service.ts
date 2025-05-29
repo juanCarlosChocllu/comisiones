@@ -362,164 +362,8 @@ export class CombinacionRecetaService {
     return { data: data.data, paginas: data.total };
   }
   async descargarCombinaciones() {
-    /* const combinacion = await this.combinacionReceta.aggregate([
-      {
-        $match: {
-          flag: flag.nuevo,
-        },
-      },
-      {
-        $lookup: {
-          from: 'Material',
-          foreignField: '_id',
-          localField: 'material',
-          as: 'material',
-        },
-      },
-      {
-        $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'TipoLente',
-          foreignField: '_id',
-          localField: 'tipoLente',
-          as: 'tipoLente',
-        },
-      },
-      {
-        $unwind: { path: '$tipoLente', preserveNullAndEmptyArrays: false },
-      },
-
-      {
-        $lookup: {
-          from: 'Rango',
-          foreignField: '_id',
-          localField: 'rango',
-          as: 'rango',
-        },
-      },
-      {
-        $unwind: { path: '$rango', preserveNullAndEmptyArrays: false },
-      },
-
-      {
-        $lookup: {
-          from: 'ColorLente',
-          foreignField: '_id',
-          localField: 'colorLente',
-          as: 'colorLente',
-        },
-      },
-      {
-        $unwind: { path: '$colorLente', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'MarcaLente',
-          foreignField: '_id',
-          localField: 'marcaLente',
-          as: 'marcaLente',
-        },
-      },
-      {
-        $unwind: { path: '$marcaLente', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'Tratamiento',
-          foreignField: '_id',
-          localField: 'tratamiento',
-          as: 'tratamiento',
-        },
-      },
-      {
-        $unwind: { path: '$tratamiento', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'TipoColorLente',
-          foreignField: '_id',
-          localField: 'tipoColorLente',
-          as: 'tipoColorLente',
-        },
-      },
-      {
-        $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'DetallePrecio',
-          foreignField: 'combinacionReceta',
-          localField: '_id',
-          as: 'detallePrecio',
-        },
-      },
-      {
-        $unwind: { path: '$detallePrecio' , preserveNullAndEmptyArrays:false},
-      },
-        {
-        $lookup: {
-          from: 'Precio',
-          foreignField: '_id',
-          localField: 'detallePrecio.precio',
-          as: 'precio',
-        },
-      },
-      {
-        $unwind: { path: '$precio' , preserveNullAndEmptyArrays:false},
-      },
-      {
-        $lookup: {
-          from: 'ComisionReceta',
-          foreignField: 'combinacionReceta',
-          localField: '_id',
-          as: 'comisionReceta',
-        },
-      },
-      {
-        $unwind: { path: '$comisionReceta' , preserveNullAndEmptyArrays:true},
-      },
-     
-    {
-        $group: {
-          
-          _id: {
-           
-            combinacion: '$detallePrecio.combinacionReceta',
-                tipoPrecio: '$precio.nombre',
-            
-           
-          },
-          material: { $first: '$material.nombre' },
-          tipoLente: { $first: '$tipoLente.nombre' },
-          rango: { $first: '$rango.nombre' },
-          colorLente: { $first: '$colorLente.nombre' },
-          marcaLente: { $first: '$marcaLente.nombre' },
-          tratamiento: { $first: '$tratamiento.nombre' },
-          tipoColorLente: { $first: '$tipoColorLente.nombre' },
-          comisionReceta: { $push: '$comisionReceta' },
-          tipoPrecio: { $first: '$precio.nombre' },
-          monto: { $first: '$detallePrecio.monto' },
-        },
-      },
-     
-      {
-        $project: {
-          _id: '$_id.combinacion',
-          material: 1,
-          tipoLente: 1,
-          rango: 1,
-          colorLente: 1,
-          marcaLente: 1,
-          tratamiento: 1,
-          tipoColorLente: 1,
-          comisionReceta: 1,
-          monto: 1,
-          tipoPrecio:1
-        },
-      },
-    ]);*/
+    
+      
     const combinacion = await this.combinacionReceta.aggregate([
       {
         $match: {
@@ -628,9 +472,7 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$precio', preserveNullAndEmptyArrays: false },
       },
-      /*{$match:{
-        'precio.nombre': { $nin: ['PRECIO 1', 'PRECIO 2', 'ECO 1' , ''] }
-      }},*/
+      
 
       {
         $project: {
@@ -646,13 +488,12 @@ export class CombinacionRecetaService {
         },
       },
     ]);
-    const combinaciones = [];
-    for (const comb of combinacion) {
-      const comision = await this.comisionRecetaService.listarComisionReceta(
+    const combinaciones =await Promise.all (combinacion.map(async (comb)=>{
+       const comision = await this.comisionRecetaService.listarComisionReceta(
         comb.tipoPrecio,
         comb._id,
       );
-      const data = {
+      return {
         _id: comb._id,
         material: comb.material,
         tipoLente: comb.tipoLente,
@@ -665,9 +506,8 @@ export class CombinacionRecetaService {
         tipoPrecio: comb.tipoPrecio,
         comisionReceta: comision,
       };
-      combinaciones.push(data);
-    }
-
+    }))
+  
   
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
@@ -1183,9 +1023,7 @@ export class CombinacionRecetaService {
       countDocuments,
       buscadorCombinacionDto.limite,
     );
-    const combinaciones = await this.combinacionReceta.aggregate(pipeline, {
-      allowDiskUse: true,
-    });
+    const combinaciones = await this.combinacionReceta.aggregate(pipeline);
     
     
     return { data: combinaciones, total };
@@ -1325,8 +1163,6 @@ export class CombinacionRecetaService {
     };
     const combinacionL = await this.combinacionReceta
       .findOne(combinacion)
-      .lean();
-
     if (combinacionL) {
       const precio = await this.preciosService.guardarPrecioReceta(data.precio);
 

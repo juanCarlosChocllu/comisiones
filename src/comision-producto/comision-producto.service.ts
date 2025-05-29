@@ -36,11 +36,13 @@ export class ComisionProductoService {
  
 
   async listarComosionPorProducto(producto: Types.ObjectId, precio: string) {
+
     const comision = await this.comisionProducto.find({
       producto: new Types.ObjectId(producto),
       flag:flag.nuevo,
       precio: precio,
     }, {precio:1, monto:1}).lean();
+   
     return comision;
   }
 

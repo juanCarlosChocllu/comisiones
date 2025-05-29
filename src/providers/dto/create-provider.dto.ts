@@ -13,5 +13,5 @@ export class DescargarProviderDto {
     @IsString()
     @IsOptional()
 
-    token:string
+    token?:string
 }

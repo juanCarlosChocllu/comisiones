@@ -115,9 +115,11 @@ export class VentaService {
                       detalle.producto,
                       venta.precio,
                     );
+                    console.log('comsion producto', comisiones);
+                    
                   return {
                     producto: {
-                      id: detalle._id,
+                      id: detalle.producto,
                       tipo: detalle.rubro,
                       marca: detalle.marca,
                       descripcion: detalle.descripcion,
