@@ -93,7 +93,7 @@ export class CombinacionRecetaService {
       tipoColorLente: tipoColorLente._id,
     };
 
-    const combinacionL = await this.combinacionReceta.findOne(combinacion);
+    const combinacionL = await this.combinacionReceta.findOne(combinacion).lean();
 
     if (combinacionL) {
       const precios = await this.preciosService.guardarPrecioReceta(
@@ -106,6 +106,10 @@ export class CombinacionRecetaService {
           precios._id,
           crearCombinacionDto.importe,
         );
+      }
+      if(crearCombinacionDto.comision1 > 0 && crearCombinacionDto.comision2 > 0 ){
+        await this.comisionRecetaService.eliminarComisionRegistrado(combinacionL._id, crearCombinacionDto.tipoPrecio)
+        await this.comisionRecetaService.registarComisionReceta(crearCombinacionDto.comision1, crearCombinacionDto.comision2, crearCombinacionDto.tipoPrecio, combinacionL._id)
       }
     } else {
       const combinacionLente = await this.combinacionReceta.create({
@@ -1174,7 +1178,10 @@ export class CombinacionRecetaService {
       }
       await this.comisionRecetaService.eliminarComisionRegistrado(combinacionL._id, precio.nombre)
       let contador: number = 0;
+
       for (const com of data.comisiones) {
+        console.log('monto' , com.monto);
+        
         if (com.monto > 0) {
           contador++;
           const nombre = `Comision ${contador}`;

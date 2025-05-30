@@ -285,10 +285,13 @@ export class VentaService {
                 detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
                 detalle.producto.marca == 'FRED' ||
                 detalle.producto.marca == 'LOEWE' ||
-                detalle.producto.marca == 'PORSHE DESIGN' ||
-                detalle.producto.marca == 'RINOWA' ||
+                detalle.producto.marca == 'PORSCHE DESIGN' ||
+                detalle.producto.marca == 'PORSCHEN DESIGN' ||
+                detalle.producto.marca == 'RIMOWA' ||
                 detalle.producto.marca == 'MONTBLANC' ||
-                detalle.producto.marca == 'TIFFANY'
+                detalle.producto.marca == 'TIFFANY'||
+                  detalle.producto.marca == 'TIFFANY & CO.'||
+                    detalle.producto.marca == 'TIFFANY & CO'
               ) {
                 lenteDeContacto++;
               }

@@ -623,10 +623,14 @@ export class ProductoService {
    
 
     for (const comb of data) {
+      
       let mayor = 0;
       let menor = 0;
       if (comb.comision.length > 0) {
+
         const montos = comb.comision.map((c) => c.monto);
+        console.log(montos);
+        
         mayor = Math.max(...montos);
         menor = Math.min(...montos);
       }
@@ -764,17 +768,27 @@ export class ProductoService {
       { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
     ];
-    console.log(data);
+
 
     for (const comb of data) {
       let mayor = 0;
       let menor = 0;
-      if (comb.comision.length > 0) {
+      if (comb.comision.length == 1) {
         const montos = comb.comision.map((c) => c.monto);
+      
+        
+        mayor = Math.max(...montos);
+        menor = 0;
+      }else {
+         if (comb.comision.length ) {
+        const montos = comb.comision.map((c) => c.monto);
+      
+        
         mayor = Math.max(...montos);
         menor = Math.min(...montos);
       }
 
+      }
       worksheet.addRow({
         id: String(comb._id),
         codigoQR: comb.codigoQR,

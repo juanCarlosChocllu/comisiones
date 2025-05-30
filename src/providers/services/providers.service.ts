@@ -356,7 +356,7 @@ export class ProvidersService {
         const precio = hoja.getCell(9).value;
         const monto = hoja.getCell(10).value;
 
-        if (!codigoMia && !meterial && !tipoLente && !tipoColor && !tratamiento && !rangos && !marca && !colorLente) continue;
+        if (!meterial && !tipoLente && !tipoColor && !tratamiento && !rangos && !marca && !colorLente && ! precio) continue;
 
         const comisiones: comisionesI[] = [
           {

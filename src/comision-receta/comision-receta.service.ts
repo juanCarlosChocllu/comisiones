@@ -24,21 +24,19 @@ export class ComisionRecetaService {
     private readonly combinacionRecetaService: CombinacionRecetaService,
   ) {}
   async create(createComisionRecetaDto: CreateComisionRecetaDto) {
-    let contador=0
-      for (const data of createComisionRecetaDto.data) {
-        contador++;
+    let contador = 0;
+    for (const data of createComisionRecetaDto.data) {
+      contador++;
 
-        await this.comisionReceta.create({
-          ...data,
-          nombre: data.nombre ? data.nombre : `comision ${contador}`,
-          combinacionReceta: new Types.ObjectId(
-            createComisionRecetaDto.combinacionReceta,
-          ),
-        });
-      }      
-      return { status: HttpStatus.CREATED };
-    
-    
+      await this.comisionReceta.create({
+        ...data,
+        nombre: data.nombre ? data.nombre : `comision ${contador}`,
+        combinacionReceta: new Types.ObjectId(
+          createComisionRecetaDto.combinacionReceta,
+        ),
+      });
+    }
+    return { status: HttpStatus.CREATED };
   }
 
   async listarComisionReceta(
@@ -112,12 +110,14 @@ export class ComisionRecetaService {
     return { status: HttpStatus.OK };
   }
 
-  async eliminarComisionRegistrado(combinacion:Types.ObjectId, precio:string){
-    return  await this.comisionReceta.deleteMany({
+  async eliminarComisionRegistrado(
+    combinacion: Types.ObjectId,
+    precio: string,
+  ) {
+    return await this.comisionReceta.deleteMany({
       combinacionReceta: new Types.ObjectId(combinacion),
-      precio:precio,
+      precio: precio,
     });
-    
   }
 
   async actulizarComisiones(data: GuardarComisionRecetaI) {
@@ -137,5 +137,28 @@ export class ComisionRecetaService {
         });
       }
     }
+  }
+  async registarComisionReceta(
+    comision1: number,
+    comision2: number,
+    tipoPrecio: string,
+    combinacion: Types.ObjectId,
+  ) {
+    await Promise.all([
+      this.comisionReceta.create({
+        monto: comision1,
+        combinacionReceta: new Types.ObjectId(combinacion),
+        nombre: 'Comision 1',
+        precio: tipoPrecio,
+      }),
+      this.comisionReceta.create({
+        monto: comision2,
+        combinacionReceta: new Types.ObjectId(combinacion),
+        nombre: 'Comision 2',
+        precio: tipoPrecio,
+      }),
+    ]);
+
+    return;
   }
 }
