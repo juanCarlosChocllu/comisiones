@@ -126,6 +126,7 @@ export class CombinacionRecetaService {
           precios._id,
           crearCombinacionDto.importe,
         );
+        await this.comisionRecetaService.registarComisionReceta(crearCombinacionDto.comision1, crearCombinacionDto.comision2, crearCombinacionDto.tipoPrecio, combinacionLente._id)
       }
     }
     return { status: HttpStatus.OK };
