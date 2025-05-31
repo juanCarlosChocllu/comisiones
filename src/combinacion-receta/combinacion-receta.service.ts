@@ -114,7 +114,7 @@ export class CombinacionRecetaService {
     } else {
       const combinacionLente = await this.combinacionReceta.create({
         ...combinacion,
-        comision: false,
+        comision: true,
       });
       const precios = await this.preciosService.guardarPrecioReceta(
         crearCombinacionDto.tipoPrecio,

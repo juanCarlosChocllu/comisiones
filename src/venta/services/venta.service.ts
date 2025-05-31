@@ -1,4 +1,9 @@
-import { BadRequestException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateVentaDto } from '../dto/create-venta.dto';
 import { UpdateVentaDto } from '../dto/update-venta.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -29,8 +34,6 @@ import { formaterFechaHora } from 'src/core/utils/formaterFechaHora';
 import { FinalizarVentaDto } from '../dto/FinalizarVentaDto';
 import { key } from 'src/core/config/config';
 
-
-
 @Injectable()
 export class VentaService {
   constructor(
@@ -50,7 +53,7 @@ export class VentaService {
     return 'This action adds a new venta';
   }
 
- async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
+  async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const asesores = await this.asesorService.listarAsesor(
       buscadorVentaDto.sucursal,
     );
@@ -98,11 +101,10 @@ export class VentaService {
                       id: detalle.combinacionReceta,
                       tipo: detalle.rubro,
                     },
-                      importe: detalle.importe,
-                      comisiones: comisiones.map((com) => ({
+                    importe: detalle.importe,
+                    comisiones: comisiones.map((com) => ({
                       monto: com.monto,
                       precio: com.precio,
-             
                     })),
                   };
                 } else if (
@@ -115,21 +117,19 @@ export class VentaService {
                       detalle.producto,
                       venta.precio,
                     );
-                    console.log('comsion producto', comisiones);
-                    
+                  console.log('comsion producto', comisiones);
+
                   return {
                     producto: {
                       id: detalle.producto,
                       tipo: detalle.rubro,
                       marca: detalle.marca,
                       descripcion: detalle.descripcion,
-                      
                     },
-                     importe: detalle.importe,
-                      comisiones: comisiones.map((com) => ({
+                    importe: detalle.importe,
+                    comisiones: comisiones.map((com) => ({
                       monto: com.monto,
                       precio: com.precio,
-               
                     })),
                   };
                 } else if (detalle.rubro === productoE.servicio) {
@@ -144,13 +144,11 @@ export class VentaService {
                       id: detalle._id,
                       tipo: detalle.rubro,
                       descripcion: detalle.descripcion,
-                   
                     },
                     importe: detalle.importe,
                     comisiones: comisiones.map((com) => ({
                       monto: com.monto,
                       precio: com.precio,
-                       
                     })),
                   };
                 } else {
@@ -159,18 +157,16 @@ export class VentaService {
                       id: detalle._id,
                       tipo: detalle.rubro,
                       descripcion: detalle.descripcion,
-                    
                     },
-                   
+
                     importe: detalle.importe,
                   };
                 }
               }),
             );
-            
-            
+
             return {
-              fechaFinalizacion:venta.fechaFinalizacion,
+              fechaFinalizacion: venta.fechaFinalizacion,
               idVenta: venta.id_venta,
               descuento: venta.descuento,
               montoTotal: venta.montoTotal,
@@ -202,15 +198,13 @@ export class VentaService {
           (acc, item) => acc + item.montoTotal,
           0,
         );
-       
+
         return ventaAsesor;
       }),
     );
-   
-    
+
     return asesoresProcesados;
   }
-
 
   private monturasYgafasVip(venta: any) {
     let monturavip: number = 0;
@@ -230,10 +224,13 @@ export class VentaService {
                 detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
                 detalle.producto.marca == 'FRED' ||
                 detalle.producto.marca == 'LOEWE' ||
-                detalle.producto.marca == 'PORSHE DESIGN' ||
-                detalle.producto.marca == 'RINOWA' ||
+                detalle.producto.marca == 'PORSCHE DESIGN' ||
+                detalle.producto.marca == 'PORSCHEN DESIGN' ||
+                detalle.producto.marca == 'RIMOWA' ||
                 detalle.producto.marca == 'MONTBLANC' ||
-                detalle.producto.marca == 'TIFFANY'
+                detalle.producto.marca == 'TIFFANY' ||
+                detalle.producto.marca == 'TIFFANY & CO.' ||
+                detalle.producto.marca == 'TIFFANY & CO'
               ) {
                 monturavip++;
               }
@@ -256,10 +253,13 @@ export class VentaService {
                 detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
                 detalle.producto.marca == 'FRED' ||
                 detalle.producto.marca == 'LOEWE' ||
-                detalle.producto.marca == 'PORSHE DESIGN' ||
-                detalle.producto.marca == 'RINOWA' ||
+                detalle.producto.marca == 'PORSCHE DESIGN' ||
+                detalle.producto.marca == 'PORSCHEN DESIGN' ||
+                detalle.producto.marca == 'RIMOWA' ||
                 detalle.producto.marca == 'MONTBLANC' ||
-                detalle.producto.marca == 'TIFFANY'
+                detalle.producto.marca == 'TIFFANY' ||
+                detalle.producto.marca == 'TIFFANY & CO.' ||
+                detalle.producto.marca == 'TIFFANY & CO'
               ) {
                 gafaVip++;
               }
@@ -276,39 +276,17 @@ export class VentaService {
             detalle.producto &&
             detalle.producto.tipo == productoE.lenteDeContacto
           ) {
-            if (venta.sucursal == 'SUCRE  CENTRAL') {
-              if (
-                detalle.producto.marca == 'PRADA' ||
-                detalle.producto.marca == 'GUCCI' ||
-                detalle.producto.marca == 'TOM FORD' ||
-                detalle.producto.marca == 'BURBERRY' ||
-                detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-                detalle.producto.marca == 'FRED' ||
-                detalle.producto.marca == 'LOEWE' ||
-                detalle.producto.marca == 'PORSCHE DESIGN' ||
-                detalle.producto.marca == 'PORSCHEN DESIGN' ||
-                detalle.producto.marca == 'RIMOWA' ||
-                detalle.producto.marca == 'MONTBLANC' ||
-                detalle.producto.marca == 'TIFFANY'||
-                  detalle.producto.marca == 'TIFFANY & CO.'||
-                    detalle.producto.marca == 'TIFFANY & CO'
-              ) {
-                lenteDeContacto++;
-              }
-            } else if (
-              detalle.producto &&
-              detalle.producto.tipo == productoE.lenteDeContacto &&
-              detalle.importe >= 700
-            ) {
-              lenteDeContacto++;
-            }
+            console.log(venta.sucursal);
+            
+            lenteDeContacto++;
           }
         }
       } else {
         console.log(vent);
       }
     }
-
+    console.log(lenteDeContacto);
+    
     return { monturavip, gafaVip, lenteDeContacto };
   }
 
@@ -318,10 +296,10 @@ export class VentaService {
     fechaFin: string,
     tipoVenta: Types.ObjectId[],
   ) {
-    const {f1,f2} = formaterFechaHora(fechaInicio, fechaFin)
+    const { f1, f2 } = formaterFechaHora(fechaInicio, fechaFin);
     const filter: FiltroI = {
       fechaFinalizacion: {
-        $gte:f1,
+        $gte: f1,
         $lte: f2,
       },
       comisiona: true,
@@ -355,13 +333,13 @@ export class VentaService {
           tipo2: 1,
           tipoDescuento: 1,
           descuento: 1,
-          nombrePromocion:1,
-          descuentoPromocion2:1,
-          descuentoPromocion:1,
+          nombrePromocion: 1,
+          descuentoPromocion2: 1,
+          descuentoPromocion: 1,
           precio: 1,
-          comisiona:1,
+          comisiona: 1,
           detalleVenta: 1,
-          fechaFinalizacion:1
+          fechaFinalizacion: 1,
         },
       },
     ]);
@@ -399,8 +377,6 @@ export class VentaService {
     ]);
     return detalle;
   }
-
-
 
   async guardarVenta(venta: VentaI) {
     const v = await this.venta.findOne({
@@ -441,21 +417,27 @@ export class VentaService {
     }
   }
 
-
-  async finalizarVentas(finalizarVentaDto:FinalizarVentaDto) {
+  async finalizarVentas(finalizarVentaDto: FinalizarVentaDto) {
     try {
-      if(finalizarVentaDto.key != key) {
-        throw new UnauthorizedException()
+      if (finalizarVentaDto.key != key) {
+        throw new UnauthorizedException();
       }
-      const venta = await this.venta.findOne({id_venta:finalizarVentaDto.idVenta.toUpperCase().trim()})
-      if(venta) {
-         await this.venta.updateMany({id_venta:finalizarVentaDto.idVenta.toUpperCase().trim()}, { fechaFinalizacion:new Date(finalizarVentaDto.fecha), flag:finalizarVentaDto.flag})
-         return {status:HttpStatus.OK}
+      const venta = await this.venta.findOne({
+        id_venta: finalizarVentaDto.idVenta.toUpperCase().trim(),
+      });
+      if (venta) {
+        await this.venta.updateMany(
+          { id_venta: finalizarVentaDto.idVenta.toUpperCase().trim() },
+          {
+            fechaFinalizacion: new Date(finalizarVentaDto.fecha),
+            flag: finalizarVentaDto.flag,
+          },
+        );
+        return { status: HttpStatus.OK };
       }
-      return {status:HttpStatus.NOT_FOUND}
+      return { status: HttpStatus.NOT_FOUND };
     } catch (error) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
-
   }
 }
