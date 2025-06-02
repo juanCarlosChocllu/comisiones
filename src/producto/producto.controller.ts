@@ -52,12 +52,29 @@ export class ProductoController {
     );
   }
 
-  @Get('sinComision')
-  listarProductosSinComision(
+
+  @Get('sinComision/montura')
+  listarMonturaSinComision(
+    @Query() BuscadorProductoDto: BuscadorProductoDto,
+    ) {
+      
+    return this.productoService.listarProductosSinComision(BuscadorProductoDto, productoE.montura);
+    }
+
+  @Get('sinComision/lente/contacto')
+  listarLcSinComision(
     @Query() BuscadorProductoDto: BuscadorProductoDto,
   ) {
-    return this.productoService.listarProductosSinComision(BuscadorProductoDto);
+    return this.productoService.listarProductosSinComision(BuscadorProductoDto, productoE.lenteDeContacto);
   }
+      @Publico()
+    @Get('sinComision/gafa')
+    listarGafaSinComision(
+    @Query() BuscadorProductoDto: BuscadorProductoDto,
+    ) {
+    return this.productoService.listarProductosSinComision(BuscadorProductoDto, productoE.gafa);
+    }
+
   @Publico()
    @Get('descargar/producto/sinComsion')
   async descargarProductoSinComision(@Res() response: Response) {

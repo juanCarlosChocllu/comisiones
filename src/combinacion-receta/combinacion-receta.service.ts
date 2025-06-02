@@ -344,6 +344,8 @@ export class CombinacionRecetaService {
   }
   async listarCombinaciones(buscadorCombinacionDto: BuscadorCombinacionDto) {
     const data = await this.combinaciones(true, buscadorCombinacionDto);
+    console.log(data);
+    
     return { data: data.data, paginas: data.total };
   }
 
