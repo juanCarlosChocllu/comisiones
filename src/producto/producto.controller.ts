@@ -60,13 +60,13 @@ export class ProductoController {
       
     return this.productoService.productoListarSinComision(productoE.montura);
     }
-      @Publico()
+ 
   @Get('sinComision/lente/contacto')
   listarLcSinComision(
   ) {
     return this.productoService.productoListarSinComision(productoE.lenteDeContacto);
   }
-        @Publico()
+       
     @Get('sinComision/gafa')
     listarGafaSinComision(
     ) {
@@ -74,9 +74,9 @@ export class ProductoController {
     }
 
 
-   @Get('descargar/producto/sinComsion')
-  async descargarProductoSinComision(@Res() response: Response) {
-    const workbook = await this.productoService.descargarProductoSinComision();
+   @Get('descargar/montura/sinComsion')
+  async descargarMonturaSinComision(@Res() response: Response) {
+    const workbook = await this.productoService.descargarProductoSinComision(productoE.montura);
 
     response.setHeader(
       'Content-Type',
@@ -89,6 +89,39 @@ export class ProductoController {
     await workbook.xlsx.write(response);
     return response.end();
   }
+    
+    @Get('descargar/lc/sinComsion')
+  async descargarLcSinComision(@Res() response: Response) {
+    const workbook = await this.productoService.descargarProductoSinComision(productoE.lenteDeContacto);
+
+    response.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="export.xlsx"',
+    );
+    await workbook.xlsx.write(response);
+    return response.end();
+  }
+      
+    @Get('descargar/gafa/sinComsion')
+  async descargarGafaSinComision(@Res() response: Response) {
+    const workbook = await this.productoService.descargarProductoSinComision(productoE.gafa);
+
+    response.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="export.xlsx"',
+    );
+    await workbook.xlsx.write(response);
+    return response.end();
+  }
+
 
   @Get('descargar/montura')
   async descargarMontura(@Res() response: Response) {

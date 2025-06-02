@@ -738,10 +738,15 @@ export class ProductoService {
     return workbook;
   }
 
-  async descargarProductoSinComision() {
+  async descargarProductoSinComision(tipo:string) {
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
     const producto = await this.producto.aggregate([
+      {
+        $match:{
+          tipoProducto:tipo
+        }
+      },
       {
         $lookup: {
           from: 'DetallePrecio',
@@ -846,23 +851,9 @@ export class ProductoService {
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
     ];
 
-    const sinComision = data.filter((item) => item.comision.length <= 0);
+    const sinComision = data.filter((item) => item.comision.length < 1);
     for (const comb of sinComision) {
-      let mayor = 0;
-      let menor = 0;
-      if (comb.comision.length == 1) {
-        const montos = comb.comision.map((c) => c.monto);
-
-        mayor = Math.max(...montos);
-        menor = 0;
-      } else {
-        if (comb.comision.length) {
-          const montos = comb.comision.map((c) => c.monto);
-
-          mayor = Math.max(...montos);
-          menor = Math.min(...montos);
-        }
-      }
+      
       worksheet.addRow({
         id: String(comb._id),
         codigoQR: comb.codigoQR,
@@ -873,8 +864,8 @@ export class ProductoService {
         tipoMontura: comb.tipoMontura,
         tipoPrecio: comb.precio,
         monto: comb.monto ? comb.monto : 0,
-        comisionFija1: mayor,
-        comisionFija2: menor,
+        comisionFija1: 0,
+        comisionFija2: 0,
       });
     }
     return workbook;
