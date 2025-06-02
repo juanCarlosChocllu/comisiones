@@ -55,27 +55,25 @@ export class ProductoController {
 
   @Get('sinComision/montura')
   listarMonturaSinComision(
-    @Query() BuscadorProductoDto: BuscadorProductoDto,
+  
     ) {
       
-    return this.productoService.listarProductosSinComision(BuscadorProductoDto, productoE.montura);
+    return this.productoService.productoListarSinComision(productoE.montura);
     }
-
+      @Publico()
   @Get('sinComision/lente/contacto')
   listarLcSinComision(
-    @Query() BuscadorProductoDto: BuscadorProductoDto,
   ) {
-    return this.productoService.listarProductosSinComision(BuscadorProductoDto, productoE.lenteDeContacto);
+    return this.productoService.productoListarSinComision(productoE.lenteDeContacto);
   }
-      @Publico()
+        @Publico()
     @Get('sinComision/gafa')
     listarGafaSinComision(
-    @Query() BuscadorProductoDto: BuscadorProductoDto,
     ) {
-    return this.productoService.listarProductosSinComision(BuscadorProductoDto, productoE.gafa);
+    return this.productoService.productoListarSinComision(productoE.gafa);
     }
 
-  @Publico()
+
    @Get('descargar/producto/sinComsion')
   async descargarProductoSinComision(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductoSinComision();

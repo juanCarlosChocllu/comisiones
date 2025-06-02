@@ -72,8 +72,6 @@ export class ProductoService {
   }
 
   async guardarProducto(data: productosExcelI) {
- 
-
     //datal color
     const producto = await this.producto.findOne({ codigoMia: data.codigoMia });
     const precioEcontrado = await this.preciosService.buscarPrecioPorNombre(
@@ -195,16 +193,7 @@ export class ProductoService {
 
     return productos[0];
   }
-  async listarProductosSinComision(BuscadorProductoDto: BuscadorProductoDto, tipo:string) {
-    
   
-    const { data, paginas } = await this.productoListarSinComision(
-      BuscadorProductoDto,
-      tipo
-
-    );
-    return { data: data, paginas: paginas };
-  }
   async listarProductos(
     BuscadorProductoDto: BuscadorProductoDto,
     rubro: productoE,
@@ -216,27 +205,11 @@ export class ProductoService {
     );
     return { data: data, paginas: paginas };
   }
-    private async productoListarSinComision(
-    BuscadorProductoDto: BuscadorProductoDto,
-      tipo:string
-  ) {
-   
-    
+   async productoListarSinComision(tipo: string) {
     const producto = await this.producto.aggregate([
       {
         $match: {
-            tipoProducto:tipo,
-          ...(BuscadorProductoDto.serie
-            ? { serie: new RegExp(BuscadorProductoDto.serie, 'i') }
-            : {}),
-          ...(BuscadorProductoDto.codigoQr
-            ? { codigoQR: new RegExp(BuscadorProductoDto.codigoQr, 'i') }
-            : {}),
-          ...(BuscadorProductoDto.tipoProducto
-            ? {
-                tipoProducto: new RegExp(BuscadorProductoDto.tipoProducto, 'i'),
-              }
-            : {}),
+          tipoProducto: tipo,
         },
       },
       {
@@ -250,15 +223,6 @@ export class ProductoService {
       {
         $unwind: { path: '$marca', preserveNullAndEmptyArrays: true },
       },
-      ...(BuscadorProductoDto.marca
-        ? [
-            {
-              $match: {
-                'marca.nombre': new RegExp(BuscadorProductoDto.marca, 'i'),
-              },
-            },
-          ]
-        : []),
 
       {
         $lookup: {
@@ -271,15 +235,7 @@ export class ProductoService {
       {
         $unwind: { path: '$color', preserveNullAndEmptyArrays: true },
       },
-      ...(BuscadorProductoDto.color
-        ? [
-            {
-              $match: {
-                'color.nombre': new RegExp(BuscadorProductoDto.color, 'i'),
-              },
-            },
-          ]
-        : []),
+
       {
         $lookup: {
           from: 'DetallePrecio',
@@ -288,8 +244,8 @@ export class ProductoService {
           as: 'detallePrecio',
         },
       },
-       {
-        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: true },
+      {
+        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
       },
       {
         $lookup: {
@@ -299,9 +255,10 @@ export class ProductoService {
           as: 'precio',
         },
       },
-       {
-        $unwind: { path: '$precio', preserveNullAndEmptyArrays: true },
+      {
+        $unwind: { path: '$precio', preserveNullAndEmptyArrays: false },
       },
+
       {
         $project: {
           codigoMia: 1,
@@ -311,36 +268,40 @@ export class ProductoService {
           color: '$color.nombre',
           categoria: 1,
           codigoQR: 1,
-          tipoPrecio:'$precio.nombre'
-        
+          tipoPrecio: '$precio.nombre',
+          importe:'$detallePrecio.monto'
         },
-      }
+      },
     ]);
-    console.log(producto);
-    
-   const productosComision = await Promise.all(producto.map(async (item)=>{
-    const comision = await this.comisionProductoService.listarComosionPorProducto(item._id, item.tipoPrecio)
-    return {
-        codigoMia: item.codigoMia,
+
+    const productosComision = await Promise.all(
+      producto.map(async (item) => {
+        const comision =
+          await this.comisionProductoService.listarComosionPorProducto(
+            item._id,
+            item.tipoPrecio,
+          );
+        return {
+          codigoMia: item.codigoMia,
           tipoProducto: item.tipoProducto,
           marca: item.marca,
           serie: item.serie,
           color: item.color,
           categoria: item.categoria,
           codigoQR: item.codigoQR,
-          tipoPrecio:item.tipoPrecio,
-          comisiones:comision
-    }
-   }) )
-   
-    const productoSinComision = productosComision.filter((item)=> item.comisiones.length <= 0)
-   
-    const pagina = calcularPaginas(productoSinComision.length, BuscadorProductoDto.limite);
-  
+          tipoPrecio: item.tipoPrecio,
+          comisiones: comision,
+          importe:item.importe
+        };
+      }),
+    );
 
-    return { data:productoSinComision, paginas: pagina };
+    const productoSinComision = productosComision.filter(
+      (item) => item.comisiones.length < 1,
+    );
+
+    return productoSinComision;
   }
-
 
   private async productoListar(
     BuscadorProductoDto: BuscadorProductoDto,
@@ -450,7 +411,6 @@ export class ProductoService {
     });
 
     if (producto) {
-     
       return await this.producto.updateOne(
         { _id: new Types.ObjectId(id) },
         { comision: true },
@@ -495,8 +455,6 @@ export class ProductoService {
         let contador: number = 0;
         for (const com of data.comisiones) {
           if (com.monto > 0) {
-            
-
             contador++;
             const nombre = `Comision ${contador}`;
 
@@ -506,9 +464,9 @@ export class ProductoService {
               nombre,
               data.precio,
             );
-          }else{
-            producto.comision = false
-            await producto.save()
+          } else {
+            producto.comision = false;
+            await producto.save();
           }
         }
       }
@@ -520,16 +478,18 @@ export class ProductoService {
         precio._id,
         data.importe,
       );
-      
-      
+
       if (data.precio === precio.nombre) {
         let contador: number = 0;
-        await this.comisionProductoService.eliminarComsionRegistrada(producto._id, precio.nombre)
+        await this.comisionProductoService.eliminarComsionRegistrada(
+          producto._id,
+          precio.nombre,
+        );
         for (const com of data.comisiones) {
           if (com.monto > 0) {
-            if(producto.comision === false){
-              producto.comision =true
-              await producto.save()
+            if (producto.comision === false) {
+              producto.comision = true;
+              await producto.save();
             }
             contador++;
             const nombre = `Comision ${contador}`;
@@ -539,9 +499,9 @@ export class ProductoService {
               nombre,
               data.precio,
             );
-          }else {
-             producto.comision=false
-             await producto.save()
+          } else {
+            producto.comision = false;
+            await producto.save();
           }
         }
       }
@@ -645,8 +605,7 @@ export class ProductoService {
     const producto = await this.producto.aggregate([
       {
         $match: {
-           tipoProducto: tipoProducto,
-      
+          tipoProducto: tipoProducto,
         },
       },
       {
@@ -750,17 +709,14 @@ export class ProductoService {
       { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
     ];
-   
 
     for (const comb of data) {
-      
       let mayor = 0;
       let menor = 0;
       if (comb.comision.length > 0) {
-
         const montos = comb.comision.map((c) => c.monto);
         console.log(montos);
-        
+
         mayor = Math.max(...montos);
         menor = Math.min(...montos);
       }
@@ -782,12 +738,10 @@ export class ProductoService {
     return workbook;
   }
 
-
-  async descargarProductoSinComision(){
+  async descargarProductoSinComision() {
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
     const producto = await this.producto.aggregate([
-       
       {
         $lookup: {
           from: 'DetallePrecio',
@@ -840,7 +794,6 @@ export class ProductoService {
       },
       { $unwind: { path: '$tipoMontura', preserveNullAndEmptyArrays: true } },
 
-    
       {
         $project: {
           codigoMia: 1,
@@ -852,22 +805,18 @@ export class ProductoService {
           precio: '$precio.nombre',
           monto: '$detallePrecio.monto',
           tipoMontura: '$tipoMontura.nombre',
-   
         },
       },
-    ])
- 
-   
-    
-   const data = await Promise.all(
+    ]);
+
+    const data = await Promise.all(
       producto.map(async (p) => {
-     
         const comision =
           await this.comisionProductoService.listarComosionPorProducto(
             p._id,
             p.precio,
           );
-        
+
         return {
           _id: p.codigoMia,
           tipoProducto: p.tipoProducto,
@@ -896,26 +845,23 @@ export class ProductoService {
       { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
     ];
-    
-    const sinComision=  data.filter((item)=> item.comision.length <= 0)
+
+    const sinComision = data.filter((item) => item.comision.length <= 0);
     for (const comb of sinComision) {
       let mayor = 0;
       let menor = 0;
       if (comb.comision.length == 1) {
         const montos = comb.comision.map((c) => c.monto);
-      
-        
+
         mayor = Math.max(...montos);
         menor = 0;
-      }else {
-         if (comb.comision.length ) {
-        const montos = comb.comision.map((c) => c.monto);
-      
-        
-        mayor = Math.max(...montos);
-        menor = Math.min(...montos);
-      }
+      } else {
+        if (comb.comision.length) {
+          const montos = comb.comision.map((c) => c.monto);
 
+          mayor = Math.max(...montos);
+          menor = Math.min(...montos);
+        }
       }
       worksheet.addRow({
         id: String(comb._id),
