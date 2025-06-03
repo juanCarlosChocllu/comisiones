@@ -52,7 +52,7 @@ export class ProductoController {
     );
   }
 
-
+  @Publico()
   @Get('sinComision/montura')
   listarMonturaSinComision(
   

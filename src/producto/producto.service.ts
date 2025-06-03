@@ -273,7 +273,8 @@ export class ProductoService {
         },
       },
     ]);
-
+    console.log(producto);
+    
     const productosComision = await Promise.all(
       producto.map(async (item) => {
         const comision =
@@ -680,7 +681,6 @@ export class ProductoService {
             p._id,
             p.precio,
           );
-
         return {
           _id: p.codigoMia,
           tipoProducto: p.tipoProducto,

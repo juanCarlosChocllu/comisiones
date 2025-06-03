@@ -27,10 +27,10 @@ export class CombinacionRecetaController {
   listarCombinaciones(@Query () buscadorCombinacionDto:BuscadorCombinacionDto) {
     return this.combinacionRecetaService.listarCombinaciones(buscadorCombinacionDto);
   }
-
+  @Publico()
   @Get('sinComision')
-  listarCombinacionesSinComision(@Query () buscadorCombinacionDto:BuscadorCombinacionDto) {
-    return this.combinacionRecetaService.listarCombinacionesSinComision(buscadorCombinacionDto);
+  listarCombinacionesSinComision() {
+    return this.combinacionRecetaService.combinacionesSinComision();
   }
   
   @Get('descargar')
