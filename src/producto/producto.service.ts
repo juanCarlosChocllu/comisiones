@@ -258,7 +258,7 @@ export class ProductoService {
                 $expr: {
                   $and: [
                     { $eq: ['$producto', '$$productoId'] },
-                    { $eq: ['$tipoPrecio', '$$tipoPrecio'] },
+                    { $eq: ['$precio', '$$tipoPrecio'] },
                   ],
                 },
               },
@@ -268,7 +268,7 @@ export class ProductoService {
         },
       },
       {
-        $match: { 'comisiones.0': { $exists: false } },
+        $match: { 'comisiones': { $size: 0 } },
       },
       {
         $project: {
@@ -281,10 +281,12 @@ export class ProductoService {
           tipoPrecio: '$precio.nombre',
           marca: { $arrayElemAt: ['$marca.nombre', 0] },
           color: { $arrayElemAt: ['$color.nombre', 0] },
-          comisiones: 1,
+          comisiones:1
         },
-      },
+      }
     ]);
+    console.log(productosConComision);
+    
     return productosConComision;
   }
 
