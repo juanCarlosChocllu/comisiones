@@ -937,6 +937,29 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$precio', preserveNullAndEmptyArrays: false },
       },
+
+      {
+        $lookup:{
+          from:'ComisionReceta',
+          let:{ combinacion:'$_id', precio:'$precio.nombre'},
+          pipeline:[
+            {
+              $match:{
+                $expr:{
+                  $and:[
+                        { $eq: ['$combinacionReceta', '$$combinacion'] },
+                    { $eq: ['$precio', '$$precio'] },
+                  ]
+                }
+              }
+            }
+          ],
+          as:'comisiones'
+        }
+      },
+       {
+        $match: { 'comisiones': { $size: 0 } },
+      },
       {
         $project: {
           codigo: 1,
@@ -949,43 +972,12 @@ export class CombinacionRecetaService {
           tipoColorLente: '$tipoColorLente.nombre',
           tipoPrecio: '$precio.nombre',
           importe: '$detallePrecio.monto',
+          comisiones:1
         },
       },
     ];
-
-    const countDocuments = await this.combinacionReceta.countDocuments({
-      flag: flag.nuevo,
-    });
-
     const combinaciones = await this.combinacionReceta.aggregate(pipeline);
-
-    const combinacion = await Promise.all(
-      combinaciones.map(async (item) => {
-        const comisiones =
-          await this.comisionRecetaService.listarComisionReceta(
-            item.tipoPrecio,
-            item._id,
-          );
-        return {
-          _id: item._id,
-          material: item.material,
-          tipoLente: item.tipoLente,
-          rango: item.rango,
-          colorLente: item.colorLente,
-          marcaLente: item.marcaLente,
-          tratamiento: item.tratamiento,
-          tipoColorLente: item.tipoColorLente,
-          importe: item.importe,
-          tipoPrecio: item.tipoPrecio,
-          comisionReceta: comisiones,
-        };
-      }),
-    );
-    const filtrado = combinacion.filter(
-      (item) => item.comisionReceta.length < 1,
-    );
-
-    return filtrado;
+    return combinaciones;
   }
 
   async listarCombinacionPorVenta(combinacionReceta: Types.ObjectId) {
