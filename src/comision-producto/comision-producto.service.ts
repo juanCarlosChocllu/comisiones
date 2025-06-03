@@ -45,6 +45,21 @@ export class ComisionProductoService {
    
     return comision;
   }
+  async listarComosionesPorProducto(producto: Types.ObjectId[], precio: string[]) {
+
+    const comisiones = await this.comisionProducto.find(
+    {
+      producto: { $in: producto },
+      precio: { $in: precio },
+      flag: flag.nuevo,
+    },
+    { producto: 1, precio: 1, monto: 1 }
+  ).lean();
+   
+    return comisiones;
+  }
+  
+ 
 
   async guardarComisionProducto(
     producto: Types.ObjectId,

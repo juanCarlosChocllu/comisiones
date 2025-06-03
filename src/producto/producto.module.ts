@@ -10,11 +10,13 @@ import { TipoMonturaModule } from 'src/tipo-montura/tipo-montura.module';
 import { PreciosService } from 'src/precios/service/precios.service';
 import { PreciosModule } from 'src/precios/precios.module';
 import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
+import { ComisionProducto, comisionProductoSchema } from 'src/comision-producto/schema/comision-producto.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Producto.name, schema: productoSchema },
+       { name: ComisionProducto.name, schema: comisionProductoSchema },
     ]),
     ColorModule,
     MarcaModule,

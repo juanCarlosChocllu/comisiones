@@ -21,11 +21,13 @@ import { BuscadorVentaDto } from 'src/venta/dto/buscadorVenta.dto,';
 import { BuscadorProductoDto } from './dto/BuscadorProducto.dto';
 import { CrearProductoDto } from './dto/crearProduto.dto';
 import * as ExcelJs from 'exceljs';
+import { ComisionProducto } from 'src/comision-producto/schema/comision-producto.schema';
 
 @Injectable()
 export class ProductoService {
   constructor(
     @InjectModel(Producto.name) private readonly producto: Model<Producto>,
+       @InjectModel(ComisionProducto.name) private readonly comisionProducto: Model<ComisionProducto>,
     private readonly colorService: ColorService,
     private readonly marcaService: MarcaService,
     private readonly tipoMonturaService: TipoMonturaService,
@@ -205,104 +207,128 @@ export class ProductoService {
     );
     return { data: data, paginas: paginas };
   }
-   async productoListarSinComision(tipo: string) {
-    const producto = await this.producto.aggregate([
-      {
-        $match: {
-          tipoProducto: tipo,
-        },
-      },
-      {
-        $lookup: {
-          from: 'Marca',
-          foreignField: '_id',
-          localField: 'marca',
-          as: 'marca',
-        },
-      },
-      {
-        $unwind: { path: '$marca', preserveNullAndEmptyArrays: true },
-      },
+async productoListarSinComision(tipo: string) {
 
-      {
-        $lookup: {
-          from: 'Color',
-          foreignField: '_id',
-          localField: 'color',
-          as: 'color',
-        },
+  const productos = await this.producto.aggregate([
+    {
+      $match: {
+        tipoProducto: tipo,
       },
-      {
-        $unwind: { path: '$color', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: 'Marca',
+        foreignField: '_id',
+        localField: 'marca',
+        as: 'marca',
       },
+    },
+    {
+      $unwind: { path: '$marca', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: 'Color',
+        foreignField: '_id',
+        localField: 'color',
+        as: 'color',
+      },
+    },
+    {
+      $unwind: { path: '$color', preserveNullAndEmptyArrays: true },
+    },
+    ...(tipo === productoE.montura) ? [
+       {
+      $lookup: {
+        from: 'TipoMontura',
+        foreignField: '_id',
+        localField: 'tipoMontura',
+        as: 'tipoMontura',
+      },
+    },
+    {
+      $unwind: { path: '$tipoMontura', preserveNullAndEmptyArrays: true },
+    },
+    ] : [],
+    {
+      $lookup: {
+        from: 'DetallePrecio',
+        foreignField: 'producto',
+        localField: '_id',
+        as: 'detallePrecio',
+      },
+    },
+    {
+      $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
+    },
+    {
+      $lookup: {
+        from: 'Precio',
+        foreignField: '_id',
+        localField: 'detallePrecio.precio',
+        as: 'precio',
+      },
+    },
+    {
+      $unwind: { path: '$precio', preserveNullAndEmptyArrays: false },
+    },
+    {
+      $project: {
+        codigoMia: 1,
+        tipoProducto: 1,
+        marca: '$marca.nombre',
+        serie: 1,
+        color: '$color.nombre',
+        categoria: 1,
+        codigoQR: 1,
+        tipoPrecio: '$precio.nombre',
+        importe: '$detallePrecio.monto',
+        productoId: '$_id',
+        tipoMontura:'$tipoMontura.nombre'
+      },
+    },
+  ]);
 
-      {
-        $lookup: {
-          from: 'DetallePrecio',
-          foreignField: 'producto',
-          localField: '_id',
-          as: 'detallePrecio',
-        },
-      },
-      {
-        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'Precio',
-          foreignField: '_id',
-          localField: 'detallePrecio.precio',
-          as: 'precio',
-        },
-      },
-      {
-        $unwind: { path: '$precio', preserveNullAndEmptyArrays: false },
-      },
+console.log(productos);
 
-      {
-        $project: {
-          codigoMia: 1,
-          tipoProducto: 1,
-          marca: '$marca.nombre',
-          serie: 1,
-          color: '$color.nombre',
-          categoria: 1,
-          codigoQR: 1,
-          tipoPrecio: '$precio.nombre',
-          importe:'$detallePrecio.monto'
-        },
-      },
-    ]);
-    console.log(producto);
-    
-    const productosComision = await Promise.all(
-      producto.map(async (item) => {
-        const comision =
-          await this.comisionProductoService.listarComosionPorProducto(
-            item._id,
-            item.tipoPrecio,
-          );
-        return {
-          codigoMia: item.codigoMia,
-          tipoProducto: item.tipoProducto,
-          marca: item.marca,
-          serie: item.serie,
-          color: item.color,
-          categoria: item.categoria,
-          codigoQR: item.codigoQR,
-          tipoPrecio: item.tipoPrecio,
-          comisiones: comision,
-          importe:item.importe
-        };
-      }),
-    );
-
-    const productoSinComision = productosComision.filter(
-      (item) => item.comisiones.length < 1,
-    );
-
-    return productoSinComision;
+  const productoIds = productos.map(p => p.productoId);
+  const precios = productos.map(p => p.tipoPrecio);
+  const comisiones = await this.comisionProductoService.listarComosionesPorProducto(productoIds, precios)
+  const comisionMap = new Map<string, any[]>();
+  console.log(comisiones);
+  
+  for (const com of comisiones) {
+    const key = `${com.producto.toString()}|${com.precio}`;
+    if (!comisionMap.has(key)) comisionMap.set(key, []);
+    comisionMap.get(key)!.push(com);
   }
+
+  const productosConComision = productos.map(item => {
+    const key = `${item.productoId.toString()}|${item.tipoPrecio}`;
+    const comision = comisionMap.get(key) || [];
+    return {
+      _id:item._id,
+      codigoMia: item.codigoMia,
+      tipoProducto: item.tipoProducto,
+      marca: item.marca,
+      serie: item.serie,
+      color: item.color,
+      categoria: item.categoria,
+      codigoQR: item.codigoQR,
+      tipoPrecio: item.tipoPrecio,
+      importe: item.importe,
+      comisiones: comision,
+      tipoMontura:item.tipoMontura
+    };
+  });
+
+
+  const productoSinComision = productosConComision.filter(
+    item => item.comisiones.length < 1
+  );
+
+  return productoSinComision;
+}
 
   private async productoListar(
     BuscadorProductoDto: BuscadorProductoDto,
@@ -603,99 +629,7 @@ export class ProductoService {
   async descargarProductos(tipoProducto: string) {
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
-    const producto = await this.producto.aggregate([
-      {
-        $match: {
-          tipoProducto: tipoProducto,
-        },
-      },
-      {
-        $lookup: {
-          from: 'DetallePrecio',
-          foreignField: 'producto',
-          localField: '_id',
-          as: 'detallePrecio',
-        },
-      },
-      {
-        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'Precio',
-          foreignField: '_id',
-          localField: 'detallePrecio.precio',
-          as: 'precio',
-        },
-      },
-
-      { $unwind: { path: '$precio', preserveNullAndEmptyArrays: false } },
-
-      {
-        $lookup: {
-          from: 'Marca',
-          localField: 'marca',
-          foreignField: '_id',
-          as: 'marca',
-        },
-      },
-      { $unwind: { path: '$marca', preserveNullAndEmptyArrays: false } },
-
-      {
-        $lookup: {
-          from: 'Color',
-          localField: 'color',
-          foreignField: '_id',
-          as: 'color',
-        },
-      },
-      { $unwind: { path: '$color', preserveNullAndEmptyArrays: false } },
-
-      {
-        $lookup: {
-          from: 'TipoMontura',
-          localField: 'tipoMontura',
-          foreignField: '_id',
-          as: 'tipoMontura',
-        },
-      },
-      { $unwind: { path: '$tipoMontura', preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
-          codigoMia: 1,
-          codigoQR: 1,
-          tipoProducto: 1,
-          marca: '$marca.nombre',
-          serie: 1,
-          color: '$color.nombre',
-          precio: '$precio.nombre',
-          monto: '$detallePrecio.monto',
-          tipoMontura: '$tipoMontura.nombre',
-        },
-      },
-    ]);
-    const data = await Promise.all(
-      producto.map(async (p) => {
-        const comision =
-          await this.comisionProductoService.listarComosionPorProducto(
-            p._id,
-            p.precio,
-          );
-        return {
-          _id: p.codigoMia,
-          tipoProducto: p.tipoProducto,
-          marca: p.marca,
-          serie: p.serie,
-          color: p.color,
-          monto: p.monto,
-          precio: p.precio,
-          codigoQR: p.codigoQR,
-          tipoMontura: p.tipoMontura,
-          comision,
-        };
-      }),
-    );
-
+    const data = await this.productoListarSinComision(tipoProducto)
     worksheet.columns = [
       { header: 'id', key: 'id', width: 30 },
       { header: 'codigoQR', key: 'codigoQR', width: 30 },
@@ -711,15 +645,7 @@ export class ProductoService {
     ];
 
     for (const comb of data) {
-      let mayor = 0;
-      let menor = 0;
-      if (comb.comision.length > 0) {
-        const montos = comb.comision.map((c) => c.monto);
-        console.log(montos);
-
-        mayor = Math.max(...montos);
-        menor = Math.min(...montos);
-      }
+     
 
       worksheet.addRow({
         id: String(comb._id),
@@ -729,10 +655,10 @@ export class ProductoService {
         color: comb.color,
         serie: comb.serie,
         tipoMontura: comb.tipoMontura,
-        tipoPrecio: comb.precio,
-        monto: comb.monto ? comb.monto : 0,
-        comisionFija1: mayor,
-        comisionFija2: menor,
+        tipoPrecio: comb.tipoPrecio,
+        monto: comb.importe ? comb.importe : 0,
+        comisionFija1: 0,
+        comisionFija2: 0,
       });
     }
     return workbook;
