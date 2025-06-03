@@ -73,7 +73,7 @@ export class ProductoController {
     return this.productoService.productoListarSinComision(productoE.gafa);
     }
 
-
+    @Publico()
    @Get('descargar/montura/sinComsion')
   async descargarMonturaSinComision(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductoSinComision(productoE.montura);
@@ -122,7 +122,7 @@ export class ProductoController {
     return response.end();
   }
 
-
+  @Publico()
   @Get('descargar/montura')
   async descargarMontura(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductos(
