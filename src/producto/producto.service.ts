@@ -276,6 +276,7 @@ export class ProductoService {
           tipoProducto: 1,
           serie: 1,
           codigoQR: 1,
+          codigoMia: 1,
           importe: '$detallePrecio.monto',
           tipoPrecio: '$precio.nombre',
           marca: { $arrayElemAt: ['$marca.nombre', 0] },
