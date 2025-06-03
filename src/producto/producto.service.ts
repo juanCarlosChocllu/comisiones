@@ -285,8 +285,6 @@ export class ProductoService {
         },
       }
     ]);
-    console.log(productosConComision);
-    
     return productosConComision;
   }
 
@@ -589,99 +587,7 @@ export class ProductoService {
   async descargarProductos(tipoProducto: string) {
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
-    const producto = await this.producto.aggregate([
-      {
-        $match: {
-          tipoProducto: tipoProducto,
-        },
-      },
-      {
-        $lookup: {
-          from: 'DetallePrecio',
-          foreignField: 'producto',
-          localField: '_id',
-          as: 'detallePrecio',
-        },
-      },
-      {
-        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'Precio',
-          foreignField: '_id',
-          localField: 'detallePrecio.precio',
-          as: 'precio',
-        },
-      },
-
-      { $unwind: { path: '$precio', preserveNullAndEmptyArrays: false } },
-
-      {
-        $lookup: {
-          from: 'Marca',
-          localField: 'marca',
-          foreignField: '_id',
-          as: 'marca',
-        },
-      },
-      { $unwind: { path: '$marca', preserveNullAndEmptyArrays: false } },
-
-      {
-        $lookup: {
-          from: 'Color',
-          localField: 'color',
-          foreignField: '_id',
-          as: 'color',
-        },
-      },
-      { $unwind: { path: '$color', preserveNullAndEmptyArrays: false } },
-
-      {
-        $lookup: {
-          from: 'TipoMontura',
-          localField: 'tipoMontura',
-          foreignField: '_id',
-          as: 'tipoMontura',
-        },
-      },
-      { $unwind: { path: '$tipoMontura', preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
-          codigoMia: 1,
-          codigoQR: 1,
-          tipoProducto: 1,
-          marca: '$marca.nombre',
-          serie: 1,
-          color: '$color.nombre',
-          precio: '$precio.nombre',
-          monto: '$detallePrecio.monto',
-          tipoMontura: '$tipoMontura.nombre',
-        },
-      },
-    ]);
-    const data = await Promise.all(
-      producto.map(async (p) => {
-        const comision =
-          await this.comisionProductoService.listarComosionPorProducto(
-            p._id,
-            p.precio,
-          );
-        return {
-          _id: p.codigoMia,
-          tipoProducto: p.tipoProducto,
-          marca: p.marca,
-          serie: p.serie,
-          color: p.color,
-          monto: p.monto,
-          precio: p.precio,
-          codigoQR: p.codigoQR,
-          tipoMontura: p.tipoMontura,
-          comision,
-        };
-      }),
-    );
-
+    const producto = await this.productoListarSinComision(tipoProducto)
     worksheet.columns = [
       { header: 'id', key: 'id', width: 30 },
       { header: 'codigoQR', key: 'codigoQR', width: 30 },
@@ -696,17 +602,8 @@ export class ProductoService {
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
     ];
 
-    for (const comb of data) {
-      let mayor = 0;
-      let menor = 0;
-      if (comb.comision.length > 0) {
-        const montos = comb.comision.map((c) => c.monto);
-        console.log(montos);
-
-        mayor = Math.max(...montos);
-        menor = Math.min(...montos);
-      }
-
+    for (const comb of producto) {
+      
       worksheet.addRow({
         id: String(comb._id),
         codigoQR: comb.codigoQR,
@@ -716,9 +613,9 @@ export class ProductoService {
         serie: comb.serie,
         tipoMontura: comb.tipoMontura,
         tipoPrecio: comb.precio,
-        monto: comb.monto ? comb.monto : 0,
-        comisionFija1: mayor,
-        comisionFija2: menor,
+        monto: comb.importe ? comb.importe : 0,
+        comisionFija1: 0,
+        comisionFija2: 0,
       });
     }
     return workbook;
