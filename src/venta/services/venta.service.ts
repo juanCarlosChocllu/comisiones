@@ -296,9 +296,7 @@ export class VentaService {
     fechaFin: string,
     tipoVenta: Types.ObjectId[],
   ) {
-    const { f1, f2 } = formaterFechaHora(fechaInicio, fechaFin);
-    console.log(f1,f2);
-    
+    const { f1, f2 } = formaterFechaHora(fechaInicio, fechaFin);    
     const filter: FiltroI = {
       fechaFinalizacion: {
         $gte: f1,

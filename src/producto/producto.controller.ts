@@ -88,6 +88,7 @@ export class ProductoController {
     await workbook.xlsx.write(response);
     return response.end();
   }
+    @Publico()
   @Get('descargar/lc/sinComsion')
   async descargarLcSinComision(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductoSinComision(
@@ -124,7 +125,7 @@ export class ProductoController {
     return response.end();
   }
 
-  @Publico()
+
   @Get('descargar/montura')
   async descargarMontura(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductos(
@@ -142,7 +143,7 @@ export class ProductoController {
     await workbook.xlsx.write(response);
     return response.end();
   }
-
+ 
   @Get('descargar/gafa')
   async descargarGafa(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductos(

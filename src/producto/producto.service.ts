@@ -658,7 +658,7 @@ export class ProductoService {
 
     for (const comb of producto) {
       worksheet.addRow({
-        id: String(comb._id),
+        id: String(comb.codigoMia),
         codigoQR: comb.codigoQR,
         producto: comb.tipoProducto,
         marca: comb.marca,
