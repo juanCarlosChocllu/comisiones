@@ -297,6 +297,8 @@ export class VentaService {
     tipoVenta: Types.ObjectId[],
   ) {
     const { f1, f2 } = formaterFechaHora(fechaInicio, fechaFin);
+    console.log(f1,f2);
+    
     const filter: FiltroI = {
       fechaFinalizacion: {
         $gte: f1,
@@ -346,38 +348,7 @@ export class VentaService {
     return ventas;
   }
 
-  async listarDetalleVentas(
-    asesor: Types.ObjectId,
-    fechaInicio: string,
-    fechaFin: string,
-    tipoVenta: Types.ObjectId[],
-  ) {
-    const detalle = await this.DetalleVenta.aggregate([
-      {
-        $lookup: {
-          from: 'Venta',
-          foreignField: '_id',
-          localField: 'venta',
-          as: 'venta',
-        },
-      },
-      {
-        $unwind: { path: '$venta', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $match: {
-          'venta.asesor': new Types.ObjectId(asesor),
-          'venta.fechaFinalizacion': {
-            $gte: new Date(fechaInicio),
-            $lte: new Date(fechaFin),
-          },
-          'venta.flag': flagVenta.finalizado,
-        },
-      },
-    ]);
-    return detalle;
-  }
-
+ 
   async guardarVenta(venta: VentaI) {
     const v = await this.venta.findOne({
       id_venta: venta.id_venta.toUpperCase(),
