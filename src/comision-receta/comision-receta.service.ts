@@ -24,6 +24,8 @@ export class ComisionRecetaService {
     private readonly combinacionRecetaService: CombinacionRecetaService,
   ) {}
   async create(createComisionRecetaDto: CreateComisionRecetaDto) {
+    
+    
     let contador = 0;
     for (const data of createComisionRecetaDto.data) {
       contador++;
@@ -98,14 +100,14 @@ export class ComisionRecetaService {
   async eliminarComision(id: Types.ObjectId) {
     const comision = await this.comisionReceta.findOne({
       _id: new Types.ObjectId(id),
+      flag:flag.nuevo
     });
     if (!comision) {
       throw new NotFoundException();
     }
 
-    await this.comisionReceta.updateOne(
-      { _id: new Types.ObjectId(id) },
-      { flag: flag.eliminado },
+    await this.comisionReceta.deleteOne(
+      { _id: new Types.ObjectId(id) }
     );
     return { status: HttpStatus.OK };
   }

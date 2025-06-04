@@ -20,17 +20,13 @@ export class ComisionProductoService {
     createComisionProductoDto.producto = new Types.ObjectId(
       createComisionProductoDto.producto,
     );
-    const producto = await this.productoService.asignaComisionProducto(
-      createComisionProductoDto.producto,
-    );
-    
-    if (producto && producto.modifiedCount > 0) {
+  
       for (const data of createComisionProductoDto.data) {
         await this.comisionProducto.create({...data, producto:createComisionProductoDto.producto});
       }
       return { status: HttpStatus.CREATED };
-    }
-    throw new NotFoundException()
+    
+
   }
 
  
@@ -103,7 +99,7 @@ export class ComisionProductoService {
     if(!comision) {
       throw new NotFoundException()
     }
-    await this.comisionProducto.updateOne({_id:new Types.ObjectId(id)},{flag:flag.eliminado})
+    await this.comisionProducto.deleteOne({_id:new Types.ObjectId(id)})
     return {status:HttpStatus.OK}
   }
   
