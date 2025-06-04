@@ -89,8 +89,7 @@ export class ProductoController {
     await workbook.xlsx.write(response);
     return response.end();
   }
-    
-    @Get('descargar/lc/sinComsion')
+  @Get('descargar/lc/sinComsion')
   async descargarLcSinComision(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductoSinComision(productoE.lenteDeContacto);
 
