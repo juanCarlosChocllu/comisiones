@@ -1,8 +1,18 @@
+import { DateTime } from 'luxon';
+
 export function formaterFechaHora(fechaInicio: string, fechaFin: string) {
-  const offsetHoras = 4; 
   const f1 = new Date(fechaInicio);
-  f1.setUTCHours(0 + offsetHoras, 0, 0, 0); 
+  f1.setUTCHours(0, 0, 0, 0);
   const f2 = new Date(fechaFin);
-  f2.setUTCHours(23 + offsetHoras, 59, 59, 999)
+  f2.setUTCHours(23, 59, 59, 999);
   return { f1, f2 };
+}
+
+export function formatearfechaYhoraBolivia(fecha: string): string {
+  const dt = DateTime.fromFormat(fecha, 'yyyy-MM-dd HH:mm:ss ZZ');
+  const dtBolivia = dt.setZone('America/La_Paz');
+  console.log(dtBolivia);
+  console.log(dtBolivia.toISO());
+
+  return dtBolivia.toUTC().toISO();
 }

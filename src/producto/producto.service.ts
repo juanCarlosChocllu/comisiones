@@ -226,6 +226,14 @@ export class ProductoService {
           as: 'color',
         },
       },
+         {
+        $lookup: {
+          from: 'TipoMontura',
+          localField: 'tipoMontura',
+          foreignField: '_id',
+          as: 'tipoMontura',
+        },
+      },
       {
         $lookup: {
           from: 'DetallePrecio',
@@ -281,10 +289,12 @@ export class ProductoService {
           tipoPrecio: '$precio.nombre',
           marca: { $arrayElemAt: ['$marca.nombre', 0] },
           color: { $arrayElemAt: ['$color.nombre', 0] },
+             tipoMontura: { $arrayElemAt: ['$tipoMontura.nombre', 0] },
           comisiones:1
         },
       }
     ]);
+  
     return productosConComision;
   }
 
@@ -630,7 +640,8 @@ export class ProductoService {
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
     const producto = await this.productoListarSinComision(tipo)
-
+    console.log(producto);
+    
     worksheet.columns = [
       { header: 'id', key: 'id', width: 30 },
       { header: 'codigoQR', key: 'codigoQR', width: 30 },
@@ -685,6 +696,16 @@ export class ProductoService {
           as: 'color',
         },
       },
+
+        {
+        $lookup: {
+          from: 'TipoMontura',
+          localField: 'tipoMontura',
+          foreignField: '_id',
+          as: 'tipoMontura',
+        },
+      },
+     
       {
         $lookup: {
           from: 'DetallePrecio',
@@ -737,6 +758,7 @@ export class ProductoService {
           tipoPrecio: '$precio.nombre',
           marca: { $arrayElemAt: ['$marca.nombre', 0] },
           color: { $arrayElemAt: ['$color.nombre', 0] },
+          tipoMontura: { $arrayElemAt: ['$tipoMontura.nombre', 0] },
           comisiones:1
         },
       }

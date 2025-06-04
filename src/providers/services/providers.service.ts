@@ -46,13 +46,13 @@ import { ServicioService } from 'src/servicio/servicio.service';
 import * as path from 'path';
 import { apiMia, tokenMia } from 'src/core/config/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { DateTime  } from 'luxon';
+import { DateTime } from 'luxon';
+
 @Injectable()
 export class ProvidersService {
-    private readonly logger = new Logger(ProductoService.name);
+  private readonly logger = new Logger(ProductoService.name);
 
   constructor(
-    
     private readonly httpService: HttpService,
     private readonly tratamientoService: TratamientoService,
     private readonly materialService: MaterialService,
@@ -105,8 +105,8 @@ export class ProvidersService {
           this.asesorService.guardarAsesor(data.nombre_vendedor, sucursal._id),
           this.tipoVentaService.guardarTipoVenta(data.tipoVenta),
         ]);
-        console.log('luxon', DateTime.fromFormat(data.fecha,'yyyy-MM-dd HH:mm:ss').toISO());
         
+
         ventaGuardar = {
           asesor: asesor._id,
           comisiona: data.comisiona,
@@ -123,12 +123,12 @@ export class ProvidersService {
           tipoDescuento: data.tipoDescuento,
           flag: data.flag,
           precio: data.precio, // se veridica en cada venta
-          fechaVenta: DateTime.fromFormat(data.fecha,'yyyy-MM-dd HH:mm:ss').toISODate(),
+          fechaVenta: new Date(data.fecha),
           ...(data.fecha_finalizacion && {
-            fechaFinalizacion:  DateTime.fromFormat(data.fecha_finalizacion,'yyyy-MM-dd HH:mm:ss').toISODate(),
+            fechaFinalizacion: new Date(data.fecha_finalizacion),
           }),
         };
-        const venta = await this.ventaService.guardarVenta(ventaGuardar);
+         const venta = await this.ventaService.guardarVenta(ventaGuardar);
         if (data.rubro === productoE.lente) {
           await this.guardarLente(data, venta._id);
         } else if (
@@ -198,8 +198,6 @@ export class ProvidersService {
   }
 
   private async guardarProducto(data: VentaApiI, venta: Types.ObjectId) {
-    
-
     const producto = await this.productoService.verificarProducto(
       data.codProducto,
       data.precio,
@@ -273,7 +271,7 @@ export class ProvidersService {
       !!marca &&
       !!rango &&
       !!tratamiento
-     ) {
+    ) {
       const recetaCombinacion =
         await this.combinacionRecetaService.verificarCombinacion(
           tratamiento._id,
@@ -359,7 +357,17 @@ export class ProvidersService {
         const precio = hoja.getCell(9).value;
         const monto = hoja.getCell(10).value;
 
-        if (!meterial && !tipoLente && !tipoColor && !tratamiento && !rangos && !marca && !colorLente && ! precio) continue;
+        if (
+          !meterial &&
+          !tipoLente &&
+          !tipoColor &&
+          !tratamiento &&
+          !rangos &&
+          !marca &&
+          !colorLente &&
+          !precio
+        )
+          continue;
 
         const comisiones: comisionesI[] = [
           {
@@ -589,10 +597,9 @@ export class ProvidersService {
     return ruta;
   }
 
-
-   @Cron(CronExpression.EVERY_DAY_AT_4AM)
-   async handleCron  () {
-     const date = new Date();
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  async handleCron() {
+    const date = new Date();
     const [año, mes, dia] = [
       date.getFullYear(),
       (date.getMonth() + 1).toString().padStart(2, '0'),
@@ -601,8 +608,8 @@ export class ProvidersService {
     const fecha: DescargarProviderDto = {
       fechaInicio: `${año}-${mes}-${dia}`,
       fechaFin: `${año}-${mes}-${dia}`,
-    }; 
-    this.logger.debug('Iniciando la descarga');   
-    await this.descargarVentasMia(fecha)  
+    };
+    this.logger.debug('Iniciando la descarga');
+    await this.descargarVentasMia(fecha);
   }
 }

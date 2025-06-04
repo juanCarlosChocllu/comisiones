@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { DateTime } from 'luxon';
 import { Types } from 'mongoose';
 import { flag } from 'src/core/enum/flag';
 
@@ -31,25 +32,25 @@ export class Venta {
   tipoVenta: Types.ObjectId;
 
   @Prop()
-  tipo:string
+  tipo: string;
 
   @Prop()
-  tipo2:string
+  tipo2: string;
 
   @Prop()
-  nombrePromocion:string
+  nombrePromocion: string;
 
   @Prop()
-  tipoDescuento:string
+  tipoDescuento: string;
 
   @Prop()
-  descuentoPromocion:number
+  descuentoPromocion: number;
 
   @Prop()
-  descuentoPromocion2:number
+  descuentoPromocion2: number;
 
   @Prop()
-  precio:string
+  precio: string;
 
   @Prop()
   fechaVenta: Date;
@@ -65,14 +66,56 @@ export class Venta {
 }
 
 export const ventaSchema = SchemaFactory.createForClass(Venta);
-ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, flag:1 });
-ventaSchema.index({ asesor: 1, fechaFinalizacion: 1 , tipoVenta:1, flag:1});
-ventaSchema.index({ id_venta: 1});
+ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, flag: 1 });
+ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, tipoVenta: 1, flag: 1 });
+ventaSchema.index({ id_venta: 1 });
 
+ventaSchema.pre('save', function (next) {
+  if (this.fechaVenta) {
+    const fechaEnBolivia = DateTime.fromJSDate(this.fechaVenta).setZone(
+      'America/La_Paz',
+    );
+
+    const fechaFalsaUTC = DateTime.fromObject(
+      {
+        year: fechaEnBolivia.year,
+        month: fechaEnBolivia.month,
+        day: fechaEnBolivia.day,
+        hour: fechaEnBolivia.hour,
+        minute: fechaEnBolivia.minute,
+        second: fechaEnBolivia.second,
+        millisecond: fechaEnBolivia.millisecond,
+      },
+      { zone: 'utc' },
+    );
+    this.fechaVenta = fechaFalsaUTC.toJSDate();
+  }
+
+  if (this.fechaFinalizacion) {
+    const fechaEnBolivia = DateTime.fromJSDate(this.fechaFinalizacion).setZone(
+      'America/La_Paz',
+    );
+    const fechaFalsaUTC = DateTime.fromObject(
+      {
+        year: fechaEnBolivia.year,
+        month: fechaEnBolivia.month,
+        day: fechaEnBolivia.day,
+        hour: fechaEnBolivia.hour,
+        minute: fechaEnBolivia.minute,
+        second: fechaEnBolivia.second,
+        millisecond: fechaEnBolivia.millisecond,
+      },
+      { zone: 'utc' },
+    );
+    this.fechaFinalizacion = fechaFalsaUTC.toJSDate();
+  }
+
+  next();
+});
 
 @Schema({ collection: 'DetalleVenta' })
 export class DetalleVenta {
-  @Prop({type:Types.ObjectId, ref:'Venta'})
+  @Prop({ type: Types.ObjectId, ref: 'Venta' })
   venta: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'CombinacioReceta' })
@@ -85,17 +128,16 @@ export class DetalleVenta {
   cantidad: number;
 
   @Prop()
-  descripcion:string
+  descripcion: string;
 
   @Prop()
-  marca:string
+  marca: string;
 
- // @Prop()
+  // @Prop()
   //comision:number[]
 
   @Prop({ type: Types.ObjectId, ref: 'Producto' })
   producto: Types.ObjectId;
-
 
   @Prop({ type: Types.ObjectId, ref: 'Servicio' })
   servicio: Types.ObjectId;
@@ -105,4 +147,4 @@ export class DetalleVenta {
 }
 
 export const detalleVentaSchema = SchemaFactory.createForClass(DetalleVenta);
-detalleVentaSchema.index({venta:1})
+detalleVentaSchema.index({ venta: 1 });
