@@ -380,12 +380,7 @@ export class CombinacionRecetaService {
   }
 
   async descargarCombinaciones() {
-    const combinacion = await this.combinacionReceta.aggregate([
-      {
-        $match: {
-          flag: flag.nuevo,
-        },
-      },
+     const pipeline: PipelineStage[] = [
       {
         $lookup: {
           from: 'Material',
@@ -397,6 +392,7 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$material', preserveNullAndEmptyArrays: false },
       },
+
       {
         $lookup: {
           from: 'TipoLente',
@@ -432,6 +428,7 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$colorLente', preserveNullAndEmptyArrays: false },
       },
+
       {
         $lookup: {
           from: 'MarcaLente',
@@ -443,6 +440,7 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$marcaLente', preserveNullAndEmptyArrays: false },
       },
+
       {
         $lookup: {
           from: 'Tratamiento',
@@ -454,6 +452,7 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$tratamiento', preserveNullAndEmptyArrays: false },
       },
+
       {
         $lookup: {
           from: 'TipoColorLente',
@@ -465,6 +464,7 @@ export class CombinacionRecetaService {
       {
         $unwind: { path: '$tipoColorLente', preserveNullAndEmptyArrays: false },
       },
+
       {
         $lookup: {
           from: 'DetallePrecio',
@@ -489,7 +489,28 @@ export class CombinacionRecetaService {
       },
 
       {
+        $lookup:{
+          from:'ComisionReceta',
+          let:{ combinacion:'$_id', precio:'$precio.nombre'},
+          pipeline:[
+            {
+              $match:{
+                $expr:{
+                  $and:[
+                        { $eq: ['$combinacionReceta', '$$combinacion'] },
+                    { $eq: ['$precio', '$$precio'] },
+                  ]
+                }
+              }
+            }
+          ],
+          as:'comisiones'
+        }
+      },
+       
+      {
         $project: {
+          codigo: 1,
           material: '$material.nombre',
           tipoLente: '$tipoLente.nombre',
           rango: '$rango.nombre',
@@ -497,32 +518,13 @@ export class CombinacionRecetaService {
           marcaLente: '$marcaLente.nombre',
           tratamiento: '$tratamiento.nombre',
           tipoColorLente: '$tipoColorLente.nombre',
-          monto: '$detallePrecio.monto',
           tipoPrecio: '$precio.nombre',
+          importe: '$detallePrecio.monto',
+          comisiones:1
         },
       },
-    ]);
-    const combinaciones = await Promise.all(
-      combinacion.map(async (comb) => {
-        const comision = await this.comisionRecetaService.listarComisionReceta(
-          comb.tipoPrecio,
-          comb._id,
-        );
-        return {
-          _id: comb._id,
-          material: comb.material,
-          tipoLente: comb.tipoLente,
-          rango: comb.rango,
-          colorLente: comb.colorLente,
-          marcaLente: comb.marcaLente,
-          tratamiento: comb.tratamiento,
-          tipoColorLente: comb.tipoColorLente,
-          monto: comb.monto,
-          tipoPrecio: comb.tipoPrecio,
-          comisionReceta: comision,
-        };
-      }),
-    );
+    ];
+    const combinaciones = await this.combinacionReceta.aggregate(pipeline);
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
@@ -544,10 +546,16 @@ export class CombinacionRecetaService {
     for (const comb of combinaciones) {
       let mayor = 0;
       let menor = 0;
-      if (comb.comisionReceta.length > 0) {
-        const montos = comb.comisionReceta.map((c) => c.monto);
+      if (comb.comisiones.length == 1) {
+        const montos = comb.comisiones.map((c) => c.monto);
+        mayor = Math.max(...montos);
+        menor = 0;
+      } else {
+        if (comb.comisiones.length > 1) {
+        const montos = comb.comisiones.map((c) => c.monto);
         mayor = Math.max(...montos);
         menor = Math.min(...montos);
+      }
       }
 
       worksheet.addRow({
@@ -560,7 +568,7 @@ export class CombinacionRecetaService {
         marca: comb.marcaLente,
         color: comb.colorLente,
         tipoPrecio: comb.tipoPrecio,
-        monto: comb.monto,
+        monto: comb.importe,
         comisionFija1: mayor,
         comisionFija2: menor,
       });

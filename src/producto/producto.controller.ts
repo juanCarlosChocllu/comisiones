@@ -54,29 +54,28 @@ export class ProductoController {
 
   @Publico()
   @Get('sinComision/montura')
-  listarMonturaSinComision(
-  
-    ) {
-      
+  listarMonturaSinComision() {
     return this.productoService.productoListarSinComision(productoE.montura);
-    }
- 
-  @Get('sinComision/lente/contacto')
-  listarLcSinComision(
-  ) {
-    return this.productoService.productoListarSinComision(productoE.lenteDeContacto);
   }
-       
-    @Get('sinComision/gafa')
-    listarGafaSinComision(
-    ) {
-    return this.productoService.productoListarSinComision(productoE.gafa);
-    }
 
-    @Publico()
-   @Get('descargar/montura/sinComsion')
+  @Get('sinComision/lente/contacto')
+  listarLcSinComision() {
+    return this.productoService.productoListarSinComision(
+      productoE.lenteDeContacto,
+    );
+  }
+
+  @Get('sinComision/gafa')
+  listarGafaSinComision() {
+    return this.productoService.productoListarSinComision(productoE.gafa);
+  }
+
+  @Publico()
+  @Get('descargar/montura/sinComsion')
   async descargarMonturaSinComision(@Res() response: Response) {
-    const workbook = await this.productoService.descargarProductoSinComision(productoE.montura);
+    const workbook = await this.productoService.descargarProductoSinComision(
+      productoE.montura,
+    );
 
     response.setHeader(
       'Content-Type',
@@ -91,7 +90,9 @@ export class ProductoController {
   }
   @Get('descargar/lc/sinComsion')
   async descargarLcSinComision(@Res() response: Response) {
-    const workbook = await this.productoService.descargarProductoSinComision(productoE.lenteDeContacto);
+    const workbook = await this.productoService.descargarProductoSinComision(
+      productoE.lenteDeContacto,
+    );
 
     response.setHeader(
       'Content-Type',
@@ -104,10 +105,12 @@ export class ProductoController {
     await workbook.xlsx.write(response);
     return response.end();
   }
-      
-    @Get('descargar/gafa/sinComsion')
+
+  @Get('descargar/gafa/sinComsion')
   async descargarGafaSinComision(@Res() response: Response) {
-    const workbook = await this.productoService.descargarProductoSinComision(productoE.gafa);
+    const workbook = await this.productoService.descargarProductoSinComision(
+      productoE.gafa,
+    );
 
     response.setHeader(
       'Content-Type',
@@ -158,7 +161,7 @@ export class ProductoController {
     return response.end();
   }
 
-    @Get('descargar/lc')
+  @Get('descargar/lc')
   async descargarlc(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductos(
       productoE.lenteDeContacto,
