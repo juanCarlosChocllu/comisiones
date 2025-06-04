@@ -20,11 +20,11 @@ export interface VentaI {
 
   tieneProductos?: boolean;
 
-  fechaVenta?: Date;
+  fechaVenta?: string;
 
   tipoVenta?: Types.ObjectId;
 
-  fechaFinalizacion?: Date;
+  fechaFinalizacion?: string;
 
   flag?: string;
 

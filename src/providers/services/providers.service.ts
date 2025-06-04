@@ -46,6 +46,7 @@ import { ServicioService } from 'src/servicio/servicio.service';
 import * as path from 'path';
 import { apiMia, tokenMia } from 'src/core/config/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { DateTime  } from 'luxon';
 @Injectable()
 export class ProvidersService {
     private readonly logger = new Logger(ProductoService.name);
@@ -104,6 +105,8 @@ export class ProvidersService {
           this.asesorService.guardarAsesor(data.nombre_vendedor, sucursal._id),
           this.tipoVentaService.guardarTipoVenta(data.tipoVenta),
         ]);
+        console.log('luxon', DateTime.fromFormat(data.fecha,'yyyy-MM-dd HH:mm:ss').toISO());
+        
         ventaGuardar = {
           asesor: asesor._id,
           comisiona: data.comisiona,
@@ -120,9 +123,9 @@ export class ProvidersService {
           tipoDescuento: data.tipoDescuento,
           flag: data.flag,
           precio: data.precio, // se veridica en cada venta
-          fechaVenta: new Date(data.fecha),
+          fechaVenta: DateTime.fromFormat(data.fecha,'yyyy-MM-dd HH:mm:ss').toISODate(),
           ...(data.fecha_finalizacion && {
-            fechaFinalizacion: new Date(data.fecha_finalizacion),
+            fechaFinalizacion:  DateTime.fromFormat(data.fecha_finalizacion,'yyyy-MM-dd HH:mm:ss').toISODate(),
           }),
         };
         const venta = await this.ventaService.guardarVenta(ventaGuardar);
@@ -369,7 +372,7 @@ export class ProvidersService {
           },
         ];
         const data: GuardarComisionRecetaI = {
-          codigoMia: String(codigoMia),
+          codigoMia: String(codigoMia).trim(),
           colorLente: String(colorLente).toUpperCase().trim(),
           comisiones: comisiones,
           marcaLente: String(marca).toUpperCase().trim(),
@@ -428,16 +431,16 @@ export class ProvidersService {
         ];
 
         const data: productosExcelI = {
-          codigoMia: String(codigoMia),
-          color: String(color),
-          marca: String(marca),
-          serie: String(serie),
+          codigoMia: String(codigoMia).trim(),
+          color: String(color).trim(),
+          marca: String(marca).trim(),
+          serie: String(serie).trim(),
           comisiones: comisiones,
-          codigoQR: String(codigoQr),
-          tipoProducto: String(producto),
+          codigoQR: String(codigoQr).trim(),
+          tipoProducto: String(producto).trim(),
           importe: Number(monto),
-          precio: String(precio),
-          tipoMontura: String(tipoMontura),
+          precio: String(precio).trim(),
+          tipoMontura: String(tipoMontura).trim(),
         };
         console.log(data);
 
@@ -561,7 +564,7 @@ export class ProvidersService {
           },
         ];
         const data: GuardarComisionRecetaI = {
-          codigoMia: String(codigoMia),
+          codigoMia: String(codigoMia).trim(),
           colorLente: String(colorLente).toUpperCase().trim(),
           comisiones: comisiones,
           marcaLente: String(marca).toUpperCase().trim(),
