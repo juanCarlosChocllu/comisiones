@@ -52,7 +52,7 @@ export class ProductoController {
     );
   }
 
-  @Publico()
+
   @Get('sinComision/montura')
   listarMonturaSinComision() {
     return this.productoService.productoListarSinComision(productoE.montura);
@@ -70,7 +70,7 @@ export class ProductoController {
     return this.productoService.productoListarSinComision(productoE.gafa);
   }
 
-  @Publico()
+
   @Get('descargar/montura/sinComsion')
   async descargarMonturaSinComision(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductoSinComision(
@@ -88,7 +88,7 @@ export class ProductoController {
     await workbook.xlsx.write(response);
     return response.end();
   }
-    @Publico()
+
   @Get('descargar/lc/sinComsion')
   async descargarLcSinComision(@Res() response: Response) {
     const workbook = await this.productoService.descargarProductoSinComision(
