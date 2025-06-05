@@ -206,96 +206,97 @@ export class ProductoService {
     return { data: data, paginas: paginas };
   }
   async productoListarSinComision(tipo: string) {
-    const productosConComision = await this.producto.aggregate([
-      {
-        $match: { tipoProducto: tipo },
-      },
-      {
-        $lookup: {
-          from: 'Marca',
-          localField: 'marca',
-          foreignField: '_id',
-          as: 'marca',
-        },
-      },
-      {
-        $lookup: {
-          from: 'Color',
-          localField: 'color',
-          foreignField: '_id',
-          as: 'color',
-        },
-      },
-         {
-        $lookup: {
-          from: 'TipoMontura',
-          localField: 'tipoMontura',
-          foreignField: '_id',
-          as: 'tipoMontura',
-        },
-      },
-      {
-        $lookup: {
-          from: 'DetallePrecio',
-          localField: '_id',
-          foreignField: 'producto',
-          as: 'detallePrecio',
-        },
-      },
-      {
-        $unwind: { path: '$detallePrecio', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'Precio',
-          localField: 'detallePrecio.precio',
-          foreignField: '_id',
-          as: 'precio',
-        },
-      },
-      {
-        $unwind: { path: '$precio', preserveNullAndEmptyArrays: false },
-      },
-      {
-        $lookup: {
-          from: 'ComisionProducto',
-          let: { productoId: '$_id', tipoPrecio: '$precio.nombre' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$producto', '$$productoId'] },
-                    { $eq: ['$precio', '$$tipoPrecio'] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: 'comisiones',
-        },
-      },
-      {
-        $match: { 'comisiones': { $size: 0 } },
-      },
-      {
-        $project: {
-          _id: 1,
-          tipoProducto: 1,
-          serie: 1,
-          codigoQR: 1,
-          codigoMia: 1,
-          importe: '$detallePrecio.monto',
-          tipoPrecio: '$precio.nombre',
-          marca: { $arrayElemAt: ['$marca.nombre', 0] },
-          color: { $arrayElemAt: ['$color.nombre', 0] },
-             tipoMontura: { $arrayElemAt: ['$tipoMontura.nombre', 0] },
-          comisiones:1
-        },
-      }
-    ]);
+   const productosSinComision =  this.producto.aggregate([
+  { $match: { tipoProducto: tipo } },
+  {
+    $lookup: {
+      from: 'DetallePrecio',
+      localField: '_id',
+      foreignField: 'producto',
+      as: 'detallePrecio'
+    }
+  },
+  { $unwind: '$detallePrecio' },
+
+
+  {
+    $lookup: {
+      from: 'Precio',
+      localField: 'detallePrecio.precio',
+      foreignField: '_id',
+      as: 'precio'
+    }
+  },
+  { $unwind: '$precio' },
+
+  {
+    $lookup: {
+      from: 'ComisionProducto',
+      let: { productoId: '$_id', tipoPrecio: '$precio.nombre' },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ['$producto', '$$productoId'] },
+                { $eq: ['$precio', '$$tipoPrecio'] }
+              ]
+            }
+          }
+        }
+      ],
+      as: 'comisiones'
+    }
+  },
+
+
+  { $match: { comisiones: { $size: 0 } } },
   
-    return productosConComision;
+  
+  {
+    $lookup: {
+      from: 'Marca',
+      localField: 'marca',
+      foreignField: '_id',
+      as: 'marca'
+    }
+  },
+  {
+    $lookup: {
+      from: 'Color',
+      localField: 'color',
+      foreignField: '_id',
+      as: 'color'
+    }
+  },
+  {
+    $lookup: {
+      from: 'TipoMontura',
+      localField: 'tipoMontura',
+      foreignField: '_id',
+      as: 'tipoMontura'
+    }
+  },
+  {
+    $project: {
+      _id: 1,
+      tipoProducto: 1,
+      serie: 1,
+      codigoQR: 1,
+      codigoMia: 1,
+      importe: '$detallePrecio.monto',
+      tipoPrecio: '$precio.nombre',
+      marca: { $arrayElemAt: ['$marca.nombre', 0] },
+      color: { $arrayElemAt: ['$color.nombre', 0] },
+      tipoMontura: { $arrayElemAt: ['$tipoMontura.nombre', 0] }
+    }
+  },
+ 
+])
+
+
+ 
+    return productosSinComision;
   }
 
   private async productoListar(
@@ -639,7 +640,7 @@ export class ProductoService {
   async descargarProductoSinComision(tipo: string) {
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
-    const producto = await this.productoListarSinComision(tipo)
+    const producto =[]// await this.productoListarSinComision(tipo)
     console.log(producto);
     
     worksheet.columns = [
