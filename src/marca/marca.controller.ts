@@ -13,8 +13,8 @@ export class MarcaController {
   }
 
   @Get()
-  findAll() {
-    return this.marcaService.findAll();
+  listar() {
+    return this.marcaService.listar();
   }
 
   @Get(':id')

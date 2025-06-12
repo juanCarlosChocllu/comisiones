@@ -12,8 +12,9 @@ export class MarcaService {
     return 'This action adds a new marca';
   }
 
-  findAll() {
-    return `This action returns all marca`;
+ async  listar() {
+    const marca= await this.marca.find()
+    return marca
   }
 
   findOne(id: number) {
