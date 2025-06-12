@@ -230,6 +230,8 @@ export class ServicioService {
           comision: 1,
           descripcion: 1,
           comisionServicio: 1,
+          importe:'$detallePrecio.monto',
+          tipoPrecio:'$precio.nombre'
         },
       },
     ]);
