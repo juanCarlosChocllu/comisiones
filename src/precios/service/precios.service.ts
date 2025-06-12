@@ -53,6 +53,8 @@ export class PreciosService {
         tipo: tipoProductoPrecio.servicio,
         //monto: monto,
       });
+  
+      
       if (!detalle) {
         await this.detallePrecio.create({
           servicio: new Types.ObjectId(producto),

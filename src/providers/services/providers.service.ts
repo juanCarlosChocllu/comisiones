@@ -164,6 +164,7 @@ export class ProvidersService {
   private async guardarServicio(data: VentaApiI, venta: Types.ObjectId) {
     const servicio = await this.servicioService.buscarServicio(
       data.codProducto,
+      data.precio
     );
     if (servicio) {
       const detalle: detalleVentaI = {
@@ -393,7 +394,7 @@ export class ProvidersService {
           monto: monto ? Number(monto) : 0,
         };
 
-        console.log(data);
+      
 
         await this.combinacionRecetaService.guardarComisionrecetaCombinacion(
           data,

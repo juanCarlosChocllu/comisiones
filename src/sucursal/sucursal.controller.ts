@@ -4,6 +4,7 @@ import { CreateSucursalDto } from './dto/create-sucursal.dto';
 import { UpdateSucursalDto } from './dto/update-sucursal.dto';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 import { Types } from 'mongoose';
+import { Publico } from 'src/autenticacion/decorators/publico';
 
 @Controller('sucursal')
 export class SucursalController {
@@ -13,9 +14,8 @@ export class SucursalController {
   create(@Body() createSucursalDto: CreateSucursalDto) {
     return this.sucursalService.create(createSucursalDto);
   }
-
   @Post('empresa/guardar')
-  guradar() {
+  guardar() {
     return this.sucursalService.guardarEmpresaYsusSucursales();
   }
 
