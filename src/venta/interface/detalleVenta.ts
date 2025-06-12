@@ -1,27 +1,25 @@
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 
-export interface detalleVentaI{
+export interface detalleVentaI {
+  venta: Types.ObjectId;
 
-      venta: Types.ObjectId;
+  combinacionReceta?: Types.ObjectId;
 
-      combinacionReceta?: Types.ObjectId;
-      servicio?: Types.ObjectId;
-    
-      importe: number;
-    
-      cantidad: number;
-    
-      producto?: Types.ObjectId;
-    
-      rubro: string;
+  servicio?: Types.ObjectId;
 
-      descripcion?:string
+  importe: number;
 
-      marca?:string
+  cantidad: number;
 
-   //   comision?:number[]
+  producto?: Types.ObjectId;
 
- 
+  rubro: string;
 
-      
+  descripcion?: string;
+
+  marca?: string;
+
+  medioPar?: boolean;
+
+  //   comision?:number[]
 }

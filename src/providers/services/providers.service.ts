@@ -246,6 +246,8 @@ export class ProvidersService {
   }
 
   private async guardarLente(data: VentaApiI, venta: Types.ObjectId) {
+ 
+    
     const [
       coloLente,
       tipoLente,
@@ -255,15 +257,16 @@ export class ProvidersService {
       tratamiento,
       rango,
     ] = await Promise.all([
-      this.colorLenteService.verificarColorLente(data.atributo1),
+      this.colorLenteService.guardarColorLente(data.atributo1),
       this.tipoLenteService.guardarTipoLente(data.atributo2),
       this.materialService.guardarMaterial(data.atributo3),
-      this.tipoColorLenteService.verificarTipoColorLente(data.atributo4),
+      this.tipoColorLenteService.guardarTipoColorLente(data.atributo4),
       this.marcaLenteService.guardarMarcaLente(data.atributo5),
       this.tratamientoService.guardarTratamiento(data.atributo6),
       this.rangoService.guardarRangoLente(data.atributo7),
     ]);
-
+    
+    
     if (
       !!coloLente &&
       !!tipoLente &&
@@ -284,9 +287,11 @@ export class ProvidersService {
           tipoColorLente._id,
           data.precio,
         );
-
+        console.log('COMB', recetaCombinacion);
+        
       if (recetaCombinacion && venta) {
         const detalle: detalleVentaI = {
+          ...(data.medioPar && {medioPar: data.medioPar}) , 
           cantidad: 1,
           combinacionReceta: recetaCombinacion._id,
           importe: data.importe,

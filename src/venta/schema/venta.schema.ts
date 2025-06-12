@@ -135,6 +135,8 @@ export class DetalleVenta {
 
   // @Prop()
   //comision:number[]
+  @Prop({type:Boolean})
+  medioPar:boolean
 
   @Prop({ type: Types.ObjectId, ref: 'Producto' })
   producto: Types.ObjectId;
