@@ -10,7 +10,6 @@ import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
 import { ComisionServicioService } from 'src/comision-servicio/comision-servicio.service';
 import { calcularPaginas, skip } from 'src/core/utils/paginador';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
-import { sign } from 'crypto';
 
 @Injectable()
 export class ServicioService {

@@ -2,6 +2,7 @@ import { PartialType } from '@nestjs/mapped-types';
 import { Types } from 'mongoose';
 import { flag } from 'src/core/enum/flag';
 import { flagVenta } from '../enum/flagVenta';
+import { LlavesI } from 'src/metas-producto-vip/interface/metasLLave';
 
 export interface VentaI {
   id_venta?: string;
@@ -42,13 +43,7 @@ export interface VentaI {
 
   precio?:string
 }
-interface MetaProductosVip {
-  _id: Types.ObjectId;
-  monturaMasGafa: number;
-  lenteDeContacto: number;
-  sucursal: Types.ObjectId;
 
-}
 
 export interface Comision {
   id: Types.ObjectId;
@@ -100,8 +95,9 @@ export interface VentaAsesor {
 }
 
 export interface RegistroVentas {
-  metaProductosVip: MetaProductosVip;
+  metaProductosVip: LlavesI;
   sucursal: string;
+  idSucursal:Types.ObjectId
   empresa:string
   asesor: string;
   totalDescuento:number

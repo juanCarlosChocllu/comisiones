@@ -33,6 +33,7 @@ import { from } from 'form-data';
 import { formaterFechaHora } from 'src/core/utils/formaterFechaHora';
 import { FinalizarVentaDto } from '../dto/FinalizarVentaDto';
 import { key } from 'src/core/config/config';
+import { LlavesI } from 'src/metas-producto-vip/interface/metasLLave';
 
 @Injectable()
 export class VentaService {
@@ -59,7 +60,7 @@ export class VentaService {
     );
     const asesoresProcesados = await Promise.all(
       asesores.map(async (asesor) => {
-        const [metas, ventas] = await Promise.all([
+        const [llaves, ventas] = await Promise.all([
           this.metasProductoVipService.listarMetasProductosVipPorSucursal(
             asesor.idSucursal,
           ),
@@ -70,9 +71,12 @@ export class VentaService {
             buscadorVentaDto.tipoVenta,
           ),
         ]);
+       
+        
         const ventaAsesor: RegistroVentas = {
-          metaProductosVip: metas,
+          metaProductosVip: llaves,
           sucursal: asesor.sucursalNombre,
+          idSucursal:asesor.idSucursal,
           asesor: asesor.nombre,
           empresa: asesor.empresa,
 
@@ -117,7 +121,7 @@ export class VentaService {
                       detalle.producto,
                       venta.precio,
                     );
-                  console.log('comsion producto', comisiones);
+             
 
                   return {
                     producto: {
@@ -186,7 +190,7 @@ export class VentaService {
         ventaAsesor.ventas = ventasProcesadas;
 
         const { gafaVip, monturavip, lenteDeContacto } =
-          this.monturasYgafasVip(ventaAsesor);
+          this.monturasYgafasVip(ventaAsesor,llaves);
         ventaAsesor.gafaVip = gafaVip;
         ventaAsesor.monturaVip = monturavip;
         ventaAsesor.lenteDeContacto = lenteDeContacto;
@@ -198,15 +202,15 @@ export class VentaService {
           (acc, item) => acc + item.montoTotal,
           0,
         );
-
         return ventaAsesor;
       }),
     );
-
+    
+    
     return asesoresProcesados;
   }
 
-  private monturasYgafasVip(venta: any) {
+  private monturasYgafasVip(venta: RegistroVentas, llave:LlavesI) {
     let monturavip: number = 0;
     let gafaVip: number = 0;
     let lenteDeContacto: number = 0;
@@ -215,78 +219,42 @@ export class VentaService {
       if (Array.isArray(vent.detalle)) {
         for (const detalle of vent.detalle) {
           if (detalle.producto && detalle.producto.tipo == productoE.montura) {
-            if (venta.sucursal == 'SUCRE  CENTRAL') {
-              if (
-                detalle.producto.marca == 'PRADA' ||
-                detalle.producto.marca == 'GUCCI' ||
-                detalle.producto.marca == 'TOM FORD' ||
-                detalle.producto.marca == 'BURBERRY' ||
-                detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-                detalle.producto.marca == 'FRED' ||
-                detalle.producto.marca == 'LOEWE' ||
-                detalle.producto.marca == 'PORSCHE DESIGN' ||
-                detalle.producto.marca == 'PORSCHEN DESIGN' ||
-                detalle.producto.marca == 'RIMOWA' ||
-                detalle.producto.marca == 'MONTBLANC' ||
-                detalle.producto.marca == 'TIFFANY' ||
-                detalle.producto.marca == 'TIFFANY & CO.' ||
-                detalle.producto.marca == 'TIFFANY & CO'
-              ) {
-                monturavip++;
-              }
-            } else if (
-              detalle.producto &&
-              detalle.producto.tipo == productoE.montura &&
-              detalle.importe >= 700
-            ) {
-              monturavip++;
-            }
+              if(llave && llave.marcaMonturas.length > 0){
+                  for (const marca of llave.marcaMonturas) {
+                      if(detalle.producto.marca === marca){
+                        monturavip ++
+                       }
+                  }
+              }else{
+                if(llave && detalle.importe >= llave.precioMontura){
+                   monturavip ++
+                }
+              }   
           }
-
           if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
-            if (venta.sucursal == 'SUCRE  CENTRAL') {
-              if (
-                detalle.producto.marca == 'PRADA' ||
-                detalle.producto.marca == 'GUCCI' ||
-                detalle.producto.marca == 'TOM FORD' ||
-                detalle.producto.marca == 'BURBERRY' ||
-                detalle.producto.marca == 'ERMENEGILDO ZEGNA' ||
-                detalle.producto.marca == 'FRED' ||
-                detalle.producto.marca == 'LOEWE' ||
-                detalle.producto.marca == 'PORSCHE DESIGN' ||
-                detalle.producto.marca == 'PORSCHEN DESIGN' ||
-                detalle.producto.marca == 'RIMOWA' ||
-                detalle.producto.marca == 'MONTBLANC' ||
-                detalle.producto.marca == 'TIFFANY' ||
-                detalle.producto.marca == 'TIFFANY & CO.' ||
-                detalle.producto.marca == 'TIFFANY & CO'
-              ) {
-                gafaVip++;
+             if(llave && llave.marcaGafas.length > 0){
+                  for (const marca of llave.marcaGafas) {
+                      if(detalle.producto.marca === marca){
+                        gafaVip ++
+                       }  
+                  }
+              }else{
+                if(llave && detalle.importe >= llave.precioGafa){
+                   gafaVip ++
+                }
               }
-            } else if (
-              detalle.producto &&
-              detalle.producto.tipo == productoE.gafa &&
-              detalle.importe >= 700
-            ) {
-              gafaVip++;
-            }
           }
-
           if (
             detalle.producto &&
             detalle.producto.tipo == productoE.lenteDeContacto
-          ) {
-            console.log(venta.sucursal);
-            
+          ) { 
             lenteDeContacto++;
           }
         }
       } else {
         console.log(vent);
       }
-    }
-    console.log(lenteDeContacto);
-    
+    }    
     return { monturavip, gafaVip, lenteDeContacto };
   }
 
