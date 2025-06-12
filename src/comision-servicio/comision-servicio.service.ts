@@ -63,7 +63,7 @@ export class ComisionServicioService {
      }
    }
    async crearComision(createComisionServicioDto:CreateComisionServicioDto) {
-      await this.servicioService.asignaComisionServicio(createComisionServicioDto.servicio)
+    
      let contador=0
       for (const data of createComisionServicioDto.data) {
         contador ++ 
