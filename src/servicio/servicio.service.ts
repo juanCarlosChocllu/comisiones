@@ -205,13 +205,13 @@ export class ServicioService {
       {
         $lookup: {
           from: 'ComisionServicio',
-          let: { productoId: '$_id', tipoPrecio: '$precio.nombre' },
+          let: { servicio: '$_id', tipoPrecio: '$precio.nombre' },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ['$producto', '$$productoId'] },
+                    { $eq: ['$servicio', '$$servicio'] },
                     { $eq: ['$precio', '$$tipoPrecio'] },
                   ],
                 },
