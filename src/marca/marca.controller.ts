@@ -3,8 +3,6 @@ import { MarcaService } from './marca.service';
 import { CreateMarcaDto } from './dto/create-marca.dto';
 import { UpdateMarcaDto } from './dto/update-marca.dto';
 import { BuscadorMarcaDto } from './dto/BuscadorMarca.dto';
-import { Publico } from 'src/autenticacion/decorators/publico';
-
 @Controller('marca')
 export class MarcaController {
   constructor(private readonly marcaService: MarcaService) {}
@@ -15,7 +13,6 @@ export class MarcaController {
   }
 
   @Get()
-  @Publico()
   listar(@Query() buscadorMarcaDto:BuscadorMarcaDto) {
     return this.marcaService.listar(buscadorMarcaDto);
   }
