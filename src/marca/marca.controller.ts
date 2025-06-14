@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { MarcaService } from './marca.service';
 import { CreateMarcaDto } from './dto/create-marca.dto';
 import { UpdateMarcaDto } from './dto/update-marca.dto';
+import { BuscadorMarcaDto } from './dto/BuscadorMarca.dto';
+import { Publico } from 'src/autenticacion/decorators/publico';
 
 @Controller('marca')
 export class MarcaController {
@@ -13,8 +15,9 @@ export class MarcaController {
   }
 
   @Get()
-  listar() {
-    return this.marcaService.listar();
+  @Publico()
+  listar(@Query() buscadorMarcaDto:BuscadorMarcaDto) {
+    return this.marcaService.listar(buscadorMarcaDto);
   }
 
   @Get(':id')
