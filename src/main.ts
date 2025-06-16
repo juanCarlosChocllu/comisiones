@@ -10,7 +10,9 @@ async function bootstrap() {
     bodyParser.json({ limit: '2mb' }),
     bodyParser.urlencoded({ limit: '2mb', extended: true }),
   );
-  app.enableCors();
+  app.enableCors({
+    origin:'https://comisiones.opti-system.com',
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
