@@ -12,6 +12,8 @@ async function bootstrap() {
   );
   app.enableCors({
     origin:rutaFrontEnd,
+    methods: 'GET,PATCH,POST,DELETE',
+     allowedHeaders: 'Content-Type,Authorization',
   });
   app.useGlobalPipes(
     new ValidationPipe({
