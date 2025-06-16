@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { port } from './core/config/config';
+import { port, rutaFrontEnd } from './core/config/config';
 import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,7 +11,7 @@ async function bootstrap() {
     bodyParser.urlencoded({ limit: '2mb', extended: true }),
   );
   app.enableCors({
-    origin:'https://comisiones.opti-system.com',
+    origin:rutaFrontEnd,
   });
   app.useGlobalPipes(
     new ValidationPipe({
