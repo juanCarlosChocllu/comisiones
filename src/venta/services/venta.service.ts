@@ -52,7 +52,7 @@ export class VentaService {
     private readonly comisionServicioService: ComisionServicioService,
   ) {}
 
-  async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
+  async listasVentasComisiones(buscadorVentaDto: BuscadorVentaDto) {
     const asesores = await this.asesorService.listarAsesor(
       buscadorVentaDto.sucursal,
     );

@@ -15,7 +15,7 @@ export class VentaController {
 
   @Post()
   listdarVentas(@Body() buscadorVentaDto:BuscadorVentaDto) {
-    return this.ventaService.listarVentas( buscadorVentaDto);
+    return this.ventaService.listasVentasComisiones( buscadorVentaDto);
   }
 
  /* @Get('detalle/:asesor/:fechaInicio/:fechaFin')
