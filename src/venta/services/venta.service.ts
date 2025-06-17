@@ -34,6 +34,7 @@ import { formaterFechaHora } from 'src/core/utils/formaterFechaHora';
 import { FinalizarVentaDto } from '../dto/FinalizarVentaDto';
 import { key } from 'src/core/config/config';
 import { LlavesI } from 'src/metas-producto-vip/interface/metasLLave';
+import { detalleVentaI } from '../interface/detalleVenta';
 
 @Injectable()
 export class VentaService {
@@ -50,6 +51,7 @@ export class VentaService {
     private readonly preciosService: PreciosService,
     private readonly comisionServicioService: ComisionServicioService,
   ) {}
+
   async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const asesores = await this.asesorService.listarAsesor(
       buscadorVentaDto.sucursal,
@@ -86,7 +88,7 @@ export class VentaService {
         const ventasProcesadas = await Promise.all(
           ventas.map(async (venta) => {
             const detalleProcesado = await Promise.all(
-              venta.detalleVenta.map(async (detalle) => {
+              venta.detalleVenta.map(async (detalle: detalleVentaI) => {
                 if (detalle.rubro === productoE.lente) {
                   const comisiones =
                     await this.comisionRecetaService.listarComisionReceta(
@@ -151,7 +153,7 @@ export class VentaService {
                       descripcion: detalle.descripcion,
                     },
                     importe: detalle.importe,
-                    comisiones:comisiones,
+                    comisiones: comisiones,
                   };
                 } else {
                   return {

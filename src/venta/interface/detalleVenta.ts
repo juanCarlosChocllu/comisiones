@@ -1,6 +1,10 @@
 import { Types } from 'mongoose';
 
 export interface detalleVentaI {
+
+  _id?:Types.ObjectId
+  
+  
   venta: Types.ObjectId;
 
   combinacionReceta?: Types.ObjectId;
@@ -21,5 +25,5 @@ export interface detalleVentaI {
 
   medioPar?: boolean;
 
-  //   comision?:number[]
+ 
 }
