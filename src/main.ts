@@ -6,8 +6,8 @@ import { port, rutaFrontEnd } from './core/config/config';
 import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const proxy = app.getHttpAdapter().getInstance()
-  proxy.set('trust proxy', true);
+  /*const proxy = app.getHttpAdapter().getInstance()
+  proxy.set('trust proxy', true);*/
   app.enableCors({
     origin: rutaFrontEnd,
     methods: 'GET,PATCH,POST,DELETE',
