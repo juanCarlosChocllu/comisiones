@@ -90,6 +90,8 @@ export class MetasProductoVipService {
           marcaMonturas: 1,
           marcaGafas: 1,
           lenteDeContacto: 1,
+          precioGafa:1,
+          precioMontura:1,
           sucursal: { $arrayElemAt: ['$sucursal.nombre', 0] },
         },
       },
