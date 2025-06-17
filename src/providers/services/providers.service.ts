@@ -291,7 +291,7 @@ export class ProvidersService {
         
       if (recetaCombinacion && venta) {
         const detalle: detalleVentaI = {
-          ...(data.medioPar && {medioPar: data.medioPar}) , 
+          medioPar: data.medioPar, 
           cantidad: 1,
           combinacionReceta: recetaCombinacion._id,
           importe: data.importe,
