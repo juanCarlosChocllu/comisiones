@@ -50,10 +50,6 @@ export class VentaService {
     private readonly preciosService: PreciosService,
     private readonly comisionServicioService: ComisionServicioService,
   ) {}
-  create(createVentaDto: CreateVentaDto) {
-    return 'This action adds a new venta';
-  }
-
   async listarVentas(buscadorVentaDto: BuscadorVentaDto) {
     const asesores = await this.asesorService.listarAsesor(
       buscadorVentaDto.sucursal,
@@ -71,12 +67,11 @@ export class VentaService {
             buscadorVentaDto.tipoVenta,
           ),
         ]);
-       
-        
+
         const ventaAsesor: RegistroVentas = {
           metaProductosVip: llaves,
           sucursal: asesor.sucursalNombre,
-          idSucursal:asesor.idSucursal,
+          idSucursal: asesor.idSucursal,
           asesor: asesor.nombre,
           empresa: asesor.empresa,
 
@@ -106,10 +101,20 @@ export class VentaService {
                       tipo: detalle.rubro,
                     },
                     importe: detalle.importe,
-                    comisiones: comisiones.map((com) => ({
-                      monto: com.monto,
-                      precio: com.precio,
-                    })),
+                    medioPar: detalle.medioPar,
+                    comisiones: comisiones.map((com) => {
+                      if (detalle.medioPar === true) {
+                        return {
+                          monto: com.monto / 2,
+                          precio: com.precio,
+                        };
+                      } else {
+                        return {
+                          monto: com.monto,
+                          precio: com.precio,
+                        };
+                      }
+                    }),
                   };
                 } else if (
                   detalle.rubro === productoE.montura ||
@@ -121,7 +126,6 @@ export class VentaService {
                       detalle.producto,
                       venta.precio,
                     );
-             
 
                   return {
                     producto: {
@@ -131,10 +135,7 @@ export class VentaService {
                       descripcion: detalle.descripcion,
                     },
                     importe: detalle.importe,
-                    comisiones: comisiones.map((com) => ({
-                      monto: com.monto,
-                      precio: com.precio,
-                    })),
+                    comisiones: comisiones,
                   };
                 } else if (detalle.rubro === productoE.servicio) {
                   const comisiones =
@@ -150,10 +151,7 @@ export class VentaService {
                       descripcion: detalle.descripcion,
                     },
                     importe: detalle.importe,
-                    comisiones: comisiones.map((com) => ({
-                      monto: com.monto,
-                      precio: com.precio,
-                    })),
+                    comisiones:comisiones,
                   };
                 } else {
                   return {
@@ -189,8 +187,10 @@ export class VentaService {
 
         ventaAsesor.ventas = ventasProcesadas;
 
-        const { gafaVip, monturavip, lenteDeContacto } =
-          this.monturasYgafasVip(ventaAsesor,llaves);
+        const { gafaVip, monturavip, lenteDeContacto } = this.monturasYgafasVip(
+          ventaAsesor,
+          llaves,
+        );
         ventaAsesor.gafaVip = gafaVip;
         ventaAsesor.monturaVip = monturavip;
         ventaAsesor.lenteDeContacto = lenteDeContacto;
@@ -205,12 +205,11 @@ export class VentaService {
         return ventaAsesor;
       }),
     );
-    
-    
+
     return asesoresProcesados;
   }
 
-  private monturasYgafasVip(venta: RegistroVentas, llave:LlavesI) {
+  private monturasYgafasVip(venta: RegistroVentas, llave: LlavesI) {
     let monturavip: number = 0;
     let gafaVip: number = 0;
     let lenteDeContacto: number = 0;
@@ -219,42 +218,42 @@ export class VentaService {
       if (Array.isArray(vent.detalle)) {
         for (const detalle of vent.detalle) {
           if (detalle.producto && detalle.producto.tipo == productoE.montura) {
-              if(llave && llave.marcaMonturas.length > 0){
-                  for (const marca of llave.marcaMonturas) {
-                      if(detalle.producto.marca === marca){
-                        monturavip ++
-                       }
-                  }
-              }else{
-                if(llave && detalle.importe >= llave.precioMontura){
-                   monturavip ++
-                }
-              }   
-          }
-          if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
-             if(llave && llave.marcaGafas.length > 0){
-                  for (const marca of llave.marcaGafas) {
-                      if(detalle.producto.marca === marca){
-                        gafaVip ++
-                       }  
-                  }
-              }else{
-                if(llave && detalle.importe >= llave.precioGafa){
-                   gafaVip ++
+            if (llave && llave.marcaMonturas.length > 0) {
+              for (const marca of llave.marcaMonturas) {
+                if (detalle.producto.marca === marca) {
+                  monturavip++;
                 }
               }
+            } else {
+              if (llave && detalle.importe >= llave.precioMontura) {
+                monturavip++;
+              }
+            }
+          }
+          if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
+            if (llave && llave.marcaGafas.length > 0) {
+              for (const marca of llave.marcaGafas) {
+                if (detalle.producto.marca === marca) {
+                  gafaVip++;
+                }
+              }
+            } else {
+              if (llave && detalle.importe >= llave.precioGafa) {
+                gafaVip++;
+              }
+            }
           }
           if (
             detalle.producto &&
             detalle.producto.tipo == productoE.lenteDeContacto
-          ) { 
+          ) {
             lenteDeContacto++;
           }
         }
       } else {
         console.log(vent);
       }
-    }    
+    }
     return { monturavip, gafaVip, lenteDeContacto };
   }
 
@@ -264,7 +263,7 @@ export class VentaService {
     fechaFin: string,
     tipoVenta: Types.ObjectId[],
   ) {
-    const { f1, f2 } = formaterFechaHora(fechaInicio, fechaFin);    
+    const { f1, f2 } = formaterFechaHora(fechaInicio, fechaFin);
     const filter: FiltroI = {
       fechaFinalizacion: {
         $gte: f1,
@@ -314,7 +313,6 @@ export class VentaService {
     return ventas;
   }
 
- 
   async guardarVenta(venta: VentaI) {
     const v = await this.venta.findOne({
       id_venta: venta.id_venta.toUpperCase(),
