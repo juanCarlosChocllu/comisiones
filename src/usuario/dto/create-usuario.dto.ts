@@ -1,4 +1,4 @@
-import { IsString, IsStrongPassword, MaxLength, MinLength, IsArray, ArrayNotEmpty } from "class-validator";
+import { IsString, IsStrongPassword, MaxLength, MinLength, IsArray, ArrayNotEmpty, IsNotEmpty } from "class-validator";
 
 export class CreateUsuarioDto {
 
@@ -19,6 +19,8 @@ export class CreateUsuarioDto {
     @IsStrongPassword({}, { 
         message: 'password Incluir mayúsculas, minúsculas, números y símbolos.' 
     })
+    @IsNotEmpty()
+    @MinLength(8, { message: 'Mínimo 8 caracteres.' })
     password: string;
 
     @IsString({ message: 'Rol requerido.' })
