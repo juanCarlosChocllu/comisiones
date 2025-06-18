@@ -3,13 +3,11 @@ import { ProvidersService } from '../services/providers.service';
 import { DescargarProviderDto } from '../dto/create-provider.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../utils/multerConfig';
-import { Publico } from 'src/autenticacion/decorators/publico';
 
 
 @Controller('provider')
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
-@Publico()
   @Post('mia/venta')
   descargarVentas(@Body() descargarProviderDto: DescargarProviderDto) {
     return this.providersService.descargarVentasMia(descargarProviderDto);
