@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AutenticacionDto } from './dto/create-autenticacion.dto';
 import * as argon2 from 'argon2'
 import { UsuarioService } from 'src/usuario/usuario.service';
@@ -25,9 +25,9 @@ export class AutenticacionService {
        token
       }
      }
-     throw new UnauthorizedException('Credenciales invalidas')
+     throw new ForbiddenException('Credenciales invalidas')
    }
-   throw new UnauthorizedException('Credenciales invalidas')
+   throw new ForbiddenException('Credenciales invalidas')
  }
 
 }
