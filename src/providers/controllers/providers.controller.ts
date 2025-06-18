@@ -8,6 +8,7 @@ import { multerConfig } from '../utils/multerConfig';
 @Controller('provider')
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
+  
   @Post('mia/venta')
   descargarVentas(@Body() descargarProviderDto: DescargarProviderDto) {
     return this.providersService.descargarVentasMia(descargarProviderDto);
