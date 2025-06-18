@@ -31,6 +31,7 @@ import { ComisionServicioModule } from './comision-servicio/comision-servicio.mo
 import { databaseConeccion } from './core/config/config';
 import { APP_GUARD } from '@nestjs/core';
 import { TokenGuard } from './autenticacion/guards/token/token.guard';
+import { LogDescargaModule } from './log-descarga/log-descarga.module';
 
 
 @Module({
@@ -64,6 +65,7 @@ import { TokenGuard } from './autenticacion/guards/token/token.guard';
     UsuarioModule,
     ServicioModule,
     ComisionServicioModule,
+    LogDescargaModule,
   ],
   controllers: [],
   providers: [

@@ -47,6 +47,7 @@ import * as path from 'path';
 import { apiMia, tokenMia } from 'src/core/config/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DateTime } from 'luxon';
+import { LogDescargaService } from 'src/log-descarga/log-descarga.service';
 
 @Injectable()
 export class ProvidersService {
@@ -74,6 +75,7 @@ export class ProvidersService {
     private readonly comisionRecetaService: ComisionRecetaService,
     private readonly comisionProductoService: ComisionProductoService,
     private readonly servicioService: ServicioService,
+        private readonly logDescargaService: LogDescargaService,
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -82,11 +84,10 @@ export class ProvidersService {
         fechaInicio: createProviderDto.fechaInicio,
         token: tokenMia,
       };
-
       const ventas = await firstValueFrom(
         this.httpService.post<VentaApiI[]>(apiMia, data),
       );
-
+      await this.logDescargaService.registrarLogDescarga('Venta',createProviderDto.fechaFin)
       return await this.guardardataVenta(ventas.data);
     } catch (error) {
       console.log(error);
@@ -145,6 +146,7 @@ export class ProvidersService {
         console.log('sin sucursal');
       }
     }
+  
     return { status: HttpStatus.CREATED };
   }
 

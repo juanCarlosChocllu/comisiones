@@ -98,12 +98,12 @@ export class VentaService {
 
                   return {
                     combinacion: {
+                      medioPar: detalle.medioPar,
                       descripcion: detalle.descripcion,
                       id: detalle.combinacionReceta,
                       tipo: detalle.rubro,
                     },
                     importe: detalle.importe,
-                    medioPar: detalle.medioPar,
                     comisiones: comisiones.map((com) => {
                       if (detalle.medioPar === true) {
                         return {
@@ -227,12 +227,13 @@ export class VentaService {
                 }
               }
             } else {
-              if (llave && detalle.importe >= llave.precioMontura) {
+              if (llave &&  llave.precioMontura >= detalle.importe) {
                 monturavip++;
               }
             }
           }
           if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
+        
             if (llave && llave.marcaGafas.length > 0) {
               for (const marca of llave.marcaGafas) {
                 if (detalle.producto.marca === marca) {
@@ -240,14 +241,16 @@ export class VentaService {
                 }
               }
             } else {
-              if (llave && detalle.importe >= llave.precioGafa) {
+             
+              
+              if (llave && llave.precioGafa >=  detalle.importe) {
                 gafaVip++;
               }
             }
           }
           if (
             detalle.producto &&
-            detalle.producto.tipo == productoE.lenteDeContacto
+            detalle.producto.tipo === productoE.lenteDeContacto
           ) {
             lenteDeContacto++;
           }
@@ -256,6 +259,7 @@ export class VentaService {
         console.log(vent);
       }
     }
+   
     return { monturavip, gafaVip, lenteDeContacto };
   }
 
