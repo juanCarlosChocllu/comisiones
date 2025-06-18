@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, HttpStatus, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { port, rutaFrontEnd } from './core/config/config';
 import * as bodyParser from 'body-parser';
@@ -20,6 +20,28 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
+      exceptionFactory(errors) {
+        const formattedErrors = errors.map((error) => {
+      
+          
+          const constraints = error.constraints
+    
+          
+            ? Object.values(error.constraints)
+            : [];
+
+          return {
+            propiedad: error.property,
+            errors: constraints,
+          };
+        });
+        
+        throw new BadRequestException({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Errores de validación',
+          errors: formattedErrors,
+        });
+      },
     }),
   );
   app.setGlobalPrefix('api');
