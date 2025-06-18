@@ -10,6 +10,7 @@ import { tipoProductoPrecio } from 'src/precios/enum/tipoProductoPrecio';
 import { ComisionServicioService } from 'src/comision-servicio/comision-servicio.service';
 import { calcularPaginas, skip } from 'src/core/utils/paginador';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
+import * as ExcelJs from 'exceljs';
 
 @Injectable()
 export class ServicioService {
@@ -127,11 +128,13 @@ export class ServicioService {
         precio._id,
         data.monto,
       );
-      await this.comisionServicioService.eliminarComisionRegistrado(servicioExiste._id, data.tipoPrecio)
+      await this.comisionServicioService.eliminarComisionRegistrado(
+        servicioExiste._id,
+        data.tipoPrecio,
+      );
       let contador = 0;
       for (const comision of comisiones) {
         if (comision.monto > 0) {
-          
           contador++;
           const nombre = `Comison ${contador}`;
           await this.comisionServicioService.guardarComisionServicio(
@@ -252,5 +255,176 @@ export class ServicioService {
         { comision: true },
       );
     }
+  }
+
+  async descargarServicioSinComision() {
+    const workbook = new ExcelJs.Workbook();
+    const worksheet = workbook.addWorksheet('hoja 1');
+    const servicio = await this.servicio.aggregate([
+      {
+        $lookup: {
+          from: 'DetallePrecio',
+          localField: '_id',
+          foreignField: 'servicio',
+          as: 'detallePrecio',
+        },
+      },
+      { $unwind: '$detallePrecio' },
+
+      {
+        $lookup: {
+          from: 'Precio',
+          localField: 'detallePrecio.precio',
+          foreignField: '_id',
+          as: 'precio',
+        },
+      },
+      { $unwind: '$precio' },
+
+      {
+        $lookup: {
+          from: 'ComisionServicio',
+          let: { servicio: '$_id', tipoPrecio: '$precio.nombre' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$servicio', '$$servicio'] },
+                    { $eq: ['$precio', '$$tipoPrecio'] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'comisionServicio',
+        },
+      },
+
+      { $match: { comisionServicio: { $size: 0 } } },
+      {
+        $project: {
+          codigoMia: 1,
+          nombre: 1,
+          comision: 1,
+          descripcion: 1,
+          comisionServicio: 1,
+          importe: '$detallePrecio.monto',
+          tipoPrecio: '$precio.nombre',
+        },
+      },
+    ]);
+
+    worksheet.columns = [
+      { header: 'id', key: 'id', width: 30 },
+      { header: 'nombre', key: 'nombre', width: 30 },
+      { header: 'tipoPrecio', key: 'tipoPrecio', width: 30 },
+      { header: 'monto', key: 'monto', width: 15 },
+      { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
+      { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
+    ];
+
+    for (const comb of servicio) {
+      worksheet.addRow({
+        id: String(comb.codigoMia),
+        nombre: comb.nombre,
+        tipoPrecio: comb.tipoPrecio,
+        monto: comb.importe ? comb.importe : 0,
+        comisionFija1: 0,
+        comisionFija2: 0,
+      });
+    }
+    return workbook;
+  }
+  async descargarServicioComision() {
+    const workbook = new ExcelJs.Workbook();
+    const worksheet = workbook.addWorksheet('hoja 1');
+    const servicio = await this.servicio.aggregate([
+      {
+        $lookup: {
+          from: 'DetallePrecio',
+          localField: '_id',
+          foreignField: 'servicio',
+          as: 'detallePrecio',
+        },
+      },
+      { $unwind: '$detallePrecio' },
+
+      {
+        $lookup: {
+          from: 'Precio',
+          localField: 'detallePrecio.precio',
+          foreignField: '_id',
+          as: 'precio',
+        },
+      },
+      { $unwind: '$precio' },
+
+      {
+        $lookup: {
+          from: 'ComisionServicio',
+          let: { servicio: '$_id', tipoPrecio: '$precio.nombre' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$servicio', '$$servicio'] },
+                    { $eq: ['$precio', '$$tipoPrecio'] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'comisionServicio',
+        },
+      },
+      {
+        $project: {
+          codigoMia: 1,
+          nombre: 1,
+          comision: 1,
+          descripcion: 1,
+          comisionServicio: 1,
+          importe: '$detallePrecio.monto',
+          tipoPrecio: '$precio.nombre',
+        },
+      },
+    ]);
+    console.log(servicio);
+    
+    worksheet.columns = [
+      { header: 'id', key: 'id', width: 30 },
+      { header: 'nombre', key: 'nombre', width: 30 },
+      { header: 'tipoPrecio', key: 'tipoPrecio', width: 30 },
+      { header: 'monto', key: 'monto', width: 15 },
+      { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
+      { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
+    ];
+
+    for (const comb of servicio) {
+      let mayor: number = 0;
+      let menor: number = 0;
+
+      if (comb.comisionServicio.length == 1) {
+        const monto = comb.comisionServicio.map((item) => item.monto);
+
+        mayor = Math.max(...monto);
+        menor = 0;
+      } else if (comb.comisionServicio.length > 1) {
+        const monto = comb.comisionServicio.map((item) => item.monto);
+        mayor = Math.max(...monto);
+        menor = Math.min(...monto);
+      }
+      worksheet.addRow({
+        id: String(comb.codigoMia),
+        nombre: comb.nombre,
+        tipoPrecio: comb.tipoPrecio,
+        monto: comb.importe ? comb.importe : 0,
+        comisionFija1: mayor,
+        comisionFija2: menor,
+      });
+    }
+    return workbook;
   }
 }
