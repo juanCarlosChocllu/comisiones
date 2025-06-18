@@ -20,7 +20,6 @@ export class ServicioController {
   listarServicios(@Query() paginadorDto: PaginadorDto) {
     return this.servicioService.listarServicios(paginadorDto);
   }
-  @Publico()
   @Get('sinComision')
   listarServiciosSinComision(@Query() paginadorDto: PaginadorDto) {
     return this.servicioService.listarServiciosSinComision(paginadorDto);

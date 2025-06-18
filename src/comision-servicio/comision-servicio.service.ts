@@ -9,75 +9,69 @@ import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class ComisionServicioService {
-    constructor(
-      @InjectModel(ComisionServicio.name) private readonly comisionServicio:Model<ComisionServicio>,
-      private readonly servicioService:ServicioService
-    ){}
-  
-  
-  async listarComosionPoraServicio(servicio:Types.ObjectId, precio:string) {
+  constructor(
+    @InjectModel(ComisionServicio.name)
+    private readonly comisionServicio: Model<ComisionServicio>,
+    private readonly servicioService: ServicioService,
+  ) {}
+
+  async listarComosionPoraServicio(servicio: Types.ObjectId, precio: string) {
     const comisiones = await this.comisionServicio
-    .find(
-      {
-        precio: precio,
+      .find(
+        {
+          precio: precio,
+          servicio: new Types.ObjectId(servicio),
+          flag: flag.nuevo,
+        },
+        { monto: 1, precio: 1 },
+      )
+      .lean();
+    return comisiones;
+  }
+
+  async guardarComisionServicio(
+    servicio: Types.ObjectId,
+    monto: number,
+    nombre: string,
+    precio: string,
+  ) {
+    const data = await this.comisionServicio.exists({
+      servicio: new Types.ObjectId(servicio),
+
+      monto: monto | 0,
+      nombre: nombre,
+      precio: precio,
+    });
+    if (!data) {
+      await this.comisionServicio.create({
         servicio: new Types.ObjectId(servicio),
-        flag:flag.nuevo
-      },
-      { monto: 1, precio: 1 },
-    )
-    .lean();
-  return comisiones;
+        monto: monto | 0,
+        nombre: nombre,
+        precio: precio,
+      });
+    }
+  }
+  async crearComision(createComisionServicioDto: CreateComisionServicioDto) {
+    let contador = 0;
+    for (const data of createComisionServicioDto.data) {
+      contador++;
+      await this.comisionServicio.create({
+        ...data,
+        nombre: data.nombre ? data.nombre : `comision ${contador}`,
+        servicio: new Types.ObjectId(createComisionServicioDto.servicio),
+      });
+    }
+    return { status: HttpStatus.OK };
   }
 
 
-   async guardarComisionServicio(
-     servicio: Types.ObjectId,
-     monto: number,
-     comision: number,
-     nombre: string,
-     precio: string,
-   ) {
-
-    
-     const diferencia = comision | 0 - monto | 0;
-  
-     
-     const data = await this.comisionServicio.exists({
-       servicio: new Types.ObjectId(servicio),
-       comision: comision,
-       diferencia: diferencia,
-       monto: monto | 0,
-       nombre: nombre,
-       precio: precio,
-     });
-     if (!data) {
-       await this.comisionServicio.create({
-         servicio: new Types.ObjectId(servicio),
-         comision: comision,
-         diferencia: diferencia,
-         monto: monto|0,
-         nombre: nombre,
-         precio: precio,
-        
-       });
-     }
-   }
-   async crearComision(createComisionServicioDto:CreateComisionServicioDto) {
-    
-     let contador=0
-      for (const data of createComisionServicioDto.data) {
-        contador ++ 
-        await this.comisionServicio.create({
-          ...data,
-          nombre: data.nombre ? data.nombre : `comision ${contador}`,
-          servicio: new Types.ObjectId(
-            createComisionServicioDto.servicio,
-          ),
-        });
-      }
-      return {status:HttpStatus.OK}
-
-   }
-
-     
+  async eliminarComisionRegistrado(
+    servicio: Types.ObjectId,
+    precio: string,
+  ) {
+    return await this.comisionServicio.deleteMany({
+      servicio: new Types.ObjectId(servicio),
+      precio: precio,
+    });
   }
+}

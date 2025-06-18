@@ -105,7 +105,6 @@ export class ProvidersService {
           this.asesorService.guardarAsesor(data.nombre_vendedor, sucursal._id),
           this.tipoVentaService.guardarTipoVenta(data.tipoVenta),
         ]);
-        
 
         ventaGuardar = {
           asesor: asesor._id,
@@ -128,7 +127,7 @@ export class ProvidersService {
             fechaFinalizacion: new Date(data.fecha_finalizacion),
           }),
         };
-         const venta = await this.ventaService.guardarVenta(ventaGuardar);
+        const venta = await this.ventaService.guardarVenta(ventaGuardar);
         if (data.rubro === productoE.lente) {
           await this.guardarLente(data, venta._id);
         } else if (
@@ -164,7 +163,7 @@ export class ProvidersService {
   private async guardarServicio(data: VentaApiI, venta: Types.ObjectId) {
     const servicio = await this.servicioService.buscarServicio(
       data.codProducto,
-      data.precio
+      data.precio,
     );
     if (servicio) {
       const detalle: detalleVentaI = {
@@ -246,8 +245,6 @@ export class ProvidersService {
   }
 
   private async guardarLente(data: VentaApiI, venta: Types.ObjectId) {
- 
-    
     const [
       coloLente,
       tipoLente,
@@ -265,8 +262,7 @@ export class ProvidersService {
       this.tratamientoService.guardarTratamiento(data.atributo6),
       this.rangoService.guardarRangoLente(data.atributo7),
     ]);
-    
-    
+
     if (
       !!coloLente &&
       !!tipoLente &&
@@ -287,11 +283,10 @@ export class ProvidersService {
           tipoColorLente._id,
           data.precio,
         );
-        console.log('COMB', recetaCombinacion);
-        
+    
       if (recetaCombinacion && venta) {
         const detalle: detalleVentaI = {
-          medioPar: data.medioPar, 
+          medioPar: data.medioPar,
           cantidad: 1,
           combinacionReceta: recetaCombinacion._id,
           importe: data.importe,
@@ -399,8 +394,6 @@ export class ProvidersService {
           monto: monto ? Number(monto) : 0,
         };
 
-      
-
         await this.combinacionRecetaService.guardarComisionrecetaCombinacion(
           data,
         );
@@ -502,8 +495,9 @@ export class ProvidersService {
       }
     }
   }
-  async guardarComisionesServicio() {
-    const workbook = this.hojaDeTrabajo('./upload/servicio.xlsx');
+  async guardarComisionesServicio(nombreArchivo: string) {
+    let ruta: string = this.rutaArchivoUpload(nombreArchivo);
+    const workbook = this.hojaDeTrabajo(ruta);
     let contador: number = 0;
     for await (const hojas of workbook) {
       for await (const hoja of hojas) {
@@ -513,24 +507,21 @@ export class ProvidersService {
         }
         const codigoMia = hoja.getCell(1).value;
         const nombre = hoja.getCell(2).value;
-        const descripcion = hoja.getCell(3).value;
-        const tipoPrecio = hoja.getCell(4).value;
-        const monto = hoja.getCell(5).value;
+       
+        const tipoPrecio = hoja.getCell(3).value;
+        const monto = hoja.getCell(4).value;
 
         const comisiones: comisionesI[] = [
           {
-            comision: hoja.getCell(6).value,
-            monto: hoja.getCell(7).value,
+            monto: hoja.getCell(5).value,
           },
           {
-            comision: hoja.getCell(8).value,
-            monto: hoja.getCell(9).value,
+            monto: hoja.getCell(6).value,
           },
         ];
         const data: exceldataServicioI = {
           codigoMia: String(codigoMia),
           comisiones: comisiones,
-          descripcion: String(descripcion),
           nombre: String(nombre),
           tipoPrecio: String(tipoPrecio),
           monto: Number(monto),

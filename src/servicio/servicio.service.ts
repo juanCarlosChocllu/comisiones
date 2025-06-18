@@ -82,10 +82,10 @@ export class ServicioService {
         },
       },
       {
-        $project:{
-          _id:1
-        }
-      }
+        $project: {
+          _id: 1,
+        },
+      },
     ]);
 
     return servicio[0];
@@ -109,17 +109,16 @@ export class ServicioService {
       );
       let contador = 0;
       for (const comision of comisiones) {
-        console.log(comision);
-
-        contador++;
-        const nombre = `Comison ${contador}`;
-        await this.comisionServicioService.guardarComisionServicio(
-          servicio._id,
-          comision.monto.result,
-          comision.comision.result,
-          nombre,
-          data.tipoPrecio,
-        );
+        if (comision.monto > 0) {
+          contador++;
+          const nombre = `Comison ${contador}`;
+          await this.comisionServicioService.guardarComisionServicio(
+            servicio._id,
+            comision.monto,
+            nombre,
+            data.tipoPrecio,
+          );
+        }
       }
     } else {
       await this.preciosService.guardarDetallePrecio(
@@ -128,17 +127,20 @@ export class ServicioService {
         precio._id,
         data.monto,
       );
+      await this.comisionServicioService.eliminarComisionRegistrado(servicioExiste._id, data.tipoPrecio)
       let contador = 0;
       for (const comision of comisiones) {
-        contador++;
-        const nombre = `Comison ${contador}`;
-        await this.comisionServicioService.guardarComisionServicio(
-          servicioExiste._id,
-          comision.monto.result,
-          comision.comision.result,
-          nombre,
-          data.tipoPrecio,
-        );
+        if (comision.monto > 0) {
+          
+          contador++;
+          const nombre = `Comison ${contador}`;
+          await this.comisionServicioService.guardarComisionServicio(
+            servicioExiste._id,
+            comision.monto,
+            nombre,
+            data.tipoPrecio,
+          );
+        }
       }
     }
   }
@@ -150,8 +152,9 @@ export class ServicioService {
     importe: number,
     nombre: string,
   ) {
-    const  servicio= await this.servicio.findOne({ codigoMia: codigoMia }) 
-   const precioEcontrado = await    this.preciosService.buscarPrecioPorNombre(precio)
+    const servicio = await this.servicio.findOne({ codigoMia: codigoMia });
+    const precioEcontrado =
+      await this.preciosService.buscarPrecioPorNombre(precio);
     if (!servicio) {
       const servicio = await this.servicio.create({
         codigoMia: codigoMia,
@@ -159,7 +162,7 @@ export class ServicioService {
         descripcion: descripcion,
         nombre: nombre,
       });
-      
+
       await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.servicio,
         servicio._id,
@@ -167,9 +170,7 @@ export class ServicioService {
         importe,
       );
       return servicio;
-    }else{
-      
-      
+    } else {
       await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.servicio,
         servicio._id,
@@ -230,8 +231,8 @@ export class ServicioService {
           comision: 1,
           descripcion: 1,
           comisionServicio: 1,
-          importe:'$detallePrecio.monto',
-          tipoPrecio:'$precio.nombre'
+          importe: '$detallePrecio.monto',
+          tipoPrecio: '$precio.nombre',
         },
       },
     ]);
