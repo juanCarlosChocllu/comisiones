@@ -32,6 +32,7 @@ import { databaseConeccion } from './core/config/config';
 import { APP_GUARD } from '@nestjs/core';
 import { TokenGuard } from './autenticacion/guards/token/token.guard';
 import { LogDescargaModule } from './log-descarga/log-descarga.module';
+import { BackupModule } from './backup/backup.module';
 
 
 @Module({
@@ -66,6 +67,7 @@ import { LogDescargaModule } from './log-descarga/log-descarga.module';
     ServicioModule,
     ComisionServicioModule,
     LogDescargaModule,
+    BackupModule,
   ],
   controllers: [],
   providers: [
