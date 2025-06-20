@@ -10,8 +10,7 @@ async function bootstrap() {
     origin: rutaFrontEnd,
     methods: 'GET,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
-    
-    //credentials: true,
+    credentials: true,
   });
   app.use(
     bodyParser.json({ limit: '2mb' }),
