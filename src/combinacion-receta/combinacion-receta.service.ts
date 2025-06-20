@@ -520,7 +520,8 @@ export class CombinacionRecetaService {
           tipoColorLente: '$tipoColorLente.nombre',
           tipoPrecio: '$precio.nombre',
           importe: '$detallePrecio.monto',
-          comisiones:1
+          comisiones:1,
+          fecha:1
         },
       },
     ];
@@ -541,6 +542,7 @@ export class CombinacionRecetaService {
       { header: 'monto', key: 'monto', width: 15 },
       { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
+    
     ];
 
     for (const comb of combinaciones) {
@@ -571,8 +573,11 @@ export class CombinacionRecetaService {
         monto: comb.importe,
         comisionFija1: mayor,
         comisionFija2: menor,
+     
       });
     }
+
+    
     /*   worksheet.eachRow((row) => {
       row.eachCell((cell) => {
         cell.protection = { locked: false };
@@ -980,7 +985,8 @@ export class CombinacionRecetaService {
           tipoColorLente: '$tipoColorLente.nombre',
           tipoPrecio: '$precio.nombre',
           importe: '$detallePrecio.monto',
-          comisiones:1
+          comisiones:1,
+          fecha:1
         },
       },
     ];
@@ -1205,6 +1211,7 @@ export class CombinacionRecetaService {
       { header: 'monto', key: 'monto', width: 15 },
       { header: 'comision Fija 1', key: 'comisionFija1', width: 30 },
       { header: 'comision Fija 2', key: 'comisionFija2', width: 30 },
+      { header: 'fecha', key: 'fecha', width: 30 },
     ];
 
     for (const comb of combinaciones) {
@@ -1221,6 +1228,7 @@ export class CombinacionRecetaService {
         monto: comb.importe,
         comisionFija1: 0,
         comisionFija2: 0,
+        fecha:comb.fecha
       });
     }
     /*   worksheet.eachRow((row) => {

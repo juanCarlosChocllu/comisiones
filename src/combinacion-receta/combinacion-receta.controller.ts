@@ -27,7 +27,7 @@ export class CombinacionRecetaController {
   listarCombinaciones(@Query () buscadorCombinacionDto:BuscadorCombinacionDto) {
     return this.combinacionRecetaService.listarCombinaciones(buscadorCombinacionDto);
   }
-  @Publico()
+
   @Get('sinComision')
   listarCombinacionesSinComision() {
     return this.combinacionRecetaService.combinacionesSinComision();
