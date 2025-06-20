@@ -6,12 +6,12 @@ import { port, rutaFrontEnd } from './core/config/config';
 import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({
+  app.enableCors(/*{
     origin: rutaFrontEnd,
     methods: 'GET,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true,
-  });
+  }*/);
   app.use(
     bodyParser.json({ limit: '2mb' }),
     bodyParser.urlencoded({ limit: '2mb', extended: true }),
