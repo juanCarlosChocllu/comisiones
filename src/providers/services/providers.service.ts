@@ -48,6 +48,7 @@ import { apiMia, tokenMia } from 'src/core/config/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { DateTime } from 'luxon';
 import { LogDescargaService } from 'src/log-descarga/log-descarga.service';
+import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class ProvidersService {
@@ -88,14 +89,16 @@ export class ProvidersService {
         this.httpService.post<VentaApiI[]>(apiMia, data),
       );
       await this.logDescargaService.registrarLogDescarga('Venta',createProviderDto.fechaFin)
-      return await this.guardardataVenta(ventas.data);
+      return ventas.data;
     } catch (error) {
       console.log(error);
     }
   }
+ 
 
-  private async guardardataVenta(ventas: VentaApiI[]) {
+   async guardardataVenta(createProviderDto: DescargarProviderDto) {
     let ventaGuardar: VentaI = {};
+    const ventas:VentaApiI[] = await this.descargarVentasMia(createProviderDto)
     for (const data of ventas) {
       const sucursal = await this.sucursalService.buscarSucursalPorNombre(
         data.local,
@@ -610,5 +613,15 @@ export class ProvidersService {
     };
     this.logger.debug('Iniciando la descarga');
     await this.descargarVentasMia(fecha);
+  }
+
+  async actualizarDescuentos(createProviderDto: DescargarProviderDto){
+    const data:VentaApiI[] = await  this.descargarVentasMia(createProviderDto)
+
+    for (const venta of data) {
+      await this.ventaService.actulizarDescuento(venta.idVenta, venta.descuentoFicha, venta.monto_total, venta.flag, venta.fecha_finalizacion)
+    }
+
+    return {status:HttpStatus.OK}
   }
 }

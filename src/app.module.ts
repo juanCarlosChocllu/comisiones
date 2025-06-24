@@ -33,6 +33,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { TokenGuard } from './autenticacion/guards/token/token.guard';
 import { LogDescargaModule } from './log-descarga/log-descarga.module';
 import { BackupModule } from './backup/backup.module';
+import { LogModule } from './log/log.module';
 
 
 @Module({
@@ -68,6 +69,7 @@ import { BackupModule } from './backup/backup.module';
     ComisionServicioModule,
     LogDescargaModule,
     BackupModule,
+    LogModule,
   ],
   controllers: [],
   providers: [

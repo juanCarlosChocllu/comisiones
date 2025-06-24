@@ -11,7 +11,12 @@ export class ProvidersController {
   
   @Post('mia/venta')
   descargarVentas(@Body() descargarProviderDto: DescargarProviderDto) {
-    return this.providersService.descargarVentasMia(descargarProviderDto);
+    return this.providersService.guardardataVenta(descargarProviderDto);
+  }
+
+  @Post('mia/venta/actualizar')
+  actualizarDescuentos(@Body() descargarProviderDto: DescargarProviderDto) {
+    return this.providersService.actualizarDescuentos(descargarProviderDto);
   }
  
   @Post('excel/combinaciones/comisiones')

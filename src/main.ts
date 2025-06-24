@@ -4,6 +4,8 @@ import { BadRequestException, HttpStatus, ValidationPipe } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { port, rutaFrontEnd } from './core/config/config';
 import * as bodyParser from 'body-parser';
+import { LoggerInterceptor } from './core/interceptors/logger.interceptor';
+import { LogService } from './log/log.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
@@ -16,7 +18,8 @@ async function bootstrap() {
     bodyParser.json({ limit: '2mb' }),
     bodyParser.urlencoded({ limit: '2mb', extended: true }),
   );
-
+   const logService = app.get(LogService)
+  app.useGlobalInterceptors(new LoggerInterceptor(logService))
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

@@ -11,6 +11,7 @@ import { DetalleVenta, Venta } from '../schema/venta.schema';
 import { Model, Types } from 'mongoose';
 import {
   FiltroI,
+  FinalizarVentaI,
   RegistroVentas,
   VentaAsesor,
   VentaI,
@@ -35,6 +36,7 @@ import { FinalizarVentaDto } from '../dto/FinalizarVentaDto';
 import { key } from 'src/core/config/config';
 import { LlavesI } from 'src/metas-producto-vip/interface/metasLLave';
 import { detalleVentaI } from '../interface/detalleVenta';
+import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class VentaService {
@@ -227,13 +229,12 @@ export class VentaService {
                 }
               }
             } else {
-              if (llave &&  llave.precioMontura >= detalle.importe) {
+              if (llave && llave.precioMontura >= detalle.importe) {
                 monturavip++;
               }
             }
           }
           if (detalle.producto && detalle.producto.tipo == productoE.gafa) {
-        
             if (llave && llave.marcaGafas.length > 0) {
               for (const marca of llave.marcaGafas) {
                 if (detalle.producto.marca === marca) {
@@ -241,9 +242,7 @@ export class VentaService {
                 }
               }
             } else {
-             
-              
-              if (llave && llave.precioGafa >=  detalle.importe) {
+              if (llave && llave.precioGafa >= detalle.importe) {
                 gafaVip++;
               }
             }
@@ -259,7 +258,7 @@ export class VentaService {
         console.log(vent);
       }
     }
-   
+
     return { monturavip, gafaVip, lenteDeContacto };
   }
 
@@ -367,11 +366,13 @@ export class VentaService {
         id_venta: finalizarVentaDto.idVenta.toUpperCase().trim(),
       });
       if (venta) {
-        await this.venta.updateMany(
+        await this.venta.updateOne(
           { id_venta: finalizarVentaDto.idVenta.toUpperCase().trim() },
           {
             fechaFinalizacion: new Date(finalizarVentaDto.fecha),
             flag: finalizarVentaDto.flag,
+            descuento: finalizarVentaDto.descuento,
+            montoTotal: finalizarVentaDto.montoTotal,
           },
         );
         return { status: HttpStatus.OK };
@@ -379,6 +380,30 @@ export class VentaService {
       return { status: HttpStatus.NOT_FOUND };
     } catch (error) {
       throw new BadRequestException();
+    }
+  }
+
+  async actulizarDescuento(
+    id_venta: string,
+    descuento: number,
+    montoTotal: number,
+    flag: string,
+    fecha_finalizacion: string,
+  ) {
+    const venta = await this.venta.findOne({
+      id_venta: id_venta.toUpperCase().trim(),
+    });
+    if (venta) {
+      const data: FinalizarVentaI = {
+        descuento: descuento,
+        montoTotal: montoTotal,
+        flag: flag,
+      };
+      if (fecha_finalizacion) {
+        data.fechaFinalizacion = new Date(fecha_finalizacion);
+      }
+
+      await this.venta.updateOne({ id_venta: id_venta }, data);
     }
   }
 }

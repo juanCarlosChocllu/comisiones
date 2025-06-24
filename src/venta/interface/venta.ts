@@ -119,3 +119,10 @@ export interface FiltroI {
     $lte: Date
   },
 }
+
+export interface FinalizarVentaI {
+  fechaFinalizacion?:Date,
+  flag: string,
+  descuento: number,
+  montoTotal: number
+}

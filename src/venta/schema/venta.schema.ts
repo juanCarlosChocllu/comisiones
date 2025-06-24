@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { DateTime } from 'luxon';
 import { Types } from 'mongoose';
-import { flag } from 'src/core/enum/flag';
+
+import { FinalizarVentaI } from '../interface/venta';
 
 @Schema({ collection: 'Venta' })
 export class Venta {
@@ -92,6 +93,7 @@ ventaSchema.pre('save', function (next) {
   }
 
   if (this.fechaFinalizacion) {
+  
     const fechaEnBolivia = DateTime.fromJSDate(this.fechaFinalizacion).setZone(
       'America/La_Paz',
     );
@@ -107,11 +109,42 @@ ventaSchema.pre('save', function (next) {
       },
       { zone: 'utc' },
     );
+
     this.fechaFinalizacion = fechaFalsaUTC.toJSDate();
   }
 
   next();
 });
+
+
+ventaSchema.pre('updateOne',function(next){
+  const data:FinalizarVentaI= this.getUpdate() as FinalizarVentaI
+  
+  if (data.fechaFinalizacion) {
+  
+    const fechaEnBolivia = DateTime.fromJSDate(data.fechaFinalizacion).setZone(
+      'America/La_Paz',
+    );
+    const fechaFalsaUTC = DateTime.fromObject(
+      {
+        year: fechaEnBolivia.year,
+        month: fechaEnBolivia.month,
+        day: fechaEnBolivia.day,
+        hour: fechaEnBolivia.hour,
+        minute: fechaEnBolivia.minute,
+        second: fechaEnBolivia.second,
+        millisecond: fechaEnBolivia.millisecond,
+      },
+      { zone: 'utc' },
+    );
+
+    data.fechaFinalizacion = fechaFalsaUTC.toJSDate();
+  }
+
+
+
+  next();
+})
 
 @Schema({ collection: 'DetalleVenta' })
 export class DetalleVenta {
