@@ -23,13 +23,10 @@ export class LoggerInterceptor implements NestInterceptor {
         next: async () => {
           if (path === '/api/autenticacion') {
             await this.succesLogin(method, path, request.body.username);
-          }else {
-            this.registrarMonvimiento(method, path, request)
-          } 
+          }
         },
         error: async (err) => {
           const e = err as AxiosError;
-        
           if (e && e.status === HttpStatusCode.Forbidden) {
             await this.errorLogin(method, path, request.body.username);
           }
@@ -58,43 +55,5 @@ export class LoggerInterceptor implements NestInterceptor {
     await this.logService.registrarLog(data);
   }
 
-  private async registrarMonvimiento(
-    method: string,
-    path: string,
-    request: Request,
-  ) {
-    const schema = this.extraerSchema(path);
-    const data: LogI = {
-      method: method,
-      usuario: new Types.ObjectId(request.user),
-      path: path,
-      schema: schema,
-    };
-
-
-    try {
-      if (method === 'PATCH') {
-        const id = request.params?.id;
-
-        
-        data.descripcion = `Se Edito un recurso en el schema ${schema} con id ${id}`;
-        await this.logService.registrarLog(data);
-      }
-      if (method === 'DELETE') {
-        const id = request.params?.id;
-   
-        data.descripcion = `Se Elimino un recurso en el schema ${schema} con id ${id}`;
-        await this.logService.registrarLog(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  private extraerSchema(path: string) {
-    const index = path.indexOf('/api/');
-    const pathArray = path.split('/');
-    const schema = pathArray[index + 2];
-    return schema.charAt(0).toUpperCase() + schema.slice(1);
-  }
+ 
 }
