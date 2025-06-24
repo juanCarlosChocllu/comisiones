@@ -66,7 +66,7 @@ export class LoggerInterceptor implements NestInterceptor {
     const schema = this.extraerSchema(path);
     const data: LogI = {
       method: method,
-      usuario: request.user,
+      usuario: new Types.ObjectId(request.user),
       path: path,
       schema: schema,
     };
