@@ -76,7 +76,7 @@ export class ProvidersService {
     private readonly comisionRecetaService: ComisionRecetaService,
     private readonly comisionProductoService: ComisionProductoService,
     private readonly servicioService: ServicioService,
-        private readonly logDescargaService: LogDescargaService,
+    private readonly logDescargaService: LogDescargaService,
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -88,69 +88,81 @@ export class ProvidersService {
       const ventas = await firstValueFrom(
         this.httpService.post<VentaApiI[]>(apiMia, data),
       );
-      await this.logDescargaService.registrarLogDescarga('Venta',createProviderDto.fechaFin)
+      await this.logDescargaService.registrarLogDescarga(
+        'Venta',
+        createProviderDto.fechaFin,
+      );
       return ventas.data;
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   }
- 
 
-   async guardardataVenta(createProviderDto: DescargarProviderDto) {
-    let ventaGuardar: VentaI = {};
-    const ventas:VentaApiI[] = await this.descargarVentasMia(createProviderDto)
-    for (const data of ventas) {
-      const sucursal = await this.sucursalService.buscarSucursalPorNombre(
-        data.local,
-      );
+  async guardardataVenta(createProviderDto: DescargarProviderDto) {
+    try {
+      console.log('descargando venta');
+      
+      let ventaGuardar: VentaI = {};
+      const ventas: VentaApiI[] =
+        await this.descargarVentasMia(createProviderDto);
+      for (const data of ventas) {
+        const sucursal = await this.sucursalService.buscarSucursalPorNombre(
+          data.local,
+        );
 
-      if (sucursal) {
-        const [asesor, tipoVenta] = await Promise.all([
-          this.asesorService.guardarAsesor(data.nombre_vendedor, sucursal._id),
-          this.tipoVentaService.guardarTipoVenta(data.tipoVenta),
-        ]);
+        if (sucursal) {
+          const [asesor, tipoVenta] = await Promise.all([
+            this.asesorService.guardarAsesor(
+              data.nombre_vendedor,
+              sucursal._id,
+            ),
+            this.tipoVentaService.guardarTipoVenta(data.tipoVenta),
+          ]);
 
-        ventaGuardar = {
-          asesor: asesor._id,
-          comisiona: data.comisiona,
-          descuento: data.descuentoFicha,
-          id_venta: data.idVenta,
-          montoTotal: data.monto_total,
-          sucursal: sucursal._id,
-          tipoVenta: tipoVenta._id,
-          descuentoPromosion: data.descuentoPromosion,
-          descuentoPromosion2: data.descuentoPromosion2,
-          nombrePromosion: data.nombrePromosion,
-          tipo: data.tipo,
-          tipo2: data.tipo2,
-          tipoDescuento: data.tipoDescuento,
-          flag: data.flag,
-          precio: data.precio, // se veridica en cada venta
-          fechaVenta: new Date(data.fecha),
-          ...(data.fecha_finalizacion && {
-            fechaFinalizacion: new Date(data.fecha_finalizacion),
-          }),
-        };
-        const venta = await this.ventaService.guardarVenta(ventaGuardar);
-        if (data.rubro === productoE.lente) {
-          await this.guardarLente(data, venta._id);
-        } else if (
-          data.rubro === productoE.gafa ||
-          data.rubro === productoE.lenteDeContacto ||
-          data.rubro === productoE.montura
-        ) {
-          await this.guardarProducto(data, venta._id);
-        } else if (data.rubro == productoE.servicio) {
-          await this.guardarServicio(data, venta._id);
+          ventaGuardar = {
+            asesor: asesor._id,
+            comisiona: data.comisiona,
+            descuento: data.descuentoFicha,
+            id_venta: data.idVenta,
+            montoTotal: data.monto_total,
+            sucursal: sucursal._id,
+            tipoVenta: tipoVenta._id,
+            descuentoPromosion: data.descuentoPromosion,
+            descuentoPromosion2: data.descuentoPromosion2,
+            nombrePromosion: data.nombrePromosion,
+            tipo: data.tipo,
+            tipo2: data.tipo2,
+            tipoDescuento: data.tipoDescuento,
+            flag: data.flag,
+            precio: data.precio, // se veridica en cada venta
+            fechaVenta: new Date(data.fecha),
+            ...(data.fecha_finalizacion && {
+              fechaFinalizacion: new Date(data.fecha_finalizacion),
+            }),
+          };
+          const venta = await this.ventaService.guardarVenta(ventaGuardar);
+          if (data.rubro === productoE.lente) {
+            await this.guardarLente(data, venta._id);
+          } else if (
+            data.rubro === productoE.gafa ||
+            data.rubro === productoE.lenteDeContacto ||
+            data.rubro === productoE.montura
+          ) {
+            await this.guardarProducto(data, venta._id);
+          } else if (data.rubro == productoE.servicio) {
+            await this.guardarServicio(data, venta._id);
+          } else {
+            await this.guadarOtroProducto(data, venta._id);
+          }
         } else {
-          await this.guadarOtroProducto(data, venta._id);
+          console.log('sin sucursal');
         }
-      } else {
-        console.log('sin sucursal');
       }
+
+      return { status: HttpStatus.CREATED };
+    } catch (error) {
+      throw error;
     }
-  
-    return { status: HttpStatus.CREATED };
   }
 
   private async guadarOtroProducto(data: VentaApiI, venta: Types.ObjectId) {
@@ -288,7 +300,7 @@ export class ProvidersService {
           tipoColorLente._id,
           data.precio,
         );
-    
+
       if (recetaCombinacion && venta) {
         const detalle: detalleVentaI = {
           medioPar: data.medioPar,
@@ -454,7 +466,6 @@ export class ProvidersService {
           precio: String(precio).trim(),
           tipoMontura: String(tipoMontura).trim(),
         };
-   
 
         await this.productoService.guardaProductoComisiones(data);
       }
@@ -512,7 +523,7 @@ export class ProvidersService {
         }
         const codigoMia = hoja.getCell(1).value;
         const nombre = hoja.getCell(2).value;
-       
+
         const tipoPrecio = hoja.getCell(3).value;
         const monto = hoja.getCell(4).value;
 
@@ -612,16 +623,27 @@ export class ProvidersService {
       fechaFin: `${año}-${mes}-${dia}`,
     };
     this.logger.debug('Iniciando la descarga');
-    await this.descargarVentasMia(fecha);
+    await this.guardardataVenta(fecha);
   }
 
-  async actualizarDescuentos(createProviderDto: DescargarProviderDto){
-    const data:VentaApiI[] = await  this.descargarVentasMia(createProviderDto)
+  async actualizarDescuentos(createProviderDto: DescargarProviderDto) {
+    try {
+      const data: VentaApiI[] =
+        await this.descargarVentasMia(createProviderDto);
 
-    for (const venta of data) {
-      await this.ventaService.actulizarDescuento(venta.idVenta, venta.descuentoFicha, venta.monto_total, venta.flag, venta.fecha_finalizacion)
+      for (const venta of data) {
+        await this.ventaService.actulizarDescuento(
+          venta.idVenta,
+          venta.descuentoFicha,
+          venta.monto_total,
+          venta.flag,
+          venta.fecha_finalizacion,
+        );
+      }
+
+      return { status: HttpStatus.OK };
+    } catch (error) {
+      throw error;
     }
-
-    return {status:HttpStatus.OK}
   }
 }
