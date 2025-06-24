@@ -17,19 +17,19 @@ export class LoggerInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request: Request = context.switchToHttp().getRequest();
     const method = request.method;
-    const path = request.originalUrl;
-
+    const path = request.originalUrl;  
     return next.handle().pipe(
       tap({
         next: async () => {
           if (path === '/api/autenticacion') {
             await this.succesLogin(method, path, request.body.username);
-          } else {
-            await this.registrarMonvimiento(method, path, request);
-          }
+          }else {
+            this.registrarMonvimiento(method, path, request)
+          } 
         },
         error: async (err) => {
           const e = err as AxiosError;
+        
           if (e && e.status === HttpStatusCode.Forbidden) {
             await this.errorLogin(method, path, request.body.username);
           }
@@ -71,22 +71,23 @@ export class LoggerInterceptor implements NestInterceptor {
       schema: schema,
     };
 
+
     try {
-       if (method === 'PATCH') {
-      const id = request.params;
+      if (method === 'PATCH') {
+        const id = request.params?.id;
 
-      data.descripcion = `Se Edito un recurso en el schema ${schema} con id ${id}`;
-      await this.logService.registrarLog(data);
-    }
-    if (method === 'DELETE') {
-      const id = request.params;
-
-      data.descripcion = `Se Elimino un recurso en el schema ${schema} con id ${id}`;
-      await this.logService.registrarLog(data);
-    }
+        
+        data.descripcion = `Se Edito un recurso en el schema ${schema} con id ${id}`;
+        await this.logService.registrarLog(data);
+      }
+      if (method === 'DELETE') {
+        const id = request.params?.id;
+   
+        data.descripcion = `Se Elimino un recurso en el schema ${schema} con id ${id}`;
+        await this.logService.registrarLog(data);
+      }
     } catch (error) {
       console.log(error);
-      
     }
   }
 

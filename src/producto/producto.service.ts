@@ -605,7 +605,7 @@ export class ProductoService {
     for (const comb of producto) {
       let mayor:number =0
       let menor:number =0
-      console.log(comb.comisiones);
+      
       
       if(comb.comisiones.length == 1) {
        const monto =   comb.comisiones.map((item)=> item.monto)
@@ -641,7 +641,7 @@ export class ProductoService {
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
     const producto =[]// await this.productoListarSinComision(tipo)
-    console.log(producto);
+  
     
     worksheet.columns = [
       { header: 'id', key: 'id', width: 30 },

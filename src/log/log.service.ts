@@ -9,6 +9,11 @@ export class LogService {
   constructor(@InjectModel(Log.name) private readonly Log: Model<Log>) {}
 
   async registrarLog(data: LogI) {
-    await this.Log.create(data);
+    try {
+          await this.Log.create(data);
+    } catch (error) {
+      console.log(error);
+      
+    }
   }
 }

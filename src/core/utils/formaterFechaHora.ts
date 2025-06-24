@@ -11,8 +11,7 @@ export function formaterFechaHora(fechaInicio: string, fechaFin: string) {
 export function formatearfechaYhoraBolivia(fecha: string): string {
   const dt = DateTime.fromFormat(fecha, 'yyyy-MM-dd HH:mm:ss ZZ');
   const dtBolivia = dt.setZone('America/La_Paz');
-  console.log(dtBolivia);
-  console.log(dtBolivia.toISO());
+ 
 
   return dtBolivia.toUTC().toISO();
 }

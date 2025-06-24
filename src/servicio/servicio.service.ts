@@ -391,7 +391,7 @@ export class ServicioService {
         },
       },
     ]);
-    console.log(servicio);
+ 
     
     worksheet.columns = [
       { header: 'id', key: 'id', width: 30 },

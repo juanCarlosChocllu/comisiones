@@ -454,7 +454,7 @@ export class ProvidersService {
           precio: String(precio).trim(),
           tipoMontura: String(tipoMontura).trim(),
         };
-        console.log(data);
+   
 
         await this.productoService.guardaProductoComisiones(data);
       }

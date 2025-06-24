@@ -361,7 +361,7 @@ export class CombinacionRecetaService {
   }
   async listarCombinaciones(buscadorCombinacionDto: BuscadorCombinacionDto) {
     const data = await this.combinaciones(true, buscadorCombinacionDto);
-    console.log(data);
+   
 
     return { data: data.data, paginas: data.total };
   }
@@ -1146,7 +1146,7 @@ export class CombinacionRecetaService {
       let contador: number = 0;
 
       for (const com of data.comisiones) {
-        console.log('monto', com.monto);
+       
 
         if (com.monto > 0) {
           contador++;
