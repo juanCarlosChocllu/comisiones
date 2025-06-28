@@ -7,29 +7,34 @@ import { Model, Types } from 'mongoose';
 import { flag } from 'src/core/enum/flag';
 import { EmpresaService } from 'src/empresa/empresa.service';
 import { dataEmpresa } from './util/data';
+import { Empresa } from 'src/empresa/schema/empresa.schema';
 
 @Injectable()
 export class SucursalService {
   constructor(
-    @InjectModel(Sucursal.name)private readonly sucursal:Model<Sucursal>,
-    private readonly empresaService:EmpresaService
-    
-  )
-     {}
+    @InjectModel(Sucursal.name) private readonly sucursal: Model<Sucursal>,
+    @InjectModel(Empresa.name) private readonly empresa: Model<Empresa>,
+    private readonly empresaService: EmpresaService,
+  ) {}
   create(createSucursalDto: CreateSucursalDto) {
     return 'This action adds a new sucursal';
   }
 
-  async buscarSucursalPorNombre(nombre:string){
-    return this.sucursal.findOne({nombre:nombre.toUpperCase()})
+  async buscarSucursalPorNombre(nombre: string) {
+    return this.sucursal.findOne({ nombre: nombre.toUpperCase() });
   }
 
-  async asignarZonaSucursal (sucursal:Types.ObjectId, zona:Types.ObjectId){
-    const s = await this.sucursal.findOne({_id:new Types.ObjectId(sucursal), flag:flag.nuevo})
-    if(s){
-      return this.sucursal.updateOne({_id: new  Types.ObjectId(sucursal)},{zona:new Types.ObjectId(zona)})
+  async asignarZonaSucursal(sucursal: Types.ObjectId, zona: Types.ObjectId) {
+    const s = await this.sucursal.findOne({
+      _id: new Types.ObjectId(sucursal),
+      flag: flag.nuevo,
+    });
+    if (s) {
+      return this.sucursal.updateOne(
+        { _id: new Types.ObjectId(sucursal) },
+        { zona: new Types.ObjectId(zona) },
+      );
     }
-  
   }
   findAll() {
     return `This action returns all sucursal`;
@@ -48,28 +53,24 @@ export class SucursalService {
   }
 
   public async guardarEmpresaYsusSucursales() {
-    const data = dataEmpresa();  
+    const data = dataEmpresa();
     for (let [empresa, sucursales] of Object.entries(data.empresa)) {
-      
       try {
-        const empresaCreada = await this.empresaService.guardarEmpresa(empresa)
-        
-        for (let sucursal of sucursales) {
+        const empresaCreada = await this.empresaService.guardarEmpresa(empresa);
 
+        for (let sucursal of sucursales) {
           const sucursalExiste = await this.sucursal.findOne({
             nombre: sucursal,
           });
-  
- 
+
           if (!sucursalExiste) {
             const sucursalData = {
-              empresa: empresaCreada._id, 
+              empresa: empresaCreada._id,
               nombre: sucursal,
             };
             await this.sucursal.create(sucursalData);
           }
         }
-        
       } catch (error) {
         console.error(
           `Error al crear empresa o sucursal para ${empresa}: `,
@@ -77,17 +78,41 @@ export class SucursalService {
         );
       }
     }
-  
+
     return { status: HttpStatus.CREATED };
   }
-  
 
- async  listarSucucrsalPorEmpresa(id:Types.ObjectId){
-    const empresa = await this.sucursal.find({empresa:new Types.ObjectId(id)})
-    return empresa
+  async listarSucucrsalPorEmpresa(id: Types.ObjectId) {
+    const empresa = await this.sucursal.find({
+      empresa: new Types.ObjectId(id),
+    });
+    return empresa;
   }
 
-  async listarSucursales () {
-    return await this.sucursal.find({flag:flag.nuevo})
+  async listarSucursales() {
+    return await this.sucursal.find({ flag: flag.nuevo });
+  }
+  async guardarSucursal(empresa: string, sucursal: string) {
+    const empresaEncontrada = await this.empresa.findOne({
+      nombre: empresa,
+    });
+    if (!empresaEncontrada) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Empresa no encontrada',
+      };
+    }
+    const sucursalExiste = await this.sucursal.findOne({
+      nombre: sucursal,
+    });
+    if (sucursalExiste) {
+      return { status: HttpStatus.BAD_REQUEST, message: 'Sucursal ya existe' };
+    }
+    const sucursalData = {
+      nombre: sucursal,
+      empresa: empresaEncontrada._id,
+    };
+    await this.sucursal.create(sucursalData);
+    return { status: HttpStatus.CREATED };
   }
 }

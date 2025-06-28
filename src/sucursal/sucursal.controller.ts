@@ -45,4 +45,9 @@ export class SucursalController {
   remove(@Param('id') id: string) {
     return this.sucursalService.remove(+id);
   }
+  @Publico()
+  @Post('/guardarSucursal')
+  guardarSucursal (@Body() body: { empresa: string; sucursal: string }) {
+    return this.sucursalService.guardarSucursal(body.empresa, body.sucursal);
+  }
 }
