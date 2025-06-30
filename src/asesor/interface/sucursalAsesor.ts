@@ -6,4 +6,6 @@ export interface ScursalAsesorI {
     sucursalNombre:string,
     idSucursal:Types.ObjectId,
     empresa:string
+    gestor:boolean
 }
+
