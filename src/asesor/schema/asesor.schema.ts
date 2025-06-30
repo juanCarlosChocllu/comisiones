@@ -13,9 +13,13 @@ export class Asesor {
   @Prop({ type: Date, default: Date.now() })
   fecha: Date;
 
+  @Prop({type:Boolean, default:false})
+  gestor:boolean
+
   @Prop({ type: String, enum: flag, default: flag.nuevo })
   flag: flag;
 }
 
 export const asesorSchema = SchemaFactory.createForClass(Asesor);
 asesorSchema.index({ sucursal: 1 });
+  

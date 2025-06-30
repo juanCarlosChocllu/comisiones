@@ -74,6 +74,7 @@ export class VentaService {
 
         const ventaAsesor: RegistroVentas = {
           metaProductosVip: llaves,
+          gestor:asesor.gestor ? asesor.gestor :false,
           sucursal: asesor.sucursalNombre,
           idSucursal: asesor.idSucursal,
           asesor: asesor.nombre,
@@ -210,7 +211,7 @@ export class VentaService {
       }),
     );
 
-    return asesoresProcesados;
+    return asesoresProcesados.filter((item) => item.ventas.length > 0);
   }
 
   private monturasYgafasVip(venta: RegistroVentas, llave: LlavesI) {

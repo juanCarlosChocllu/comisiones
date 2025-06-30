@@ -100,6 +100,7 @@ export interface RegistroVentas {
   idSucursal:Types.ObjectId
   empresa:string
   asesor: string;
+  gestor:boolean
   totalDescuento:number
   montoTotal:number
   monturaVip:number,
