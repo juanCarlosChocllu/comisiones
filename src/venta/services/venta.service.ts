@@ -42,7 +42,7 @@ import { flag } from 'src/core/enum/flag';
 export class VentaService {
   constructor(
     @InjectModel(Venta.name) private readonly venta: Model<Venta>,
-    @InjectModel(DetalleVenta.name) private readonly DetalleVenta: Model<Venta>,
+    @InjectModel(DetalleVenta.name) private readonly detalleVenta: Model<Venta>,
     private readonly asesorService: AsesorService,
     private readonly detalleVentaService: DetalleVentaService,
     private readonly combinacionRecetaService: CombinacionRecetaService,
@@ -74,7 +74,7 @@ export class VentaService {
 
         const ventaAsesor: RegistroVentas = {
           metaProductosVip: llaves,
-          gestor:asesor.gestor ? asesor.gestor :false,
+          gestor: asesor.gestor ? asesor.gestor : false,
           sucursal: asesor.sucursalNombre,
           idSucursal: asesor.idSucursal,
           asesor: asesor.nombre,
@@ -384,27 +384,33 @@ export class VentaService {
     }
   }
 
-  async actulizarDescuento(
-    id_venta: string,
-    descuento: number,
-    montoTotal: number,
-    flag: string,
-    fecha_finalizacion: string,
-  ) {
+  async actulizarDescuento(ventaMia: VentaApiI) {
     const venta = await this.venta.findOne({
-      id_venta: id_venta.toUpperCase().trim(),
+      id_venta: ventaMia.idVenta.toUpperCase().trim(),
     });
     if (venta) {
       const data: FinalizarVentaI = {
-        descuento: descuento,
-        montoTotal: montoTotal,
-        flag: flag,
+        descuento: ventaMia.descuentoFicha,
+        montoTotal: ventaMia.monto_total,
+        precioTotal: ventaMia.precioTotal,
+        flag: ventaMia.flag,
       };
-      if (fecha_finalizacion) {
-        data.fechaFinalizacion = new Date(fecha_finalizacion);
+      if (ventaMia.fecha_finalizacion) {
+        data.fechaFinalizacion = new Date(ventaMia.fecha_finalizacion);
       }
-
-      await this.venta.updateOne({ id_venta: id_venta }, data);
+      await this.venta.updateOne({ id_venta: ventaMia.idVenta }, data);
+      if (ventaMia.rubro === productoE.lente) {
+        const detalle = await this.detalleVenta.findOne({
+          venta: venta._id,
+          rubro: ventaMia.rubro,
+        });
+        if (detalle) {
+          await this.detalleVenta.updateOne(
+            { _id: detalle._id },
+            { importe: ventaMia.importe },
+          );
+        }
+      }
     }
   }
 }

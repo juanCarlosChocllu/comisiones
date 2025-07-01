@@ -11,7 +11,11 @@ export class Venta {
   @Prop()
   montoTotal: number;
 
+  @Prop()
+  precioTotal: number;
   @Prop({ type: Types.ObjectId, ref: 'Asesor' })
+
+
   asesor: Types.ObjectId;
 
   @Prop()
@@ -93,7 +97,6 @@ ventaSchema.pre('save', function (next) {
   }
 
   if (this.fechaFinalizacion) {
-  
     const fechaEnBolivia = DateTime.fromJSDate(this.fechaFinalizacion).setZone(
       'America/La_Paz',
     );
@@ -116,12 +119,10 @@ ventaSchema.pre('save', function (next) {
   next();
 });
 
+ventaSchema.pre('updateOne', function (next) {
+  const data: FinalizarVentaI = this.getUpdate() as FinalizarVentaI;
 
-ventaSchema.pre('updateOne',function(next){
-  const data:FinalizarVentaI= this.getUpdate() as FinalizarVentaI
-  
   if (data.fechaFinalizacion) {
-  
     const fechaEnBolivia = DateTime.fromJSDate(data.fechaFinalizacion).setZone(
       'America/La_Paz',
     );
@@ -141,10 +142,8 @@ ventaSchema.pre('updateOne',function(next){
     data.fechaFinalizacion = fechaFalsaUTC.toJSDate();
   }
 
-
-
   next();
-})
+});
 
 @Schema({ collection: 'DetalleVenta' })
 export class DetalleVenta {
@@ -168,8 +167,8 @@ export class DetalleVenta {
 
   // @Prop()
   //comision:number[]
-  @Prop({type:Boolean})
-  medioPar:boolean
+  @Prop({ type: Boolean })
+  medioPar: boolean;
 
   @Prop({ type: Types.ObjectId, ref: 'Producto' })
   producto: Types.ObjectId;
@@ -183,3 +182,4 @@ export class DetalleVenta {
 
 export const detalleVentaSchema = SchemaFactory.createForClass(DetalleVenta);
 detalleVentaSchema.index({ venta: 1 });
+

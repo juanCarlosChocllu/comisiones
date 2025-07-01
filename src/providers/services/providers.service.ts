@@ -134,7 +134,9 @@ export class ProvidersService {
             tipo2: data.tipo2,
             tipoDescuento: data.tipoDescuento,
             flag: data.flag,
+            precioTotal:data.precioTotal,
             precio: data.precio, // se veridica en cada venta
+            
             fechaVenta: new Date(data.fecha),
             ...(data.fecha_finalizacion && {
               fechaFinalizacion: new Date(data.fecha_finalizacion),
@@ -633,12 +635,9 @@ export class ProvidersService {
 
       for (const venta of data) {
         await this.ventaService.actulizarDescuento(
-          venta.idVenta,
-          venta.descuentoFicha,
-          venta.monto_total,
-          venta.flag,
-          venta.fecha_finalizacion,
+        venta
         );
+
       }
 
       return { status: HttpStatus.OK };
