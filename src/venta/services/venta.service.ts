@@ -177,6 +177,7 @@ export class VentaService {
               idVenta: venta.id_venta,
               descuento: venta.descuento,
               montoTotal: venta.montoTotal,
+              precioTotal:venta.precioTotal ? venta.precioTotal :0,
               precio: venta.precio,
               comisiona: venta.comisiona,
               tipo: venta.tipo,
@@ -313,6 +314,7 @@ export class VentaService {
           comisiona: 1,
           detalleVenta: 1,
           fechaFinalizacion: 1,
+          precioTotal:1
         },
       },
     ]);
