@@ -177,7 +177,7 @@ export class VentaService {
               idVenta: venta.id_venta,
               descuento: venta.descuento,
               montoTotal: venta.montoTotal,
-              precioTotal:venta.precioTotal ? venta.precioTotal :0,
+              precioTotal: venta.precioTotal ? venta.precioTotal : 0,
               precio: venta.precio,
               comisiona: venta.comisiona,
               tipo: venta.tipo,
@@ -314,7 +314,7 @@ export class VentaService {
           comisiona: 1,
           detalleVenta: 1,
           fechaFinalizacion: 1,
-          precioTotal:1
+          precioTotal: 1,
         },
       },
     ]);
@@ -405,6 +405,34 @@ export class VentaService {
         const detalle = await this.detalleVenta.findOne({
           venta: venta._id,
           rubro: ventaMia.rubro,
+          importe: 0,
+        });
+        if (detalle) {
+          await this.detalleVenta.updateOne(
+            { _id: detalle._id },
+            { importe: ventaMia.importe },
+          );
+        }
+      }
+
+      if (ventaMia.rubro === productoE.montura) {
+        const detalle = await this.detalleVenta.findOne({
+          venta: venta._id,
+          rubro: ventaMia.rubro,
+          importe: 0,
+        });
+        if (detalle) {
+          await this.detalleVenta.updateOne(
+            { _id: detalle._id },
+            { importe: ventaMia.importe },
+          );
+        }
+      }
+      if (ventaMia.rubro === productoE.gafa) {
+        const detalle = await this.detalleVenta.findOne({
+          venta: venta._id,
+          rubro: ventaMia.rubro,
+          importe: 0,
         });
         if (detalle) {
           await this.detalleVenta.updateOne(
