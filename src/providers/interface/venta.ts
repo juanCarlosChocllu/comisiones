@@ -42,6 +42,6 @@ interface VentaApiI {
   descuentoPromosion2: string;
 
   precio:string
-  
+  precioTotal:number
   medioPar:boolean
 }

@@ -40,7 +40,7 @@ export interface VentaI {
   descuentoPromosion?: Number;
 
   descuentoPromosion2?: string;
-
+  precioTotal?:number
   precio?:string
 }
 
@@ -126,4 +126,5 @@ export interface FinalizarVentaI {
   flag: string,
   descuento: number,
   montoTotal: number
+  precioTotal:number
 }
