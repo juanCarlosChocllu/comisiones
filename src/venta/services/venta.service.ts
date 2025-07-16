@@ -2,6 +2,7 @@ import {
   BadRequestException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateVentaDto } from '../dto/create-venta.dto';
@@ -37,6 +38,8 @@ import { key } from 'src/core/config/config';
 import { LlavesI } from 'src/metas-producto-vip/interface/metasLLave';
 import { detalleVentaI } from '../interface/detalleVenta';
 import { flag } from 'src/core/enum/flag';
+import { AnularVentaDto } from '../dto/AnularVenta.dto';
+import { horaUtc } from 'src/core/utils/horaUtc';
 
 @Injectable()
 export class VentaService {
@@ -443,4 +446,16 @@ export class VentaService {
       }
     }
   }
+
+  async anularVenta(anularVentaDto: AnularVentaDto){
+    const venta = await this.venta.findOne({id_venta:anularVentaDto.idVenta})
+    if(venta){
+      await this.venta.updateOne({id_venta:anularVentaDto.idVenta}, {
+        fechaAnulacion:horaUtc(anularVentaDto.fechaAnulacion),
+        estadoTracking:anularVentaDto.estadoTracking,
+      })
+      return {status:HttpStatus.OK}
+    }
+    throw new NotFoundException()
+  }  
 }

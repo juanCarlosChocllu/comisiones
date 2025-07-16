@@ -7,6 +7,7 @@ import { Types } from 'mongoose';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 import { Publico } from 'src/autenticacion/decorators/publico';
 import { FinalizarVentaDto } from './dto/FinalizarVentaDto';
+import { AnularVentaDto } from './dto/AnularVenta.dto';
 
 @Controller('venta')
 export class VentaController {
@@ -34,5 +35,9 @@ export class VentaController {
     return this.ventaService.finalizarVentas(finalizarVentaDto)
    }
 
-  
+    @Publico()
+    @Post('anular')
+   async anularVenta(@Body() anularVentaDto: AnularVentaDto) {
+    return this.ventaService.anularVenta(anularVentaDto);
+  }
 }

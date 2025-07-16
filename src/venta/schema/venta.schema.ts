@@ -63,6 +63,12 @@ export class Venta {
   @Prop()
   fechaFinalizacion: Date;
 
+  @Prop()
+  fechaAnulacion: Date;
+
+  @Prop()
+  estadoTracking: string;
+
   @Prop({ type: Date, default: Date.now() })
   fecha: Date;
 
