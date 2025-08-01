@@ -49,6 +49,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { DateTime } from 'luxon';
 import { LogDescargaService } from 'src/log-descarga/log-descarga.service';
 import { flag } from 'src/core/enum/flag';
+import { AnularVentaMiaI, VentaApiI } from '../interface/venta';
+import { AnularVentaDto } from 'src/venta/dto/AnularVenta.dto';
 
 @Injectable()
 export class ProvidersService {
@@ -86,7 +88,7 @@ export class ProvidersService {
         token: tokenMia,
       };
       const ventas = await firstValueFrom(
-        this.httpService.post<VentaApiI[]>(apiMia, data),
+        this.httpService.post<VentaApiI[]>(`${apiMia}/api/ventas`, data),
       );
       await this.logDescargaService.registrarLogDescarga(
         'Venta',
@@ -97,6 +99,27 @@ export class ProvidersService {
       throw error;
     }
   }
+
+   async anularVentasMia(createProviderDto: DescargarProviderDto) {
+    try {
+      const data: DescargarProviderDto = {
+        fechaFin: createProviderDto.fechaFin,
+        fechaInicio: createProviderDto.fechaInicio,
+        token: tokenMia,
+      };
+      const ventas = await firstValueFrom(
+        this.httpService.post<AnularVentaMiaI[]>(`${apiMia}/api/ventas/anuladas`, data),
+      );
+      await this.logDescargaService.registrarLogDescarga(
+        'Venta',
+        createProviderDto.fechaFin,
+      );
+      return ventas.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 
   async guardardataVenta(createProviderDto: DescargarProviderDto) {
     try {
@@ -672,4 +695,52 @@ export class ProvidersService {
     this.logger.debug('Iniciando las finalizaciones');
     await this.actualizarDescuentos(fecha);
   }
+
+  async anularVentas(createProviderDto: DescargarProviderDto){
+    const ventas = await this.anularVentasMia(createProviderDto)
+    for (const venta of ventas) {
+      const data: AnularVentaDto= {
+        estado:venta.estado,
+        estadoTracking:venta.estadoTracking,
+        fechaAnulacion:venta.fechaAprobacionAnulacion,
+        idVenta:venta.id_venta
+      }
+ 
+      
+      await this.ventaService.anularVenta(data)
+    }
+    return {status:HttpStatus.OK}
+  }
+
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  async anularVentasCron() {
+    try {
+      const hoy = new Date();
+      const fechaFinDate = new Date(hoy);
+      fechaFinDate.setDate(hoy.getDate() - 1);
+
+      const fechaInicioDate = new Date(hoy);
+      fechaInicioDate.setDate(hoy.getDate() - 5);
+
+      const formatearFecha = (fecha: Date): string => {
+        const año = fecha.getFullYear();
+        const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+        const dia = fecha.getDate().toString().padStart(2, '0');
+        return `${año}-${mes}-${dia}`;
+      };
+
+      const fecha: DescargarProviderDto = {
+        fechaInicio: formatearFecha(fechaInicioDate),
+        fechaFin: formatearFecha(fechaFinDate),
+      };
+
+      this.logger.debug('Iniciando la anulaciones');
+      const response = await this.anularVentas(fecha);
+      console.log(fecha);
+    } catch (error) {
+      console.log(error);
+    }
+  }n      
+
 }

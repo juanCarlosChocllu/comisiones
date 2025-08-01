@@ -5,8 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateVentaDto } from '../dto/create-venta.dto';
-import { UpdateVentaDto } from '../dto/update-venta.dto';
+
 import { InjectModel } from '@nestjs/mongoose';
 import { DetalleVenta, Venta } from '../schema/venta.schema';
 import { Model, Types } from 'mongoose';
@@ -40,6 +39,7 @@ import { detalleVentaI } from '../interface/detalleVenta';
 import { flag } from 'src/core/enum/flag';
 import { AnularVentaDto } from '../dto/AnularVenta.dto';
 import { horaUtc } from 'src/core/utils/horaUtc';
+import { VentaApiI } from 'src/providers/interface/venta';
 
 @Injectable()
 export class VentaService {
@@ -456,6 +456,9 @@ export class VentaService {
       })
       return {status:HttpStatus.OK}
     }
-    throw new NotFoundException()
-  }  
+   
+  }
+
+  
+  
 }

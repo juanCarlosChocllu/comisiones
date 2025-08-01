@@ -1,4 +1,4 @@
-interface VentaApiI {
+export interface VentaApiI {
   fecha: string;
   idVenta: string;
   apertura_tkt: number;
@@ -44,4 +44,13 @@ interface VentaApiI {
   precio:string
   precioTotal:number
   medioPar:boolean
+}
+
+
+
+export interface AnularVentaMiaI{
+    id_venta:string
+    estado:string,
+    estadoTracking:string
+    fechaAprobacionAnulacion:string
 }
