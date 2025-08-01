@@ -713,7 +713,7 @@ export class ProvidersService {
   }
 
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_7AM)
   async anularVentasCron() {
     try {
       const hoy = new Date();
@@ -741,6 +741,6 @@ export class ProvidersService {
     } catch (error) {
       console.log(error);
     }
-  }n      
+  }
 
 }
