@@ -459,6 +459,15 @@ export class VentaService {
    
   }
 
+  async buscarVenta(id_venta:string):Promise<detalleVentaI[]>{
+    console.log(id_venta);
+    
+    const venta= await this.venta.findOne({id_venta:id_venta})
+    if(venta){
+      return this.detalleVenta.find({venta:venta._id})
+    }
+
+  }
   
   
 }

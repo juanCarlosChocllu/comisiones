@@ -14,8 +14,6 @@ export class Venta {
   @Prop()
   precioTotal: number;
   @Prop({ type: Types.ObjectId, ref: 'Asesor' })
-
-
   asesor: Types.ObjectId;
 
   @Prop()

@@ -100,7 +100,7 @@ export class ProvidersService {
     }
   }
 
-   async anularVentasMia(createProviderDto: DescargarProviderDto) {
+  async anularVentasMia(createProviderDto: DescargarProviderDto) {
     try {
       const data: DescargarProviderDto = {
         fechaFin: createProviderDto.fechaFin,
@@ -108,7 +108,10 @@ export class ProvidersService {
         token: tokenMia,
       };
       const ventas = await firstValueFrom(
-        this.httpService.post<AnularVentaMiaI[]>(`${apiMia}/api/ventas/anuladas`, data),
+        this.httpService.post<AnularVentaMiaI[]>(
+          `${apiMia}/api/ventas/anuladas`,
+          data,
+        ),
       );
       await this.logDescargaService.registrarLogDescarga(
         'Venta',
@@ -119,7 +122,6 @@ export class ProvidersService {
       throw error;
     }
   }
-
 
   async guardardataVenta(createProviderDto: DescargarProviderDto) {
     try {
@@ -650,7 +652,7 @@ export class ProvidersService {
       fechaInicio: `${año}-${mes}-${dia}`,
       fechaFin: `${año}-${mes}-${dia}`,
     };
-   // console.log(fecha);
+    // console.log(fecha);
 
     this.logger.debug('Iniciando la descarga');
     await this.guardardataVenta(fecha);
@@ -696,22 +698,20 @@ export class ProvidersService {
     await this.actualizarDescuentos(fecha);
   }
 
-  async anularVentas(createProviderDto: DescargarProviderDto){
-    const ventas = await this.anularVentasMia(createProviderDto)
+  async anularVentas(createProviderDto: DescargarProviderDto) {
+    const ventas = await this.anularVentasMia(createProviderDto);
     for (const venta of ventas) {
-      const data: AnularVentaDto= {
-        estado:venta.estado,
-        estadoTracking:venta.estadoTracking,
-        fechaAnulacion:venta.fechaAprobacionAnulacion,
-        idVenta:venta.id_venta
-      }
- 
-      
-      await this.ventaService.anularVenta(data)
-    }
-    return {status:HttpStatus.OK}
-  }
+      const data: AnularVentaDto = {
+        estado: venta.estado,
+        estadoTracking: venta.estadoTracking,
+        fechaAnulacion: venta.fechaAprobacionAnulacion,
+        idVenta: venta.id_venta,
+      };
 
+      await this.ventaService.anularVenta(data);
+    }
+    return { status: HttpStatus.OK };
+  }
 
   @Cron(CronExpression.EVERY_DAY_AT_7AM)
   async anularVentasCron() {
@@ -743,4 +743,41 @@ export class ProvidersService {
     }
   }
 
+  async actualizaMarcaVenta(descargarProviderDto: DescargarProviderDto) {
+    const ventas = await this.descargarVentasMia(descargarProviderDto);
+    for (const venta of ventas) {
+      if (venta.rubro == 'MONTURA') {
+        console.log(venta.rubro, venta.atributo1);
+
+        const ventaEncontrada = await this.ventaService.buscarVenta(
+          venta.idVenta,
+        );
+        if (ventaEncontrada && ventaEncontrada.length > 0) {
+          for (const detalle of ventaEncontrada) {
+            if (detalle.rubro == 'MONTURA') {
+              const producto = await this.productoService.buscarProducto(
+                detalle.producto,
+              );
+              if (producto) {
+                await this.marcaService.actulizarMarca(
+                  producto.marca,
+                  venta.atributo1,
+                );
+              }
+            }
+          }
+        }
+        /*     const ventaEncontrada=  await this.ventaService.buscarVenta(venta.idVenta)      
+     if( ventaEncontrada && ventaEncontrada.length > 0) {
+        for (const detalle of ventaEncontrada) {
+          if(detalle.rubro!= 'LENTE'){
+              const producto = await this.productoService.buscarProducto(detalle.producto)
+              if(producto){
+                await this.marcaService.actulizarMarca(producto.marca, venta.atributo1)
+              }   
+          }
+        }*/
+      }
+    }
+  }
 }

@@ -80,7 +80,7 @@ export class ProductoService {
     if (!producto) {
       const [color, marca] = await Promise.all([
         this.colorService.guardarColor(data.color),
-        this.marcaService.guardarMarca(data.color),
+        this.marcaService.guardarMarca(data.marca),
       ]);
 
       const dataProducto: DataProductoI = {
@@ -767,5 +767,8 @@ export class ProductoService {
     return productosConComision;
   }
 
+  async buscarProducto(id:Types.ObjectId){
+    return this.producto.findOne({_id:new Types.ObjectId(id)})
+  }
 
 }

@@ -9,10 +9,17 @@ import { Publico } from 'src/autenticacion/decorators/publico';
 @Controller('provider')
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
+
   @Publico()
   @Post('mia/venta')
   descargarVentas(@Body() descargarProviderDto: DescargarProviderDto) {
     return this.providersService.guardardataVenta(descargarProviderDto);
+  }
+
+  @Publico()
+  @Post('mia/venta/marca/actulizar')
+  actualizaMarcaVenta(@Body() descargarProviderDto: DescargarProviderDto) {
+    return this.providersService.actualizaMarcaVenta(descargarProviderDto);
   }
 
    @Publico()

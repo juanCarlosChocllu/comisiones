@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Type } from '@nestjs/common';
 import { CreateMarcaDto } from './dto/create-marca.dto';
 import { UpdateMarcaDto } from './dto/update-marca.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Marca } from './schema/marca.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { BuscadorMarcaDto } from './dto/BuscadorMarca.dto';
 import { calcularPaginas, skip } from 'src/core/utils/paginador';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
@@ -43,6 +43,14 @@ export class MarcaService {
     return `This action removes a #${id} marca`;
   }
 
+  async actulizarMarca(id:Types.ObjectId, nombre:string){
+    const marca= await this.marca.findOne({_id:new Types.ObjectId(id)})
+    if(marca){
+    const data= await this.marca.updateOne({_id:new Types.ObjectId(id)}, {nombre:nombre})
+     console.log(data);
+     
+    }
+  }
   async guardarMarca(nombre: string) {
     const marca = await this.marca.findOne({ nombre: nombre.toUpperCase() });
     if (!marca) {
