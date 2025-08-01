@@ -178,7 +178,7 @@ export class VentaService {
             return {
               fechaFinalizacion: venta.fechaFinalizacion,
               idVenta: venta.id_venta,
-              descuento: venta.descuento,
+              descuento:  venta.precioTotal - venta.montoTotal,
               montoTotal: venta.montoTotal,
               precioTotal: venta.precioTotal ? venta.precioTotal : 0,
               precio: venta.precio,
