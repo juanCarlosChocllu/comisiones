@@ -101,7 +101,7 @@ export class ProvidersService {
   async guardardataVenta(createProviderDto: DescargarProviderDto) {
     try {
       console.log('descargando venta');
-      
+
       let ventaGuardar: VentaI = {};
       const ventas: VentaApiI[] =
         await this.descargarVentasMia(createProviderDto);
@@ -134,9 +134,9 @@ export class ProvidersService {
             tipo2: data.tipo2,
             tipoDescuento: data.tipoDescuento,
             flag: data.flag,
-            precioTotal:data.precioTotal,
+            precioTotal: data.precioTotal,
             precio: data.precio, // se veridica en cada venta
-            
+
             fechaVenta: new Date(data.fecha),
             ...(data.fecha_finalizacion && {
               fechaFinalizacion: new Date(data.fecha_finalizacion),
@@ -612,18 +612,23 @@ export class ProvidersService {
     return ruta;
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  @Cron(CronExpression.EVERY_DAY_AT_4PM)
   async handleCron() {
     const date = new Date();
-    const [año, mes, dia] = [
-      date.getFullYear(),
-      (date.getMonth() + 1).toString().padStart(2, '0'),
-      (date.getDate() - 1).toString().padStart(2, '0'),
-    ];
+
+    const fechaAyer = new Date(date);
+    fechaAyer.setDate(date.getDate() - 1);
+
+    const año = fechaAyer.getFullYear();
+    const mes = (fechaAyer.getMonth() + 1).toString().padStart(2, '0');
+    const dia = fechaAyer.getDate().toString().padStart(2, '0');
+
     const fecha: DescargarProviderDto = {
       fechaInicio: `${año}-${mes}-${dia}`,
       fechaFin: `${año}-${mes}-${dia}`,
     };
+   // console.log(fecha);
+
     this.logger.debug('Iniciando la descarga');
     await this.guardardataVenta(fecha);
   }
@@ -634,15 +639,37 @@ export class ProvidersService {
         await this.descargarVentasMia(createProviderDto);
 
       for (const venta of data) {
-        await this.ventaService.actulizarDescuento(
-        venta
-        );
-
+        await this.ventaService.actulizarDescuento(venta);
       }
 
       return { status: HttpStatus.OK };
     } catch (error) {
       throw error;
     }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_6AM)
+  async finalizarVentasCron() {
+    const hoy = new Date();
+
+    const fechaFinDate = new Date(hoy);
+    fechaFinDate.setDate(hoy.getDate() - 1);
+
+    const fechaInicioDate = new Date(hoy);
+    fechaInicioDate.setDate(hoy.getDate() - 2);
+
+    const formatearFecha = (fecha: Date): string => {
+      const año = fecha.getFullYear();
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const dia = fecha.getDate().toString().padStart(2, '0');
+      return `${año}-${mes}-${dia}`;
+    };
+
+    const fecha: DescargarProviderDto = {
+      fechaInicio: formatearFecha(fechaInicioDate),
+      fechaFin: formatearFecha(fechaFinDate),
+    };
+    this.logger.debug('Iniciando las finalizaciones');
+    await this.actualizarDescuentos(fecha);
   }
 }
