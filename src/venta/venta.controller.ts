@@ -29,6 +29,14 @@ export class VentaController {
   }*/
 
 
+ 
+  @Post('invalidas')
+   async ventasInvalidas(){
+    return this.ventaService.ventasInvalidas()
+   }
+
+   
+
   @Publico()
   @Post('finalizar')
    async finalizarVentas(@Body() finalizarVentaDto: FinalizarVentaDto){

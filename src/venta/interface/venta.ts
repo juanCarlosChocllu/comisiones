@@ -34,8 +34,10 @@ export interface VentaI {
   tipo2?: string;
 
   nombrePromosion?: string;
-
+  estadoTracking?:string
   tipoDescuento?: string;
+
+  esValida?:boolean
 
   descuentoPromosion?: Number;
 

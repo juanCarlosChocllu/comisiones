@@ -469,5 +469,49 @@ export class VentaService {
 
   }
   
-  
+  async ventasInvalidas(){
+      const ventas = await this.venta.aggregate([
+        {
+          $match:{
+            esValida:false,
+            estadoTracking:{$ne:'ANULADO'}
+          }
+        },
+
+        {
+          $lookup:{
+             from:'Sucursal',
+             foreignField:'_id',
+             localField:'sucursal',
+             as:'sucursal'
+          }
+        },
+        {
+          $lookup:{
+            from:'Asesor',
+            foreignField:'_id',
+            localField:'asesor',
+            as:'asesor'
+          }
+        },
+        {
+          $project:{
+            id_venta:1,
+            montoTotal:1,
+            precioTotal:1,
+            asesor:{ $arrayElemAt: [ '$asesor.nombre', 0] },
+            sucursal:{ $arrayElemAt: [ '$sucursal.nombre', 0] },
+            fechaVenta:1,
+            fechaFinalizacion:1,
+          }
+        },
+        {
+          $sort:{fechaVenta:-1}
+        },
+        {
+          $limit:20
+        }
+      ])
+      return ventas
+  }
 }
