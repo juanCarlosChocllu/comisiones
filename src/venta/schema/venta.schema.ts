@@ -80,10 +80,17 @@ export class Venta {
 }
 
 export const ventaSchema = SchemaFactory.createForClass(Venta);
+
 ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, flag: 1 });
+
 ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, tipoVenta: 1, flag: 1 });
+
 ventaSchema.index({ id_venta: 1 });
-ventaSchema.index({ esValida:1,estadoTracking:1})
+//indice para listar fichas invalidas
+ventaSchema.index({ esValida:1,estadoTracking:1,fechaVenta:1})
+
+
+
 ventaSchema.pre('save', function (next) {
   if (this.fechaVenta) {
     const fechaEnBolivia = DateTime.fromJSDate(this.fechaVenta).setZone(
