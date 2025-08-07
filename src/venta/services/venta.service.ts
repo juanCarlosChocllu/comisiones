@@ -40,6 +40,7 @@ import { flag } from 'src/core/enum/flag';
 import { AnularVentaDto } from '../dto/AnularVenta.dto';
 import { horaUtc } from 'src/core/utils/horaUtc';
 import { VentaApiI } from 'src/providers/interface/venta';
+import { RangoFecha } from '../dto/RangoFecha.dto';
 
 @Injectable()
 export class VentaService {
@@ -469,12 +470,16 @@ export class VentaService {
 
   }
   
-  async ventasInvalidas(){
+  async ventasInvalidas(rangoFecha:RangoFecha){
       const ventas = await this.venta.aggregate([
         {
           $match:{
             esValida:false,
-            estadoTracking:{$ne:'ANULADO'}
+            estadoTracking:{$ne:'ANULADO'},
+            fechaVenta:{
+              $gte:rangoFecha.fechaInicio,
+              $lte:rangoFecha.fechaFin
+            }
           }
         },
 

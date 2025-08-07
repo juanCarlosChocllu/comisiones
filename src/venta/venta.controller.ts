@@ -8,6 +8,7 @@ import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 import { Publico } from 'src/autenticacion/decorators/publico';
 import { FinalizarVentaDto } from './dto/FinalizarVentaDto';
 import { AnularVentaDto } from './dto/AnularVenta.dto';
+import { RangoFecha } from './dto/RangoFecha.dto';
 
 @Controller('venta')
 export class VentaController {
@@ -31,11 +32,13 @@ export class VentaController {
 
  
   @Post('invalidas')
-   async ventasInvalidas(){
-    return this.ventaService.ventasInvalidas()
+   async ventasInvalidas(@Body() rangoFecha:RangoFecha){
+    console.log(rangoFecha);
+    
+    return this.ventaService.ventasInvalidas(rangoFecha)
    }
 
-   
+
 
   @Publico()
   @Post('finalizar')
