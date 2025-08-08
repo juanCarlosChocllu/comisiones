@@ -37,7 +37,6 @@ export interface VentaI {
   estadoTracking?:string
   tipoDescuento?: string;
 
-  esValida?:boolean
 
   descuentoPromosion?: Number;
 

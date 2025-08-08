@@ -474,7 +474,7 @@ export class VentaService {
       const ventas = await this.venta.aggregate([
         {
           $match:{
-            esValida:false,
+            $expr:{ $gt:['$montoTotal', '$precioTotal'] },
             estadoTracking:{$ne:'ANULADO'},
             fechaVenta:{
               $gte:rangoFecha.fechaInicio,
@@ -512,11 +512,11 @@ export class VentaService {
         },
         {
           $sort:{fechaVenta:-1}
-        },
-        {
-          $limit:20
         }
+       
       ])
+      console.log(ventas);
+      
       return ventas
   }
 }

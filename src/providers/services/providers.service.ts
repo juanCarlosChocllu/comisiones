@@ -156,7 +156,6 @@ export class ProvidersService {
             descuentoPromosion: data.descuentoPromosion,
             descuentoPromosion2: data.descuentoPromosion2,
             nombrePromosion: data.nombrePromosion,
-            esValida:data.monto_total > data.precioTotal ? false :true,
             tipo: data.tipo,
             tipo2: data.tipo2,
             tipoDescuento: data.tipoDescuento,
