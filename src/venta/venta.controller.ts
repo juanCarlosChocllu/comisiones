@@ -33,8 +33,6 @@ export class VentaController {
  
   @Post('invalidas')
    async ventasInvalidas(@Body() rangoFecha:RangoFecha){
-    console.log(rangoFecha);
-    
     return this.ventaService.ventasInvalidas(rangoFecha)
    }
 

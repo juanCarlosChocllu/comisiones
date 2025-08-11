@@ -30,4 +30,9 @@ export class ComisionProducto {
 }
 export const comisionProductoSchema =
   SchemaFactory.createForClass(ComisionProducto);
+
+  //indice para buscar comisiones de cada venta
+
 comisionProductoSchema.index({ producto: 1, precio: 1 , flag:1});
+//indice para lo que no tienen comision
+comisionProductoSchema.index({ producto: 1, precio: 1});

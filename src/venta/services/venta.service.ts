@@ -515,8 +515,7 @@ export class VentaService {
         }
        
       ])
-      console.log(ventas);
-      
+    
       return ventas
   }
 }

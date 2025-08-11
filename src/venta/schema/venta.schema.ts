@@ -46,10 +46,6 @@ export class Venta {
   @Prop()
   tipoDescuento: string;
 
-
-
-
-
   @Prop()
   descuentoPromocion: number;
 
@@ -85,10 +81,9 @@ ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, flag: 1 });
 ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, tipoVenta: 1, flag: 1 });
 
 ventaSchema.index({ id_venta: 1 });
+
 //indice para listar fichas invalidas
-ventaSchema.index({estadoTracking:1,fechaVenta:1})
-
-
+ventaSchema.index({ estadoTracking: 1, fechaVenta: 1 });
 
 ventaSchema.pre('save', function (next) {
   if (this.fechaVenta) {
@@ -197,4 +192,3 @@ export class DetalleVenta {
 
 export const detalleVentaSchema = SchemaFactory.createForClass(DetalleVenta);
 detalleVentaSchema.index({ venta: 1 });
-
