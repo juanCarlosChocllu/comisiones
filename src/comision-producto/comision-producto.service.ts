@@ -35,8 +35,9 @@ export class ComisionProductoService {
 
     const comision = await this.comisionProducto.find({
       producto: new Types.ObjectId(producto),
-      flag:flag.nuevo,
+
       precio: precio,
+            flag:flag.nuevo,
     }, {precio:1, monto:1}).lean();
    
     return comision;

@@ -205,9 +205,12 @@ export class ProductoService {
     );
     return { data: data, paginas: paginas };
   }
+
+  
   async productoListarSinComision(tipo: string) {
    const productosSinComision =  this.producto.aggregate([
   { $match: { tipoProducto: tipo } },
+  {$limit:1000},
   {
     $lookup: {
       from: 'DetallePrecio',
@@ -216,6 +219,7 @@ export class ProductoService {
       as: 'detallePrecio'
     }
   },
+
   { $unwind: '$detallePrecio' },
 
 
@@ -239,11 +243,13 @@ export class ProductoService {
             $expr: {
               $and: [
                 { $eq: ['$producto', '$$productoId'] },
-                { $eq: ['$precio', '$$tipoPrecio'] }
+                { $eq: ['$precio', '$$tipoPrecio'] },
+                  { $eq: ['$flag', 'nuevo'] }
               ]
             }
           }
-        }
+        },
+        
       ],
       as: 'comisiones'
     }
@@ -293,7 +299,6 @@ export class ProductoService {
   },
  
 ])
-
 
  
     return productosSinComision;
