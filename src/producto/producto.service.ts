@@ -231,7 +231,6 @@ export class ProductoService {
     }
   },
   { $unwind: '$precio' },
-
   {
     $lookup: {
       from: 'ComisionProducto',
@@ -243,12 +242,11 @@ export class ProductoService {
               $and: [
                 { $eq: ['$producto', '$$productoId'] },
                 { $eq: ['$precio', '$$tipoPrecio'] },
-                  { $eq: ['$flag', 'nuevo'] }
+                { $eq: ['$flag', 'nuevo'] }
               ]
             }
           }
-        },
-        
+        }
       ],
       as: 'comisiones'
     }
@@ -297,7 +295,7 @@ export class ProductoService {
     }
   },
  
-])
+]).explain('executionStats')
 
  
     return productosSinComision;

@@ -14,3 +14,4 @@ export class Precio {
 }
 
 export const PrecioSchema = SchemaFactory.createForClass(Precio);
+PrecioSchema.index({nombre:1})
