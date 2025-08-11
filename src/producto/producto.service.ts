@@ -295,7 +295,7 @@ export class ProductoService {
     }
   },
  
-]).explain('executionStats')
+])
 
  
     return productosSinComision;
