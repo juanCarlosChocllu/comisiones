@@ -7,6 +7,7 @@ import { DetallePrecio } from '../schema/detallePrecio.schema';
 
 import { tipoProductoPrecio } from '../enum/tipoProductoPrecio';
 import { preciosI } from '../interface/precios';
+import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class PreciosService {
@@ -144,7 +145,7 @@ export class PreciosService {
   }
 
   async listar() {
-    const precio = await this.precio.find();
+    const precio = await this.precio.find({flag:flag.nuevo});
     return precio;
   }
 
