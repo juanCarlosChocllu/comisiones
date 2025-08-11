@@ -210,7 +210,6 @@ export class ProductoService {
   async productoListarSinComision(tipo: string) {
    const productosSinComision =  this.producto.aggregate([
   { $match: { tipoProducto: tipo } },
-  {$limit:1000},
   {
     $lookup: {
       from: 'DetallePrecio',
