@@ -34,6 +34,8 @@ import { TokenGuard } from './autenticacion/guards/token/token.guard';
 import { LogDescargaModule } from './log-descarga/log-descarga.module';
 import { BackupModule } from './backup/backup.module';
 import { LogModule } from './log/log.module';
+import { AlmacenModule } from './almacen/almacen.module';
+import { StockModule } from './stock/stock.module';
 
 
 @Module({
@@ -70,6 +72,8 @@ import { LogModule } from './log/log.module';
     LogDescargaModule,
     BackupModule,
     LogModule,
+    AlmacenModule,
+    StockModule,
   ],
   controllers: [],
   providers: [

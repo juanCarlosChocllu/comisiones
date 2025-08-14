@@ -51,6 +51,9 @@ import { LogDescargaService } from 'src/log-descarga/log-descarga.service';
 import { flag } from 'src/core/enum/flag';
 import { AnularVentaMiaI, VentaApiI } from '../interface/venta';
 import { AnularVentaDto } from 'src/venta/dto/AnularVenta.dto';
+import { StockMia } from '../interface/stockMia';
+import { AxiosResponse } from 'axios';
+import { StockService } from 'src/stock/stock.service';
 
 @Injectable()
 export class ProvidersService {
@@ -79,6 +82,7 @@ export class ProvidersService {
     private readonly comisionProductoService: ComisionProductoService,
     private readonly servicioService: ServicioService,
     private readonly logDescargaService: LogDescargaService,
+    private readonly stockService: StockService,
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -87,7 +91,7 @@ export class ProvidersService {
         fechaInicio: createProviderDto.fechaInicio,
         token: tokenMia,
       };
-      const ventas = await firstValueFrom(
+      const ventas= await firstValueFrom(
         this.httpService.post<VentaApiI[]>(`${apiMia}/api/ventas`, data),
       );
       await this.logDescargaService.registrarLogDescarga(
@@ -99,6 +103,27 @@ export class ProvidersService {
       throw error;
     }
   }
+
+  async descargarStockMia(producto:string):Promise<StockMia[]>{
+     try {
+      const data ={
+        producto:producto,
+        token:tokenMia
+      }      
+     const stock:AxiosResponse<StockMia[]>= await firstValueFrom(this.httpService.post(`${apiMia}/api/stock`, data))
+      return stock.data
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+
+   public async guardarStockMia(id:string){
+    const stock = await this.descargarStockMia(id)
+    await this.stockService.guardarStockMia(stock)
+    
+   }
 
   async anularVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -768,16 +793,7 @@ export class ProvidersService {
             }
           }
         }
-        /*     const ventaEncontrada=  await this.ventaService.buscarVenta(venta.idVenta)      
-     if( ventaEncontrada && ventaEncontrada.length > 0) {
-        for (const detalle of ventaEncontrada) {
-          if(detalle.rubro!= 'LENTE'){
-              const producto = await this.productoService.buscarProducto(detalle.producto)
-              if(producto){
-                await this.marcaService.actulizarMarca(producto.marca, venta.atributo1)
-              }   
-          }
-        }*/
+       
       }
     }
   }
