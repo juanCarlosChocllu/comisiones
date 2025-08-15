@@ -52,6 +52,8 @@ export class SucursalService {
     return `This action removes a #${id} sucursal`;
   }
 
+
+
   public async guardarEmpresaYsusSucursales() {
     const data = dataEmpresa();
     for (let [empresa, sucursales] of Object.entries(data.empresa)) {

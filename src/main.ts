@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { BadRequestException, HttpStatus, ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  ValidationPipe,
+} from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { port, rutaFrontEnd } from './core/config/config';
 import * as bodyParser from 'body-parser';
@@ -18,19 +22,15 @@ async function bootstrap() {
     bodyParser.json({ limit: '2mb' }),
     bodyParser.urlencoded({ limit: '2mb', extended: true }),
   );
-   const logService = app.get(LogService)
-  app.useGlobalInterceptors(new LoggerInterceptor(logService))
+  const logService = app.get(LogService);
+  app.useGlobalInterceptors(new LoggerInterceptor(logService));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
       whitelist: true,
       exceptionFactory(errors) {
         const formattedErrors = errors.map((error) => {
-      
-          
           const constraints = error.constraints
-    
-          
             ? Object.values(error.constraints)
             : [];
 
@@ -39,7 +39,7 @@ async function bootstrap() {
             errors: constraints,
           };
         });
-        
+
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: 'Errores de validación',

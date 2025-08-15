@@ -8,4 +8,5 @@ export interface StockMia {
   sucursal: string
   cantidad: number
   almacen: string
+  empresa:string
 }
