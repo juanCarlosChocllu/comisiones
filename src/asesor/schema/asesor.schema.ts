@@ -10,6 +10,9 @@ export class Asesor {
   @Prop({ ref: 'Sucursal', type: Types.ObjectId })
   sucursal: Types.ObjectId;
 
+  @Prop({ ref: 'Usuario', type: Types.ObjectId })
+  usuario: Types.ObjectId;
+
   @Prop({ type: Date, default: Date.now() })
   fecha: Date;
 

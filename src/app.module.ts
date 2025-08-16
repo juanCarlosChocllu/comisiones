@@ -36,6 +36,8 @@ import { BackupModule } from './backup/backup.module';
 import { LogModule } from './log/log.module';
 import { AlmacenModule } from './almacen/almacen.module';
 import { StockModule } from './stock/stock.module';
+import { MetasSucursalModule } from './metas-sucursal/metas-sucursal.module';
+import { RendimientoDiarioModule } from './rendimiento-diario/rendimiento-diario.module';
 
 
 @Module({
@@ -74,6 +76,8 @@ import { StockModule } from './stock/stock.module';
     LogModule,
     AlmacenModule,
     StockModule,
+    MetasSucursalModule,
+    RendimientoDiarioModule,
   ],
   controllers: [],
   providers: [

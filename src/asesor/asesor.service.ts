@@ -6,6 +6,7 @@ import { Asesor } from './schema/asesor.schema';
 import { Model, Types } from 'mongoose';
 import { ScursalAsesorI } from './interface/sucursalAsesor';
 import { from } from 'rxjs';
+import { console } from 'inspector';
 
 @Injectable()
 export class AsesorService {
@@ -139,7 +140,13 @@ export class AsesorService {
     } catch (error) {
       throw error
     }
-
-    
   }
+
+  public async  asignarUsuarioAsesor(id:Types.ObjectId, usuario:Types.ObjectId){
+    const asesor= await this.asesor.findOne({_id:id})
+    if(asesor){
+      await this.asesor.updateOne({_id:new Types.ObjectId(id)},{usuario:usuario})
+    }
+  }
+
 }
