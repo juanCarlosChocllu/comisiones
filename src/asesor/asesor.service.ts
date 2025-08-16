@@ -145,7 +145,7 @@ export class AsesorService {
   public async  asignarUsuarioAsesor(id:Types.ObjectId, usuario:Types.ObjectId){
     const asesor= await this.asesor.findOne({_id:id})
     if(asesor){
-      await this.asesor.updateOne({_id:new Types.ObjectId(id)},{usuario:usuario})
+      await this.asesor.updateOne({_id:new Types.ObjectId(id)},{usuario:usuario, tieneAesor:true})
     }
   }
 

@@ -12,6 +12,9 @@ export class Asesor {
 
   @Prop({ ref: 'Usuario', type: Types.ObjectId })
   usuario: Types.ObjectId;
+    
+  @Prop({ type: Boolean, default:false })
+  tieneAesor:boolean
 
   @Prop({ type: Date, default: Date.now() })
   fecha: Date;
