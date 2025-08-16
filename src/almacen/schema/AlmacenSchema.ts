@@ -6,10 +6,5 @@ import { BaseSchema } from "src/core/schema/BaseSchema";
 export class Almacen extends BaseSchema {
     @Prop()
     nombre:string
-    
-    @Prop({type:Types.ObjectId, ref:'Sucursal'})
-    sucursal:Types.ObjectId
-
-
 }
 export const almacenSchema = SchemaFactory.createForClass(Almacen)

@@ -1,4 +1,5 @@
 export interface StockMia {
+  codigoMiaProducto:string
   producto: string
   categoria: string
   marca: string

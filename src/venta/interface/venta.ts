@@ -129,3 +129,8 @@ export interface FinalizarVentaI {
   montoTotal: number
   precioTotal:number
 }
+
+export interface CodigoMiaProductoI{
+producto:Types.ObjectId,
+codigoMia:string
+}
