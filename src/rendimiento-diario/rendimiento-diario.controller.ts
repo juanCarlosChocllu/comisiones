@@ -1,20 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { RendimientoDiarioService } from './rendimiento-diario.service';
 import { CreateRendimientoDiarioDto } from './dto/create-rendimiento-diario.dto';
 import { UpdateRendimientoDiarioDto } from './dto/update-rendimiento-diario.dto';
-
+import { Request}from 'express'
+import { BuscadorRendimientoDiarioDto } from './dto/BuscardorRendimientoDiario';
 @Controller('rendimiento/diario')
 export class RendimientoDiarioController {
   constructor(private readonly rendimientoDiarioService: RendimientoDiarioService) {}
 
   @Post()
-  create(@Body() createRendimientoDiarioDto: CreateRendimientoDiarioDto) {
-    return this.rendimientoDiarioService.create(createRendimientoDiarioDto);
+  create(@Req() request:Request,@Body() createRendimientoDiarioDto: CreateRendimientoDiarioDto) {
+    return this.rendimientoDiarioService.create(createRendimientoDiarioDto, request);
   }
 
-  @Get()
-  findAll() {
-    return this.rendimientoDiarioService.findAll();
+  @Post('listar')
+  findAll(@Body() buscadorRendimientoDiarioDto:BuscadorRendimientoDiarioDto ) {
+    return this.rendimientoDiarioService.findAll(buscadorRendimientoDiarioDto);
   }
 
   @Get(':id')

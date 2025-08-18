@@ -19,8 +19,8 @@ export class Usuario {
     @Prop({select:false})
     password:string
 
-    @Prop({type:Types.ObjectId, ref:'Sucursal'})
-    sucursal:Types.ObjectId
+    @Prop({type:Types.ObjectId, ref:'Asersor'})
+    asesor:Types.ObjectId
 
     @Prop()
     rol:string

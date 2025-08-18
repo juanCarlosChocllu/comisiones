@@ -129,3 +129,26 @@ export interface FinalizarVentaI {
   montoTotal: number
   precioTotal:number
 }
+
+
+export interface VentaRendimientoDiarioI {
+  lente: number
+  lc: number
+  entregadas: number
+  receta: Receum[]
+  montoTotal: number
+  asesorId: Types.ObjectId
+  asesor: string
+  fecha: string
+  ticket:number
+}
+
+export interface Receum {
+  descripcion: string
+}
+
+export interface resultadRendimientoDiarioI {
+  sucursal:string,
+    asesor:string,
+  ventas:VentaRendimientoDiarioI[]
+}

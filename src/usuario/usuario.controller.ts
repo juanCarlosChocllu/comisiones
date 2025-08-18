@@ -47,11 +47,11 @@ export class UsuarioController {
     return this.usuarioService.softDelete(id);
   }
 
-  @Get('asignar/sucursal/:sucursal')
+  @Get('asignar/sucursal/:asesor')
   asignarSucursalAusuario(
     @Req() request: Request,
-    @Param('sucursal', ValidateIdPipe) sucursal: Types.ObjectId,
+    @Param('asesor', ValidateIdPipe) asesor: Types.ObjectId,
   ) {
-    return this.usuarioService.asignarSucursalAusuario(sucursal, request);
+    return this.usuarioService.asignarSucursalAusuario(asesor, request);
   }
 }

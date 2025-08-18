@@ -35,14 +35,21 @@ export class TokenGuard implements CanActivate {
       });
 
       const usuario = await this.usuariosService.buscarUsuarioPorId(
-        tokenVerificada.id,
-      );
+       tokenVerificada.id,
+      );    
+ 
       if (!usuario) {
         return false;
       }
-      request.user = usuario.id;
+      request.usuario = {
+        idUsuario:usuario._id,
+        asesor: usuario.asesor ? usuario.asesor : null
+      };
+ 
       return true;
     } catch (error) {
+      console.log(error);
+      
       throw new UnauthorizedException();
     }
   }

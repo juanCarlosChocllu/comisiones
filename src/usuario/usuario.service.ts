@@ -3,7 +3,6 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
-
 } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -13,7 +12,7 @@ import { Model, Types } from 'mongoose';
 import * as argon2 from 'argon2';
 import { flag } from 'src/core/enum/flag';
 import { AsesorService } from 'src/asesor/asesor.service';
-import { Request} from 'express'
+import { Request } from 'express';
 @Injectable()
 export class UsuarioService {
   private readonly opcionesArgon2: argon2.Options = {
@@ -108,8 +107,15 @@ export class UsuarioService {
     return { status: HttpStatus.OK };
   }
 
- async  asignarSucursalAusuario(sucursal:Types.ObjectId, request:Request){
-    await this.usuario.updateOne({_id:new Types.ObjectId(request.user)}, {sucursal:new  Types.ObjectId(sucursal)})
-    return {status:HttpStatus.OK}
+  async asignarSucursalAusuario(asesor: Types.ObjectId, request: Request) {
+    const asesorEncontrado = await this.asesorService.verificarAsesor(asesor, request.usuario.idUsuario);
+    if (!asesorEncontrado) {
+      throw new NotFoundException('asesor no encontrado');
+    }
+    await this.usuario.updateOne(
+      { _id: new Types.ObjectId(request.usuario.idUsuario) },
+      { asesor: new Types.ObjectId(asesor) },
+    );
+    return { status: HttpStatus.OK };
   }
 }

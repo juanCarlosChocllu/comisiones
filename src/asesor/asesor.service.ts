@@ -153,7 +153,7 @@ export class AsesorService {
     const sucursales = await this.asesor.aggregate([
       {
         $match:{
-          usuario:new  Types.ObjectId(request.user)
+          usuario:new  Types.ObjectId(request.usuario.idUsuario)
         }
       },
       {
@@ -167,7 +167,7 @@ export class AsesorService {
       {
         $project:{
           _id:0,
-          idSucursal:{$arrayElemAt: [ '$sucursal._id', 0 ]},
+          asesor:'$_id',
            nombreSucursal:{$arrayElemAt: [ '$sucursal.nombre', 0 ]}
         }
       }
@@ -175,4 +175,38 @@ export class AsesorService {
     return sucursales
   }
 
+  verificarAsesor(id:Types.ObjectId, usuario:Types.ObjectId){
+    return this.asesor.findOne({_id:new Types.ObjectId(id), usuario:new Types.ObjectId(usuario)})
+  }
+
+   async listarAsesoresPorSucursal(sucursal: Types.ObjectId[]) {
+    const asesor: ScursalAsesorI[] = await this.asesor.aggregate([
+      {
+        $match: {
+          sucursal: { $in: sucursal.map((id) => new Types.ObjectId(id)) },
+        },
+      },
+
+      {
+        $lookup: {
+          from: 'Sucursal',
+          foreignField: '_id',
+          localField: 'sucursal',
+          as: 'sucursal',
+        },
+      },
+
+    
+
+      {
+        $project: {
+          _id:1,
+          nombre: 1,
+          sucursalNombre: { $arrayElemAt: ['$sucursal.nombre', 0] },
+          idSucursal: { $arrayElemAt: ['$sucursal._id', 0] },
+        },
+      },
+    ]);
+    return asesor;
+  }
 }
