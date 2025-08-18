@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseBoolPipe, Type } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query,Req, ParseBoolPipe, Type } from '@nestjs/common';
 import { AsesorService } from './asesor.service';
 import { CreateAsesorDto } from './dto/create-asesor.dto';
 import { UpdateAsesorDto } from './dto/update-asesor.dto';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 import { Types } from 'mongoose';
-
+import {Request} from 'express'
 @Controller('asesor')
 export class AsesorController {
   constructor(private readonly asesorService: AsesorService) {}
@@ -27,5 +27,9 @@ export class AsesorController {
   }
 
 
+  @Get('sucursal')
+  listarSucursalesAsesor(@Req() request:Request){
+        return this.asesorService.listarSucursalesAsesor(request);
+  }
   
 }

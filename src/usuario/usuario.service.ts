@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+
 } from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -12,7 +13,7 @@ import { Model, Types } from 'mongoose';
 import * as argon2 from 'argon2';
 import { flag } from 'src/core/enum/flag';
 import { AsesorService } from 'src/asesor/asesor.service';
-
+import { Request} from 'express'
 @Injectable()
 export class UsuarioService {
   private readonly opcionesArgon2: argon2.Options = {
@@ -24,7 +25,7 @@ export class UsuarioService {
   };
   constructor(
     @InjectModel(Usuario.name) private readonly usuario: Model<Usuario>,
-    private readonly asesorService:AsesorService
+    private readonly asesorService: AsesorService,
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto) {
@@ -42,7 +43,7 @@ export class UsuarioService {
     const usuario = await this.usuario.create(createUsuarioDto);
     if (createUsuarioDto.asesor && createUsuarioDto.asesor.length > 0) {
       for (const asesor of createUsuarioDto.asesor) {
-         await this.asesorService.asignarUsuarioAsesor(asesor, usuario._id)
+        await this.asesorService.asignarUsuarioAsesor(asesor, usuario._id);
       }
     }
     return { status: HttpStatus.CREATED };
@@ -105,5 +106,10 @@ export class UsuarioService {
       { flag: flag.eliminado },
     );
     return { status: HttpStatus.OK };
+  }
+
+ async  asignarSucursalAusuario(sucursal:Types.ObjectId, request:Request){
+    await this.usuario.updateOne({_id:new Types.ObjectId(request.user)}, {sucursal:new  Types.ObjectId(sucursal)})
+    return {status:HttpStatus.OK}
   }
 }

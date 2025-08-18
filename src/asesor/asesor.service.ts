@@ -6,7 +6,7 @@ import { Asesor } from './schema/asesor.schema';
 import { Model, Types } from 'mongoose';
 import { ScursalAsesorI } from './interface/sucursalAsesor';
 import { from } from 'rxjs';
-import { console } from 'inspector';
+import { Request } from 'express';
 
 @Injectable()
 export class AsesorService {
@@ -147,6 +147,32 @@ export class AsesorService {
     if(asesor){
       await this.asesor.updateOne({_id:new Types.ObjectId(id)},{usuario:usuario, tieneAesor:true})
     }
+  }
+
+  async listarSucursalesAsesor(request:Request){
+    const sucursales = await this.asesor.aggregate([
+      {
+        $match:{
+          usuario:new  Types.ObjectId(request.user)
+        }
+      },
+      {
+        $lookup:{
+          from:'Sucursal',
+          foreignField:'_id',
+          localField:'sucursal',
+          as:'sucursal'
+        }
+      },
+      {
+        $project:{
+          _id:0,
+          idSucursal:{$arrayElemAt: [ '$sucursal._id', 0 ]},
+           nombreSucursal:{$arrayElemAt: [ '$sucursal.nombre', 0 ]}
+        }
+      }
+    ])
+    return sucursales
   }
 
 }
