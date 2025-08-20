@@ -44,52 +44,53 @@ export class RendimientoDiarioService {
 
     const rendimiento = await Promise.all(
       ventas.map(async (item) => {
-        const resultado = await Promise.all(item.ventas.map(async (data) => {
-          let antireflejos: number = 0;
-          let progresivos: number = 0;
-          for (const receta of data.receta) {
-            const data = receta.descripcion.split('/');
+        const resultado = await Promise.all(
+          item.ventas.map(async (data) => {
+            let antireflejos: number = 0;
+            let progresivos: number = 0;
+            for (const receta of data.receta) {
+              const data = receta.descripcion.split('/');
 
-            const tipoLente = data[1];
-            const tratamiento = data[3];
-            if (tipoLente === 'PROGRESIVO') {
-              progresivos += 1;
+              const tipoLente = data[1];
+              const tratamiento = data[3];
+              if (tipoLente === 'PROGRESIVO') {
+                progresivos += 1;
+              }
+              if (
+                tratamiento === 'ANTIREFLEJO' ||
+                tratamiento === 'BLUE SHIELD' ||
+                tratamiento === 'GREEN SHIELD'
+              ) {
+                antireflejos += 1;
+              }
             }
-            if (
-              tratamiento === 'ANTIREFLEJO' ||
-              tratamiento === 'BLUE SHIELD' ||
-              tratamiento === 'GREEN SHIELD'
-            ) {
-              antireflejos += 1;
-            }
-          }
-          const rendimientoDia = await this.rendimientoDiario.findOne({
-            fechaDia: data.fecha,
-            asesor: data.asesorId,
-            flag: flag.nuevo,
-          });
+            const rendimientoDia = await this.rendimientoDiario.findOne({
+              fechaDia: data.fecha,
+              asesor: data.asesorId,
+              flag: flag.nuevo,
+            });
 
-          const resulado: rendimientoI = {
-            asesor: data.asesor,
-            antireflejos: antireflejos,
-            atenciones: rendimientoDia ? rendimientoDia.antenciones : 0,
-            cantidadLente: data.lente,
-            entregas: data.entregadas,
-            lc: data.lc,
-            montoTotalVentas: data.montoTotal,
-            progresivos: progresivos,
-            fecha: data.fecha,
-            idAsesor: data.asesorId,
-            segundoPar: rendimientoDia ? rendimientoDia.segundoPar : 0,
-            ticket:data.ticket
-
-          };
-          return resulado;
-        }))
+            const resulado: rendimientoI = {
+              asesor: data.asesor,
+              antireflejos: antireflejos,
+              atenciones: rendimientoDia ? rendimientoDia.atenciones : 0,
+              cantidadLente: data.lente,
+              entregas: data.entregadas,
+              lc: data.lc,
+              montoTotalVentas: data.montoTotal,
+              progresivos: progresivos,
+              fecha: data.fecha,
+              idAsesor: data.asesorId,
+              segundoPar: rendimientoDia ? rendimientoDia.segundoPar : 0,
+              ticket: data.ticket,
+            };
+            return resulado;
+          }),
+        );
 
         return {
           sucursal: item.sucursal,
-          asesor:item.asesor,
+          asesor: item.asesor,
           ventas: resultado,
         };
       }),
@@ -97,15 +98,45 @@ export class RendimientoDiarioService {
     return rendimiento;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} rendimientoDiario`;
-  }
+  async listarRendimientoDiarioAsesor() {
+    const rendimiento = await this.rendimientoDiario.aggregate([
+      {
+        $match: {
+          flag: 'nuevo',
+        },
+      },
+      {
+        $lookup: {
+          from: 'Asesor',
+          foreignField: '_id',
+          localField: 'asesor',
+          as: 'asesor',
+        },
+      },
+      {
+        $lookup: {
+          from: 'Sucursal',
+          foreignField: '_id',
+          localField: 'asesor.sucursal',
+          as: 'sucursal',
+        },
+      },
+      {
+        $project: {
+          asesor: { $arrayElemAt: ['$asesor.nombre', 0] },
+          sucursal: { $arrayElemAt: ['$sucursal.nombre', 0] },
+          atenciones: 1,
+          segundoPar: 1,
+          fecha: 1,
+          fechaDia: 1,
+        },
+      },
+      {
+        $sort:{fecha:-1}
+      }
+    ]);
+    console.log(rendimiento);
 
-  update(id: number, updateRendimientoDiarioDto: UpdateRendimientoDiarioDto) {
-    return `This action updates a #${id} rendimientoDiario`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} rendimientoDiario`;
+    return rendimiento;
   }
 }

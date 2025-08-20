@@ -4,7 +4,7 @@ export class CreateRendimientoDiarioDto {
 
     @IsNumber()
     @IsNotEmpty()
-    antenciones:number
+    atenciones:number
 
     @IsNumber()
     @IsNotEmpty()

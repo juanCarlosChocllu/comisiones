@@ -15,3 +15,4 @@ export interface rendimientoI{
     ticket:number
     
 }
+

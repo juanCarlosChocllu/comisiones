@@ -17,19 +17,12 @@ export class RendimientoDiarioController {
   findAll(@Body() buscadorRendimientoDiarioDto:BuscadorRendimientoDiarioDto ) {
     return this.rendimientoDiarioService.findAll(buscadorRendimientoDiarioDto);
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.rendimientoDiarioService.findOne(+id);
+  
+  @Post('listar/asesor')
+  listarRendimientoDiarioAsesor() {
+    return this.rendimientoDiarioService.listarRendimientoDiarioAsesor();
   }
+  
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRendimientoDiarioDto: UpdateRendimientoDiarioDto) {
-    return this.rendimientoDiarioService.update(+id, updateRendimientoDiarioDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.rendimientoDiarioService.remove(+id);
-  }
+ 
 }

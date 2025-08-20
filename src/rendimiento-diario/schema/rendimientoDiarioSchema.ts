@@ -8,7 +8,7 @@ export class RendimientoDiario {
   asesor: Types.ObjectId;
 
   @Prop()
-  antenciones: number;
+  atenciones: number;
 
   @Prop()
   segundoPar: number;
