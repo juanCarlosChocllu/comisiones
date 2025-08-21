@@ -38,38 +38,50 @@ export class RendimientoDiarioService {
   }
 
   async findAll(buscadorRendimientoDiarioDto: BuscadorRendimientoDiarioDto) {
+    console.log(buscadorRendimientoDiarioDto);
+    
     const ventas = await this.ventasService.ventasParaRendimientoDiario(
       buscadorRendimientoDiarioDto,
     );
+
+    
 
     const rendimiento = await Promise.all(
       ventas.map(async (item) => {
         const resultado = await Promise.all(
           item.ventas.map(async (data) => {
+          
+            
             let antireflejos: number = 0;
             let progresivos: number = 0;
             for (const receta of data.receta) {
               const data = receta.descripcion.split('/');
 
               const tipoLente = data[1];
-              const tratamiento = data[3];
+              const tratamiento = data[3];  
               if (tipoLente === 'PROGRESIVO') {
                 progresivos += 1;
               }
               if (
                 tratamiento === 'ANTIREFLEJO' ||
                 tratamiento === 'BLUE SHIELD' ||
-                tratamiento === 'GREEN SHIELD'
+                tratamiento === 'GREEN SHIELD' ||
+                tratamiento === 'CLARITY' ||
+                tratamiento === 'CLARITY PLUS' ||
+                tratamiento === 'STOP AGE' 
               ) {
                 antireflejos += 1;
               }
             }
+     
+            
             const rendimientoDia = await this.rendimientoDiario.findOne({
               fechaDia: data.fecha,
               asesor: data.asesorId,
               flag: flag.nuevo,
             });
-
+    
+            
             const resulado: rendimientoI = {
               asesor: data.asesor,
               antireflejos: antireflejos,
@@ -95,14 +107,18 @@ export class RendimientoDiarioService {
         };
       }),
     );
+
     return rendimiento;
   }
 
-  async listarRendimientoDiarioAsesor() {
+  async listarRendimientoDiarioAsesor(request:Request) {
+  
+
     const rendimiento = await this.rendimientoDiario.aggregate([
       {
         $match: {
           flag: 'nuevo',
+          ...(request.usuario.asesor) && {asesor:new Types.ObjectId(request.usuario.asesor)}
         },
       },
       {

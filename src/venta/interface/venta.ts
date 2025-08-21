@@ -150,5 +150,7 @@ export interface Receum {
 export interface resultadRendimientoDiarioI {
   sucursal:string,
     asesor:string,
+
   ventas:VentaRendimientoDiarioI[]
 }
+

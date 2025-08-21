@@ -91,8 +91,19 @@ ventaSchema.index({ estadoTracking: 1, fechaVenta: 1 });
 ventaSchema.index({
   asesor: 1,
   fechaVenta: 1,
-  estadoTracking: 1
+  comisiona:1,
+  estadoTracking: 1,
+  tipoVenta:1
 })
+
+ventaSchema.index({
+  asesor: 1,
+  fecha: 1,
+  comisiona:1,
+  estadoTracking: 1,
+  tipoVenta:1
+})
+
 
 ventaSchema.pre('save', function (next) {
   if (this.fechaVenta) {

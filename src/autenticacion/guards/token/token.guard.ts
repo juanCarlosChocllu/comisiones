@@ -28,28 +28,38 @@ export class TokenGuard implements CanActivate {
     }
     const request: Request = context.switchToHttp().getRequest();
     const header: string = request.headers.authorization;
+
     try {
       const token = header.split(' ')[1];
+
       const tokenVerificada = await this.jwtService.verify(token, {
         secret: jwtConstants.secret,
       });
 
       const usuario = await this.usuariosService.buscarUsuarioPorId(
-       tokenVerificada.id,
-      );    
- 
-      if (!usuario) {
+        tokenVerificada.id,
+      );
+
+      if (!usuario && !tokenVerificada) {
         return false;
       }
+      if (!usuario && tokenVerificada) {
+        request.usuario = {
+          idUsuario: tokenVerificada.id,
+          asesor: null,
+        };
+        return true;
+      }
+
       request.usuario = {
-        idUsuario:usuario._id,
-        asesor: usuario.asesor ? usuario.asesor : null
+        idUsuario: usuario._id,
+        asesor: usuario.asesor ? usuario.asesor : null,
       };
- 
+
       return true;
     } catch (error) {
-      console.log(error);
-      
+  
+
       throw new UnauthorizedException();
     }
   }

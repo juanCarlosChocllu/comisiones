@@ -31,6 +31,6 @@ export class CreateUsuarioDto {
     @IsOptional()
     @IsArray()
     @IsMongoId({each:true})
-    asesor:Types.ObjectId[]
+    asesorUsuario:Types.ObjectId[]
 
 }

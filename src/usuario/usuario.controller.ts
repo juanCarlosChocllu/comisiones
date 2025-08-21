@@ -54,4 +54,11 @@ export class UsuarioController {
   ) {
     return this.usuarioService.asignarSucursalAusuario(asesor, request);
   }
+
+  @Get('verificar/rol')
+  verificarRol(
+    @Req() request: Request,
+  ) {
+    return this.usuarioService.verificarRol(request);
+  }
 }

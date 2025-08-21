@@ -38,7 +38,7 @@ export class AsesorService {
         },
       },
     ]);
-    console.log(asesor);
+
     
     return asesor;
   }
@@ -208,5 +208,33 @@ export class AsesorService {
       },
     ]);
     return asesor;
+  }
+
+
+ async  listarAsesorSinUsario(){
+    const usuario = await this.asesor.aggregate([
+      {
+        $match:
+        {tieneAesor:{$ne:true}}
+      },
+      {
+        $lookup: {
+          from: 'Sucursal',
+          foreignField: '_id',
+          localField: 'sucursal',
+          as: 'sucursal',
+        },
+      },
+        {
+        $project: {
+          id:'$_id',
+          nombre: 1,
+          sucursal: { $arrayElemAt: ['$sucursal.nombre', 0] },
+         
+        },
+      },
+
+    ])
+    return usuario
   }
 }

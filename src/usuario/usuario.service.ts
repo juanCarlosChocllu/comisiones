@@ -40,8 +40,8 @@ export class UsuarioService {
       this.opcionesArgon2,
     );
     const usuario = await this.usuario.create(createUsuarioDto);
-    if (createUsuarioDto.asesor && createUsuarioDto.asesor.length > 0) {
-      for (const asesor of createUsuarioDto.asesor) {
+    if (createUsuarioDto.asesorUsuario && createUsuarioDto.asesorUsuario.length > 0) {
+      for (const asesor of createUsuarioDto.asesorUsuario) {
         await this.asesorService.asignarUsuarioAsesor(asesor, usuario._id);
       }
     }
@@ -117,5 +117,10 @@ export class UsuarioService {
       { asesor: new Types.ObjectId(asesor) },
     );
     return { status: HttpStatus.OK };
+  }
+
+ async  verificarRol(request:Request){
+    const usuario = await this.usuario.findOne({_id:new Types.ObjectId(request.usuario.idUsuario)}).select("rol")
+    return usuario
   }
 }

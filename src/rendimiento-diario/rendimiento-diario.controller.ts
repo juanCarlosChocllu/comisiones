@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller,  Post, Body,  Req } from '@nestjs/common';
 import { RendimientoDiarioService } from './rendimiento-diario.service';
 import { CreateRendimientoDiarioDto } from './dto/create-rendimiento-diario.dto';
-import { UpdateRendimientoDiarioDto } from './dto/update-rendimiento-diario.dto';
 import { Request}from 'express'
 import { BuscadorRendimientoDiarioDto } from './dto/BuscardorRendimientoDiario';
 @Controller('rendimiento/diario')
@@ -19,8 +18,8 @@ export class RendimientoDiarioController {
   }
   
   @Post('listar/asesor')
-  listarRendimientoDiarioAsesor() {
-    return this.rendimientoDiarioService.listarRendimientoDiarioAsesor();
+  listarRendimientoDiarioAsesor( @Req() request:Request) {
+    return this.rendimientoDiarioService.listarRendimientoDiarioAsesor(request);
   }
   
 
