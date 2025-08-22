@@ -13,7 +13,7 @@ export class AutenticacionService {
  ){}
  async autenticacion(AutenticacionDto: AutenticacionDto) {
    const usuario = await  this.usuarioService.buscarUsuaurio(AutenticacionDto.username)
-   if(usuario){
+   if(usuario && usuario.rol === "ADMINISTRADOR"){
      const match = await  argon2.verify(usuario.password, AutenticacionDto.password)
      if(match){
       const token = await this.jwtService.signAsync({
