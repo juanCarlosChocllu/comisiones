@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpStatus,
   Injectable,
@@ -62,7 +63,53 @@ export class UsuarioService {
     return usuario;
   }
   async listarusuarios() {
-    const usuario = await this.usuario.find();
+    const usuario = await this.usuario.aggregate([
+      {
+        $match:{
+          flag:flag.nuevo
+        }
+
+      },
+      {
+        $lookup:{
+          from:'Asesor',
+          foreignField:'usuario',
+          localField:'_id',
+          as:'asesor'
+
+        }
+      },
+       { $unwind: {path: "$asesor", preserveNullAndEmptyArrays :true} },
+       {
+        $lookup:{
+          from:'Sucursal',
+          foreignField:'_id',
+          localField:'asesor.sucursal',
+          as:'sucursal'
+
+        }
+      },
+       { $unwind: {path: "$sucursal", preserveNullAndEmptyArrays :true} },
+      {
+        $group:{
+          _id:'$_id',
+          nombre:{$first:'$nombre'},
+            apellidos:{$first:'$apellidos'},
+            username:{$first:'$username'},
+             rol:{$first:'$rol'},
+              sucursales: {
+          $push: {
+            sucursal:'$sucursal.nombre',
+            asesor: '$asesor._id'
+          }
+        }
+            
+        
+      }
+      }
+    ])
+
+    
     return usuario;
   }
 
@@ -77,7 +124,9 @@ export class UsuarioService {
     return usuario;
   }
 
-  async actulizar(id: Types.ObjectId, updateUsuarioDto: UpdateUsuarioDto) {
+  async actualizar(id: Types.ObjectId, updateUsuarioDto: UpdateUsuarioDto) {
+    try {
+    
     const usuario = await this.usuario.findOne({
       _id: new Types.ObjectId(id),
       flag: flag.nuevo,
@@ -89,7 +138,18 @@ export class UsuarioService {
       { _id: new Types.ObjectId(id) },
       updateUsuarioDto,
     );
+    if(updateUsuarioDto.asesorUsuario && updateUsuarioDto.asesorUsuario.length > 0 ){
+      await this.asesorService.eliminarUsuarioAsesor(usuario._id)
+       for (const asesor of updateUsuarioDto.asesorUsuario) {
+        await this.asesorService.asignarUsuarioAsesor(asesor, usuario._id);
+      }
+    }
+    
     return { status: HttpStatus.OK };
+    } catch (error) {
+      throw new BadRequestException()
+      
+    }
   }
 
   async softDelete(id: Types.ObjectId) {

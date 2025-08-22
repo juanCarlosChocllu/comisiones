@@ -145,9 +145,21 @@ export class AsesorService {
   public async  asignarUsuarioAsesor(id:Types.ObjectId, usuario:Types.ObjectId){
     const asesor= await this.asesor.findOne({_id:id})
     if(asesor){
-      await this.asesor.updateOne({_id:new Types.ObjectId(id)},{usuario:usuario, tieneAesor:true})
+      await this.asesor.updateOne({_id:new Types.ObjectId(id)},{usuario:usuario})
     }
   }
+
+ public async  eliminarUsuarioAsesor(usuario:Types.ObjectId){
+    const asesor= await this.asesor.find({usuario:new Types.ObjectId(usuario)})
+    if(asesor.length > 0) {
+
+      for (const a of asesor) {
+          await this.asesor.updateOne({_id:a._id}, {$unset:{usuario:1}})
+      }
+      
+    }
+  }
+
 
   async listarSucursalesAsesor(request:Request){
     const sucursales = await this.asesor.aggregate([
@@ -213,10 +225,7 @@ export class AsesorService {
 
  async  listarAsesorSinUsario(){
     const usuario = await this.asesor.aggregate([
-      {
-        $match:
-        {tieneAesor:{$ne:true}}
-      },
+     
       {
         $lookup: {
           from: 'Sucursal',

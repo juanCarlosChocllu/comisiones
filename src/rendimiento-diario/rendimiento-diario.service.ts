@@ -1,15 +1,22 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { CreateRendimientoDiarioDto } from './dto/create-rendimiento-diario.dto';
 import { UpdateRendimientoDiarioDto } from './dto/update-rendimiento-diario.dto';
 import { Request } from 'express';
 import { RendimientoDiario } from './schema/rendimientoDiarioSchema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model, PipelineStage, Types } from 'mongoose';
 import { VentaService } from 'src/venta/services/venta.service';
 import { dataEmpresa } from 'src/sucursal/util/data';
 import { rendimientoI } from './interface/rendimiento';
 import { flag } from 'src/core/enum/flag';
 import { BuscadorRendimientoDiarioDto } from './dto/BuscardorRendimientoDiario';
+import { PaginadorDto } from 'src/core/dto/paginadorDto';
+import { calcularPaginas, skip } from 'src/core/utils/paginador';
 @Injectable()
 export class RendimientoDiarioService {
   constructor(
@@ -23,12 +30,24 @@ export class RendimientoDiarioService {
   ) {
     if (!request.usuario.idUsuario || !request.usuario.asesor) {
       throw new BadRequestException(
-        'Deve tener una sucrsal asignada para este registro',
+        'Deve tener una sucursal asignada para este registro',
       );
     }
+
     const asesor: Types.ObjectId = new Types.ObjectId(request.usuario.asesor);
     const date = new Date();
     const diaRegistro: string = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    const verificar = await this.rendimientoDiario.countDocuments({
+      asesor: new Types.ObjectId(asesor),
+      fechaDia: diaRegistro,
+      flag:flag.nuevo
+    });
+    if (verificar > 0) {
+      throw new ConflictException(
+        `Rendiemiento de la fecha ${diaRegistro} ya fue registrado`,
+      );
+    }
+
     await this.rendimientoDiario.create({
       ...createRendimientoDiarioDto,
       asesor: asesor,
@@ -38,27 +57,21 @@ export class RendimientoDiarioService {
   }
 
   async findAll(buscadorRendimientoDiarioDto: BuscadorRendimientoDiarioDto) {
-    console.log(buscadorRendimientoDiarioDto);
-    
     const ventas = await this.ventasService.ventasParaRendimientoDiario(
       buscadorRendimientoDiarioDto,
     );
-
-    
 
     const rendimiento = await Promise.all(
       ventas.map(async (item) => {
         const resultado = await Promise.all(
           item.ventas.map(async (data) => {
-          
-            
             let antireflejos: number = 0;
             let progresivos: number = 0;
             for (const receta of data.receta) {
               const data = receta.descripcion.split('/');
 
               const tipoLente = data[1];
-              const tratamiento = data[3];  
+              const tratamiento = data[3];
               if (tipoLente === 'PROGRESIVO') {
                 progresivos += 1;
               }
@@ -68,20 +81,18 @@ export class RendimientoDiarioService {
                 tratamiento === 'GREEN SHIELD' ||
                 tratamiento === 'CLARITY' ||
                 tratamiento === 'CLARITY PLUS' ||
-                tratamiento === 'STOP AGE' 
+                tratamiento === 'STOP AGE'
               ) {
                 antireflejos += 1;
               }
             }
-     
-            
+
             const rendimientoDia = await this.rendimientoDiario.findOne({
               fechaDia: data.fecha,
               asesor: data.asesorId,
               flag: flag.nuevo,
             });
-    
-            
+
             const resulado: rendimientoI = {
               asesor: data.asesor,
               antireflejos: antireflejos,
@@ -111,14 +122,17 @@ export class RendimientoDiarioService {
     return rendimiento;
   }
 
-  async listarRendimientoDiarioAsesor(request:Request) {
-  
-
-    const rendimiento = await this.rendimientoDiario.aggregate([
+  async listarRendimientoDiarioAsesor(
+    request: Request,
+    paginadorDto: PaginadorDto,
+  ) {
+    const pipeline: PipelineStage[] = [
       {
         $match: {
           flag: 'nuevo',
-          ...(request.usuario.asesor) && {asesor:new Types.ObjectId(request.usuario.asesor)}
+          ...(request.usuario.asesor && {
+            asesor: new Types.ObjectId(request.usuario.asesor),
+          }),
         },
       },
       {
@@ -148,11 +162,31 @@ export class RendimientoDiarioService {
         },
       },
       {
-        $sort:{fecha:-1}
-      }
-    ]);
-    console.log(rendimiento);
+        $sort: { fecha: -1 },
+      },
+      {
+        $skip: skip(paginadorDto.pagina, paginadorDto.limite),
+      },
+      {
+        $limit: paginadorDto.limite,
+      },
+    ];
 
-    return rendimiento;
+    const [countDocuments, rendimiento] = await Promise.all([
+      this.rendimientoDiario.countDocuments({
+        ...(request.usuario.asesor && {
+          asesor: new Types.ObjectId(request.usuario.asesor),
+        }),
+      }),
+      this.rendimientoDiario.aggregate(pipeline),
+    ]);
+
+    const paginas = calcularPaginas(countDocuments, paginadorDto.limite);
+
+    return {
+      paginas: paginas,
+      paginaActual: paginadorDto.pagina,
+      data: rendimiento,
+    };
   }
 }

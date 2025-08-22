@@ -35,11 +35,11 @@ export class UsuarioController {
   }
 
   @Patch(':id')
-  actulizar(
+  actualizar(
     @Param('id', ValidateIdPipe) id: Types.ObjectId,
     @Body() updateUsuarioDto: UpdateUsuarioDto,
   ) {
-    return this.usuarioService.actulizar(id, updateUsuarioDto);
+    return this.usuarioService.actualizar(id, updateUsuarioDto);
   }
 
   @Delete(':id')

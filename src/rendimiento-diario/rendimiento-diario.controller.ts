@@ -1,8 +1,9 @@
-import { Controller,  Post, Body,  Req } from '@nestjs/common';
+import { Controller,  Post, Body,  Req, Query, Get } from '@nestjs/common';
 import { RendimientoDiarioService } from './rendimiento-diario.service';
 import { CreateRendimientoDiarioDto } from './dto/create-rendimiento-diario.dto';
 import { Request}from 'express'
 import { BuscadorRendimientoDiarioDto } from './dto/BuscardorRendimientoDiario';
+import { PaginadorDto } from 'src/core/dto/paginadorDto';
 @Controller('rendimiento/diario')
 export class RendimientoDiarioController {
   constructor(private readonly rendimientoDiarioService: RendimientoDiarioService) {}
@@ -17,9 +18,9 @@ export class RendimientoDiarioController {
     return this.rendimientoDiarioService.findAll(buscadorRendimientoDiarioDto);
   }
   
-  @Post('listar/asesor')
-  listarRendimientoDiarioAsesor( @Req() request:Request) {
-    return this.rendimientoDiarioService.listarRendimientoDiarioAsesor(request);
+  @Get('listar/asesor')
+  listarRendimientoDiarioAsesor( @Req() request:Request, @Query() paginadorDto: PaginadorDto) {
+    return this.rendimientoDiarioService.listarRendimientoDiarioAsesor(request, paginadorDto);
   }
   
 
