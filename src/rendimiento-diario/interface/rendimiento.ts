@@ -13,6 +13,5 @@ export interface rendimientoI{
     idAsesor:Types.ObjectId
     segundoPar:number
     ticket:number
-    
 }
 

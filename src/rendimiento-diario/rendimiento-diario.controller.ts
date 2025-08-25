@@ -4,6 +4,7 @@ import { CreateRendimientoDiarioDto } from './dto/create-rendimiento-diario.dto'
 import { Request}from 'express'
 import { BuscadorRendimientoDiarioDto } from './dto/BuscardorRendimientoDiario';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
+import { FechasDto } from 'src/core/dto/FechasDto';
 @Controller('rendimiento/diario')
 export class RendimientoDiarioController {
   constructor(private readonly rendimientoDiarioService: RendimientoDiarioService) {}
@@ -21,6 +22,11 @@ export class RendimientoDiarioController {
   @Get('listar/asesor')
   listarRendimientoDiarioAsesor( @Req() request:Request, @Query() paginadorDto: PaginadorDto) {
     return this.rendimientoDiarioService.listarRendimientoDiarioAsesor(request, paginadorDto);
+  }
+
+  @Post('asesor')
+  rendimientoDiario(@Req() request:Request  ) {
+    return this.rendimientoDiarioService.rendimientoDiarioAsesor(request);
   }
   
 

@@ -3,6 +3,7 @@ import {
   ConflictException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateRendimientoDiarioDto } from './dto/create-rendimiento-diario.dto';
 import { UpdateRendimientoDiarioDto } from './dto/update-rendimiento-diario.dto';
@@ -17,6 +18,7 @@ import { flag } from 'src/core/enum/flag';
 import { BuscadorRendimientoDiarioDto } from './dto/BuscardorRendimientoDiario';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import { calcularPaginas, skip } from 'src/core/utils/paginador';
+import { FechasDto } from 'src/core/dto/FechasDto';
 @Injectable()
 export class RendimientoDiarioService {
   constructor(
@@ -40,7 +42,7 @@ export class RendimientoDiarioService {
     const verificar = await this.rendimientoDiario.countDocuments({
       asesor: new Types.ObjectId(asesor),
       fechaDia: diaRegistro,
-      flag:flag.nuevo
+      flag: flag.nuevo,
     });
     if (verificar > 0) {
       throw new ConflictException(
@@ -93,7 +95,7 @@ export class RendimientoDiarioService {
               flag: flag.nuevo,
             });
 
-            const resulado: rendimientoI = {
+            const resultado: rendimientoI = {
               asesor: data.asesor,
               antireflejos: antireflejos,
               atenciones: rendimientoDia ? rendimientoDia.atenciones : 0,
@@ -107,7 +109,7 @@ export class RendimientoDiarioService {
               segundoPar: rendimientoDia ? rendimientoDia.segundoPar : 0,
               ticket: data.ticket,
             };
-            return resulado;
+            return resultado;
           }),
         );
 
@@ -188,5 +190,66 @@ export class RendimientoDiarioService {
       paginaActual: paginadorDto.pagina,
       data: rendimiento,
     };
+  }
+
+  async rendimientoDiarioAsesor(request: Request) {
+    if (!request.usuario.asesor) {
+      throw new NotFoundException(
+        'Su usuario deve estar vinculado a un asesor',
+      );
+    }
+
+    const ventas =
+      await this.ventasService.ventasParaRendimientoDiarioAsesor(request);
+    const data = await Promise.all(
+      ventas.map(async (item) => {
+        let antireflejos: number = 0;
+        let progresivos: number = 0;
+        for (const receta of item.receta) {
+          const data = receta.descripcion.split('/');
+
+          const tipoLente = data[1];
+          const tratamiento = data[3];
+          if (tipoLente === 'PROGRESIVO') {
+            progresivos += 1;
+          }
+          if (
+            tratamiento === 'ANTIREFLEJO' ||
+            tratamiento === 'BLUE SHIELD' ||
+            tratamiento === 'GREEN SHIELD' ||
+            tratamiento === 'CLARITY' ||
+            tratamiento === 'CLARITY PLUS' ||
+            tratamiento === 'STOP AGE'
+          ) {
+            antireflejos += 1;
+          }
+        }
+
+        const rendimientoDia = await this.rendimientoDiario.findOne({
+          fechaDia: item.fecha,
+          asesor: item.asesorId,
+          flag: flag.nuevo,
+        });
+
+        const resultado: rendimientoI = {
+          asesor: item.asesor,
+          antireflejos: antireflejos,
+          atenciones: rendimientoDia ? rendimientoDia.atenciones : 0,
+          cantidadLente: item.lente,
+          entregas: item.entregadas,
+          lc: item.lc,
+          montoTotalVentas: item.montoTotal,
+          progresivos: progresivos,
+          fecha: item.fecha,
+          idAsesor: item.asesorId,
+          segundoPar: rendimientoDia ? rendimientoDia.segundoPar : 0,
+          ticket: item.ticket,
+        };
+        return resultado;
+      }),
+    );
+    console.log(data);
+    
+    return data;
   }
 }

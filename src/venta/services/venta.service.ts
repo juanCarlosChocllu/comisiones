@@ -47,6 +47,7 @@ import { BuscadorRendimientoDiarioDto } from 'src/rendimiento-diario/dto/Buscard
 import { SucursalService } from 'src/sucursal/sucursal.service';
 import { filtradorVenta } from '../utils/filtroVenta';
 import { FlagVentaE } from 'src/core/enum/venta';
+import { Request } from 'express';
 
 @Injectable()
 export class VentaService {
@@ -635,7 +636,7 @@ export class VentaService {
                   { $toString: '$_id.dia' },
                 ],
               },
-              asesor: 1,
+         
               receta: 1,
               montoTotal: 1,
               lente: 1,
@@ -661,5 +662,123 @@ export class VentaService {
     );
 
     return dataVenta;
+  }
+
+
+   async ventasParaRendimientoDiarioAsesor(
+      request:Request
+  ): Promise<VentaRendimientoDiarioI[]> {
+        const ventas = await this.venta.aggregate([
+          {
+            $match: {
+              asesor: new Types.ObjectId(request.usuario.asesor),
+             
+            },
+          },
+          {
+            $lookup: {
+              from: 'DetalleVenta',
+              foreignField: 'venta',
+              localField: '_id',
+              as: 'detalleVenta',
+            },
+          },
+          {
+            $unwind: {
+              path: '$detalleVenta',
+              preserveNullAndEmptyArrays: false,
+            },
+          },
+
+            {
+            $lookup: {
+              from: 'Asesor',
+              foreignField: '_id',
+              localField: 'asesor',
+              as: 'asesor',
+            },
+          },
+          {
+            $group: {
+              _id: {
+                aqo: { $year: '$fechaVenta' },
+                mes: { $month: '$fechaVenta' },
+                dia: { $dayOfMonth: '$fechaVenta' },
+              } ,
+              lente: {
+                $sum: {
+                  $cond: {
+                    if: { $eq: ['$detalleVenta.rubro', 'LENTE'] },
+                    then: '$detalleVenta.cantidad',
+                    else: 0,
+                  },
+                },
+              },
+              lc: {
+                $sum: {
+                  $cond: {
+                    if: { $eq: ['$detalleVenta.rubro', 'LENTE DE CONTACTO'] },
+                    then: '$detalleVenta.cantidad',
+                    else: 0,
+                  },
+                },
+              },
+              entregadas: {
+                $sum: {
+                  $cond: {
+                    if: { $eq: ['$flag', 'FINALIZADO'] },
+                    then: 1,
+                    else: 0,
+                  },
+                },
+              },
+
+              receta: {
+                $push: {
+                  $cond: {
+                    if: { $eq: ['$detalleVenta.rubro', 'LENTE'] },
+                    then: {
+                      descripcion: '$detalleVenta.descripcion',
+                    },
+                    else: '$$REMOVE',
+                  },
+                },
+              },
+              montoTotal: { $sum: '$montoTotal' },
+              ticket: { $sum: 1 },
+              asesorId: { $first: { $arrayElemAt: [ '$asesor._id', 0 ] } },
+                asesor: { $first: { $arrayElemAt: [ '$asesor.nombre', 0 ] } },
+              
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              fecha: {
+                $concat: [
+                  { $toString: '$_id.aqo' },
+                  '-',
+                  { $toString: '$_id.mes' },
+                  '-',
+                  { $toString: '$_id.dia' },
+                ],
+              },
+              asesor: 1,
+              receta: 1,
+              montoTotal: 1,
+              lente: 1,
+              lc: 1,
+              entregadas: 1,
+              asesorId: 1,
+              ticket: 1,
+            },
+          },
+          {
+            $sort: { fechaVenta: -1 },
+          },
+        ]);
+        
+        
+    return ventas;
   }
 }
