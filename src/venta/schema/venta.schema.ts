@@ -82,8 +82,28 @@ ventaSchema.index({ asesor: 1, fechaFinalizacion: 1, tipoVenta: 1, flag: 1 });
 
 ventaSchema.index({ id_venta: 1 });
 
+
 //indice para listar fichas invalidas
 ventaSchema.index({ estadoTracking: 1, fechaVenta: 1 });
+
+
+//indice para rendimiento diario de ventas
+ventaSchema.index({
+  asesor: 1,
+  fechaVenta: 1,
+  comisiona:1,
+  estadoTracking: 1,
+  tipoVenta:1
+})
+
+ventaSchema.index({
+  asesor: 1,
+  fecha: 1,
+  comisiona:1,
+  estadoTracking: 1,
+  tipoVenta:1
+})
+
 
 ventaSchema.pre('save', function (next) {
   if (this.fechaVenta) {

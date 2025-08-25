@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Types } from "mongoose";
 import { flag } from "src/core/enum/flag";
 
 
@@ -18,11 +19,16 @@ export class Usuario {
     @Prop({select:false})
     password:string
 
+    @Prop({type:Types.ObjectId, ref:'Asersor'})
+    asesor:Types.ObjectId
+
     @Prop()
     rol:string
     
     @Prop({type:String, enum:flag, default:flag.nuevo})
     flag:string
+
+
 
 }
 

@@ -10,8 +10,11 @@ import { port, rutaFrontEnd } from './core/config/config';
 import * as bodyParser from 'body-parser';
 import { LoggerInterceptor } from './core/interceptors/logger.interceptor';
 import { LogService } from './log/log.service';
+import * as cookieParser from 'cookie-parser';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
   app.enableCors({
     origin: [rutaFrontEnd],
     methods: 'GET,PATCH,POST,DELETE',

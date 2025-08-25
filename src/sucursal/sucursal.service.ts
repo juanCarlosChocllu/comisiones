@@ -117,4 +117,11 @@ export class SucursalService {
     await this.sucursal.create(sucursalData);
     return { status: HttpStatus.CREATED };
   }
+
+  listarSucursalPorNombre(nombre:string[]){
+    return this.sucursal.find({nombre:{$in:nombre}})
+  }
+  buscarSucursalPorId(id:Types.ObjectId){
+    return this.sucursal.findOne({_id:new Types.ObjectId(id)})
+  }
 }

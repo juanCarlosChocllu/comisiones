@@ -18,7 +18,7 @@ export class AutenticacionService {
      if(match){
       const token = await this.jwtService.signAsync({
        sub: usuario.id,
-       id: usuario.id
+       id: usuario.id,
       })
       return {
        status:HttpStatus.OK,

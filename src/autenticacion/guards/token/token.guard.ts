@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { log } from 'node:console';
@@ -13,39 +18,49 @@ import { PUBLIC_KEY } from 'src/autenticacion/decorators/keys';
 export class TokenGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly  reflector:Reflector,
-    private readonly usuariosService:UsuarioService
-  ){}
-  async canActivate(
-    context: ExecutionContext,
-  ) {
-    const publico = this.reflector.get(PUBLIC_KEY,context.getHandler())
-
-    
-    if(publico){
-   
-        return true
+    private readonly reflector: Reflector,
+    private readonly usuariosService: UsuarioService,
+  ) {}
+  async canActivate(context: ExecutionContext) {
+    const publico = this.reflector.get(PUBLIC_KEY, context.getHandler());
+    if (publico) {
+      return true;
     }
-    const request:Request = context.switchToHttp().getRequest()
-    const header:string = request.headers.authorization       
+    const request: Request = context.switchToHttp().getRequest();
+    const header: string = request.headers.authorization;
+
     try {
-      const token = header.split(' ')[1];  
-      const tokenVerificada = await this.jwtService.verify(token,{
-        secret:jwtConstants.secret
-      })     
+      const token = header.split(' ')[1];
+
+      const tokenVerificada = await this.jwtService.verify(token, {
+        secret: jwtConstants.secret,
+      });
+
+      const usuario = await this.usuariosService.buscarUsuarioPorId(
+        tokenVerificada.id,
+      );
+
+      if (!usuario && !tokenVerificada) {
+        return false;
+      }
+      if (!usuario && tokenVerificada) {
+        request.usuario = {
+          idUsuario: tokenVerificada.id,
+          asesor: null,
+        };
+        return true;
+      }
+
+      request.usuario = {
+        idUsuario: usuario._id,
+        asesor: usuario.asesor ? usuario.asesor : null,
+      };
+
+      return true;
+    } catch (error) {
   
-      const usuario = await this.usuariosService.buscarUsuarioPorId(tokenVerificada.id)      
-      if(!usuario){        
-        return false
-      }          
-      request.user = usuario.id   
-      return true
-    } catch (error) {          
 
-        
-       throw new UnauthorizedException()
-      
+      throw new UnauthorizedException();
     }
-
   }
 }
