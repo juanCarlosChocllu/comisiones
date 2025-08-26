@@ -41,7 +41,10 @@ export class UsuarioService {
       this.opcionesArgon2,
     );
     const usuario = await this.usuario.create(createUsuarioDto);
-    if (createUsuarioDto.asesorUsuario && createUsuarioDto.asesorUsuario.length > 0) {
+    if (
+      createUsuarioDto.asesorUsuario &&
+      createUsuarioDto.asesorUsuario.length > 0
+    ) {
       for (const asesor of createUsuarioDto.asesorUsuario) {
         await this.asesorService.asignarUsuarioAsesor(asesor, usuario._id);
       }
@@ -65,51 +68,93 @@ export class UsuarioService {
   async listarusuarios() {
     const usuario = await this.usuario.aggregate([
       {
-        $match:{
-          flag:flag.nuevo
-        }
-
+        $match: {
+          flag: flag.nuevo,
+        },
       },
       {
-        $lookup:{
-          from:'Asesor',
-          foreignField:'usuario',
-          localField:'_id',
-          as:'asesor'
-
-        }
+        $lookup: {
+          from: 'Asesor',
+          foreignField: 'usuario',
+          localField: '_id',
+          as: 'asesor',
+        },
       },
-       { $unwind: {path: "$asesor", preserveNullAndEmptyArrays :true} },
-       {
-        $lookup:{
-          from:'Sucursal',
-          foreignField:'_id',
-          localField:'asesor.sucursal',
-          as:'sucursal'
-
-        }
-      },
-       { $unwind: {path: "$sucursal", preserveNullAndEmptyArrays :true} },
+      { $unwind: { path: '$asesor', preserveNullAndEmptyArrays: true } },
       {
-        $group:{
-          _id:'$_id',
-          nombre:{$first:'$nombre'},
-            apellidos:{$first:'$apellidos'},
-            username:{$first:'$username'},
-             rol:{$first:'$rol'},
-              sucursales: {
-          $push: {
-            sucursal:'$sucursal.nombre',
-            asesor: '$asesor._id'
-          }
-        }
-            
-        
-      }
-      }
-    ])
+        $lookup: {
+          from: 'Sucursal',
+          foreignField: '_id',
+          localField: 'asesor.sucursal',
+          as: 'sucursal',
+        },
+      },
+      { $unwind: { path: '$sucursal', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: '$_id',
+          nombre: { $first: '$nombre' },
+          apellidos: { $first: '$apellidos' },
+          username: { $first: '$username' },
+          rol: { $first: '$rol' },
+          sucursales: {
+            $push: {
+              sucursal: '$sucursal.nombre',
+              asesor: '$asesor._id',
+            },
+          },
+        },
+      },
+    ]);
 
-    
+    return usuario;
+  }
+
+  async listarusuariosAsesor() {
+    const usuario = await this.usuario.aggregate([
+      {
+        $match: {
+          flag: flag.nuevo,
+          rol: { $ne: 'ADMINISTRADOR' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'Asesor',
+          foreignField: 'usuario',
+          localField: '_id',
+          as: 'asesorArr',
+        },
+      },
+     
+      { $unwind: { path: '$asesorArr', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'Sucursal',
+          foreignField: '_id',
+          localField: 'asesorArr.sucursal',
+          as: 'sucursal',
+        },
+      },
+      { $unwind: { path: '$sucursal', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: '$_id',
+          nombre: { $first: '$nombre' },
+          apellidos: { $first: '$apellidos' },
+          asesor: { $first: '$asesor' },
+          username: { $first: '$username' },
+          rol: { $first: '$rol' },
+          sucursales: {
+            $push: {
+              sucursal: '$sucursal.nombre',
+              asesor: '$asesorArr._id',
+            },
+          },
+        },
+      },
+    ]);
+
     return usuario;
   }
 
@@ -126,29 +171,30 @@ export class UsuarioService {
 
   async actualizar(id: Types.ObjectId, updateUsuarioDto: UpdateUsuarioDto) {
     try {
-    
-    const usuario = await this.usuario.findOne({
-      _id: new Types.ObjectId(id),
-      flag: flag.nuevo,
-    });
-    if (!usuario) {
-      throw new NotFoundException();
-    }
-    await this.usuario.updateOne(
-      { _id: new Types.ObjectId(id) },
-      updateUsuarioDto,
-    );
-    if(updateUsuarioDto.asesorUsuario && updateUsuarioDto.asesorUsuario.length > 0 ){
-      await this.asesorService.eliminarUsuarioAsesor(usuario._id)
-       for (const asesor of updateUsuarioDto.asesorUsuario) {
-        await this.asesorService.asignarUsuarioAsesor(asesor, usuario._id);
+      const usuario = await this.usuario.findOne({
+        _id: new Types.ObjectId(id),
+        flag: flag.nuevo,
+      });
+      if (!usuario) {
+        throw new NotFoundException();
       }
-    }
-    
-    return { status: HttpStatus.OK };
+      await this.usuario.updateOne(
+        { _id: new Types.ObjectId(id) },
+        updateUsuarioDto,
+      );
+      if (
+        updateUsuarioDto.asesorUsuario &&
+        updateUsuarioDto.asesorUsuario.length > 0
+      ) {
+        await this.asesorService.eliminarUsuarioAsesor(usuario._id);
+        for (const asesor of updateUsuarioDto.asesorUsuario) {
+          await this.asesorService.asignarUsuarioAsesor(asesor, usuario._id);
+        }
+      }
+
+      return { status: HttpStatus.OK };
     } catch (error) {
-      throw new BadRequestException()
-      
+      throw new BadRequestException();
     }
   }
 
@@ -167,20 +213,28 @@ export class UsuarioService {
     return { status: HttpStatus.OK };
   }
 
-  async asignarSucursalAusuario(asesor: Types.ObjectId, request: Request) {
-    const asesorEncontrado = await this.asesorService.verificarAsesor(asesor, request.usuario.idUsuario);
+  async asignarSucursalAusuario(
+    asesor: Types.ObjectId,
+    usuario: Types.ObjectId,
+  ) {
+    const asesorEncontrado = await this.asesorService.verificarAsesor(
+      asesor,
+      usuario,
+    );
     if (!asesorEncontrado) {
       throw new NotFoundException('asesor no encontrado');
     }
     await this.usuario.updateOne(
-      { _id: new Types.ObjectId(request.usuario.idUsuario) },
+      { _id: new Types.ObjectId(usuario) },
       { asesor: new Types.ObjectId(asesor) },
     );
     return { status: HttpStatus.OK };
   }
 
- async  verificarRol(request:Request){
-    const usuario = await this.usuario.findOne({_id:new Types.ObjectId(request.usuario.idUsuario)}).select("rol")
-    return usuario
+  async verificarRol(request: Request) {
+    const usuario = await this.usuario
+      .findOne({ _id: new Types.ObjectId(request.usuario.idUsuario) })
+      .select('rol');
+    return usuario;
   }
 }

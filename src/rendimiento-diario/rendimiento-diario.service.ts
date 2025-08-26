@@ -248,8 +248,27 @@ export class RendimientoDiarioService {
         return resultado;
       }),
     );
-    console.log(data);
-    
+
     return data;
+  }
+  async update(
+    updateRendimientoDiarioDto: UpdateRendimientoDiarioDto,
+    id: Types.ObjectId,
+  ) {
+    const date = new Date();
+    const rendimiento = await this.rendimientoDiario.findOne({
+      _id: new Types.ObjectId(id),
+    });
+    const diaRegistro: string = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    if (rendimiento) {
+      if (rendimiento.fechaDia == diaRegistro) {
+        return await this.rendimientoDiario.updateOne(
+          { _id: new Types.ObjectId(id) },
+          updateRendimientoDiarioDto,
+        );
+      }
+       throw new BadRequestException("Tua tiempo de edicion expiro")
+    }
+    throw new NotFoundException();
   }
 }

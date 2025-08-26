@@ -44,6 +44,12 @@ export class AsesorController {
     return this.asesorService.listarSucursalesAsesor(request);
   }
 
+   @Get('sucursal/:usuario')
+  listarSucursalesAsesores(@Param('usuario', ValidateIdPipe) usuario: Types.ObjectId) {
+    return this.asesorService.listarSucursalesAsesores(usuario);
+  }
+  
+
   @Get('sin/usuario')
   listarAsesorSinUsario() {
     return this.asesorService.listarAsesorSinUsario();

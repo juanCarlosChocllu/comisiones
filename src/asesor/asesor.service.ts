@@ -246,4 +246,30 @@ export class AsesorService {
     ])
     return usuario
   }
+
+ async  listarSucursalesAsesores(usuario:Types.ObjectId){
+    const sucursales = await this.asesor.aggregate([
+      {
+        $match:{
+          usuario:new  Types.ObjectId(usuario)
+        }
+      },
+      {
+        $lookup:{
+          from:'Sucursal',
+          foreignField:'_id',
+          localField:'sucursal',
+          as:'sucursal'
+        }
+      },
+      {
+        $project:{
+          _id:0,
+          asesor:'$_id',
+           nombreSucursal:{$arrayElemAt: [ '$sucursal.nombre', 0 ]}
+        }
+      }
+    ])
+    return sucursales
+  }
 }

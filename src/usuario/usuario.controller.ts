@@ -28,6 +28,11 @@ export class UsuarioController {
   listarusuarios() {
     return this.usuarioService.listarusuarios();
   }
+   @Get("asesor")
+  listarusuariosAsesor() {
+    return this.usuarioService.listarusuariosAsesor();
+  }
+
 
   @Get(':id')
   findOne(@Param('id', ValidateIdPipe) id: Types.ObjectId) {
@@ -47,12 +52,13 @@ export class UsuarioController {
     return this.usuarioService.softDelete(id);
   }
 
-  @Get('asignar/sucursal/:asesor')
+  @Get('asignar/sucursal/:asesor/:usuario')
   asignarSucursalAusuario(
-    @Req() request: Request,
+    //@Req() request: Request,
     @Param('asesor', ValidateIdPipe) asesor: Types.ObjectId,
+      @Param('usuario', ValidateIdPipe) usuario: Types.ObjectId,
   ) {
-    return this.usuarioService.asignarSucursalAusuario(asesor, request);
+    return this.usuarioService.asignarSucursalAusuario(asesor, usuario);
   }
 
   @Get('verificar/rol')
