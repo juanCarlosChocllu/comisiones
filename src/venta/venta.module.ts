@@ -14,6 +14,7 @@ import { MetasProductoVipModule } from 'src/metas-producto-vip/metas-producto-vi
 import { PreciosModule } from 'src/precios/precios.module';
 import { ComisionServicioModule } from 'src/comision-servicio/comision-servicio.module';
 import { SucursalModule } from 'src/sucursal/sucursal.module';
+import { MetasSucursalModule } from 'src/metas-sucursal/metas-sucursal.module';
 
 @Module({
     imports:[
@@ -33,7 +34,8 @@ import { SucursalModule } from 'src/sucursal/sucursal.module';
       MetasProductoVipModule,
       PreciosModule,
       ComisionServicioModule,
-      SucursalModule
+      SucursalModule,
+      MetasSucursalModule
     ],
   controllers: [VentaController],
   providers: [VentaService, DetalleVentaService],

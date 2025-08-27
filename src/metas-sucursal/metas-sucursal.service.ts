@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { MetasSucursal } from './schema/metasSucursalSchema';
 import { Model, Types } from 'mongoose';
 import { SucursalService } from 'src/sucursal/sucursal.service';
+import { flag } from 'src/core/enum/flag';
 
 @Injectable()
 export class MetasSucursalService {
@@ -32,9 +33,10 @@ export class MetasSucursalService {
     return { status: HttpStatus.OK };
   }
 
-  findAll() {
-    return `This action returns all metasSucursal`;
-  }
+   async listarMetasPorSucursal(sucursal:Types.ObjectId, fechaInicio:Date){
+      const metas =await this.metasSucursal.findOne({sucursal:new Types.ObjectId(sucursal), flag:flag.nuevo})
+    return metas
+   }
 
   findOne(id: number) {
     return `This action returns a #${id} metasSucursal`;

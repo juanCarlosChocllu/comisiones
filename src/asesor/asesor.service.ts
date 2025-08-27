@@ -17,6 +17,10 @@ export class AsesorService {
     return 'This action adds a new asesor';
   }
 
+   async listarAsesorPorSucursal(sucursal:Types.ObjectId) {
+    const asesor = await this.asesor.find({sucursal:new Types.ObjectId(sucursal)})
+    return asesor;
+  }
   async listar() {
     const asesor: ScursalAsesorI[] = await this.asesor.aggregate([
       

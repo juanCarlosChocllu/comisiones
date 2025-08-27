@@ -48,6 +48,7 @@ import { SucursalService } from 'src/sucursal/sucursal.service';
 import { filtradorVenta } from '../utils/filtroVenta';
 import { FlagVentaE } from 'src/core/enum/venta';
 import { Request } from 'express';
+import { MetasSucursalService } from 'src/metas-sucursal/metas-sucursal.service';
 
 @Injectable()
 export class VentaService {
@@ -64,6 +65,7 @@ export class VentaService {
     private readonly preciosService: PreciosService,
     private readonly comisionServicioService: ComisionServicioService,
     private readonly sucursalService: SucursalService,
+    private readonly metasSucursalService: MetasSucursalService,
   ) {}
 
   async listasVentasComisiones(buscadorVentaDto: BuscadorVentaDto) {
@@ -536,24 +538,23 @@ export class VentaService {
       buscadorRendimientoDiarioDto.sucursal,
     );
 
-    const filter = filtradorVenta(buscadorRendimientoDiarioDto)
-    let agrupacion = {}
-    if(buscadorRendimientoDiarioDto.flagVenta == FlagVentaE.realizadas) {
+    const filter = filtradorVenta(buscadorRendimientoDiarioDto);
+    let agrupacion = {};
+    if (buscadorRendimientoDiarioDto.flagVenta == FlagVentaE.realizadas) {
       agrupacion = {
-                aqo: { $year: '$fechaVenta' },
-                mes: { $month: '$fechaVenta' },
-                dia: { $dayOfMonth: '$fechaVenta' },
-              } 
-    }else {
-       agrupacion ={
-                aqo: { $year: '$fecha' },
-                mes: { $month: '$fecha' },
-                dia: { $dayOfMonth: '$fecha' },
-              } 
+        aqo: { $year: '$fechaVenta' },
+        mes: { $month: '$fechaVenta' },
+        dia: { $dayOfMonth: '$fechaVenta' },
+      };
+    } else {
+      agrupacion = {
+        aqo: { $year: '$fecha' },
+        mes: { $month: '$fecha' },
+        dia: { $dayOfMonth: '$fecha' },
+      };
     }
-     console.log(agrupacion);
-     
-    
+    console.log(agrupacion);
+
     const dataVenta = await Promise.all(
       asesor.map(async (item) => {
         const ventas = await this.venta.aggregate([
@@ -636,7 +637,7 @@ export class VentaService {
                   { $toString: '$_id.dia' },
                 ],
               },
-         
+
               receta: 1,
               montoTotal: 1,
               lente: 1,
@@ -664,121 +665,227 @@ export class VentaService {
     return dataVenta;
   }
 
-
-   async ventasParaRendimientoDiarioAsesor(
-      request:Request
+  async ventasParaRendimientoDiarioAsesor(
+    request: Request,
   ): Promise<VentaRendimientoDiarioI[]> {
-        const ventas = await this.venta.aggregate([
-          {
-            $match: {
-              asesor: new Types.ObjectId(request.usuario.asesor),
-             
+    const ventas = await this.venta.aggregate([
+      {
+        $match: {
+          asesor: new Types.ObjectId(request.usuario.asesor),
+        },
+      },
+      {
+        $lookup: {
+          from: 'DetalleVenta',
+          foreignField: 'venta',
+          localField: '_id',
+          as: 'detalleVenta',
+        },
+      },
+      {
+        $unwind: {
+          path: '$detalleVenta',
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+
+      {
+        $lookup: {
+          from: 'Asesor',
+          foreignField: '_id',
+          localField: 'asesor',
+          as: 'asesor',
+        },
+      },
+      {
+        $group: {
+          _id: {
+            aqo: { $year: '$fechaVenta' },
+            mes: { $month: '$fechaVenta' },
+            dia: { $dayOfMonth: '$fechaVenta' },
+          },
+          lente: {
+            $sum: {
+              $cond: {
+                if: { $eq: ['$detalleVenta.rubro', 'LENTE'] },
+                then: '$detalleVenta.cantidad',
+                else: 0,
+              },
             },
           },
-          {
-            $lookup: {
-              from: 'DetalleVenta',
-              foreignField: 'venta',
-              localField: '_id',
-              as: 'detalleVenta',
+          lc: {
+            $sum: {
+              $cond: {
+                if: { $eq: ['$detalleVenta.rubro', 'LENTE DE CONTACTO'] },
+                then: '$detalleVenta.cantidad',
+                else: 0,
+              },
             },
           },
-          {
-            $unwind: {
-              path: '$detalleVenta',
-              preserveNullAndEmptyArrays: false,
+          entregadas: {
+            $sum: {
+              $cond: {
+                if: { $eq: ['$flag', 'FINALIZADO'] },
+                then: 1,
+                else: 0,
+              },
             },
           },
 
-            {
-            $lookup: {
-              from: 'Asesor',
-              foreignField: '_id',
-              localField: 'asesor',
-              as: 'asesor',
+          receta: {
+            $push: {
+              $cond: {
+                if: { $eq: ['$detalleVenta.rubro', 'LENTE'] },
+                then: {
+                  descripcion: '$detalleVenta.descripcion',
+                },
+                else: '$$REMOVE',
+              },
             },
           },
-          {
-            $group: {
-              _id: {
-                aqo: { $year: '$fechaVenta' },
-                mes: { $month: '$fechaVenta' },
-                dia: { $dayOfMonth: '$fechaVenta' },
-              } ,
-              lente: {
-                $sum: {
-                  $cond: {
-                    if: { $eq: ['$detalleVenta.rubro', 'LENTE'] },
-                    then: '$detalleVenta.cantidad',
-                    else: 0,
-                  },
-                },
-              },
-              lc: {
-                $sum: {
-                  $cond: {
-                    if: { $eq: ['$detalleVenta.rubro', 'LENTE DE CONTACTO'] },
-                    then: '$detalleVenta.cantidad',
-                    else: 0,
-                  },
-                },
-              },
-              entregadas: {
-                $sum: {
-                  $cond: {
-                    if: { $eq: ['$flag', 'FINALIZADO'] },
-                    then: 1,
-                    else: 0,
-                  },
-                },
-              },
+          montoTotal: { $sum: '$montoTotal' },
+          ticket: { $sum: 1 },
+          asesorId: { $first: { $arrayElemAt: ['$asesor._id', 0] } },
+          asesor: { $first: { $arrayElemAt: ['$asesor.nombre', 0] } },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          fecha: {
+            $concat: [
+              { $toString: '$_id.aqo' },
+              '-',
+              { $toString: '$_id.mes' },
+              '-',
+              { $toString: '$_id.dia' },
+            ],
+          },
+          asesor: 1,
+          receta: 1,
+          montoTotal: 1,
+          lente: 1,
+          lc: 1,
+          entregadas: 1,
+          asesorId: 1,
+          ticket: 1,
+        },
+      },
+      {
+        $sort: { fechaVenta: -1 },
+      },
+    ]);
 
-              receta: {
-                $push: {
-                  $cond: {
-                    if: { $eq: ['$detalleVenta.rubro', 'LENTE'] },
-                    then: {
-                      descripcion: '$detalleVenta.descripcion',
-                    },
-                    else: '$$REMOVE',
-                  },
-                },
-              },
-              montoTotal: { $sum: '$montoTotal' },
-              ticket: { $sum: 1 },
-              asesorId: { $first: { $arrayElemAt: [ '$asesor._id', 0 ] } },
-                asesor: { $first: { $arrayElemAt: [ '$asesor.nombre', 0 ] } },
-              
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              fecha: {
-                $concat: [
-                  { $toString: '$_id.aqo' },
-                  '-',
-                  { $toString: '$_id.mes' },
-                  '-',
-                  { $toString: '$_id.dia' },
-                ],
-              },
-              asesor: 1,
-              receta: 1,
-              montoTotal: 1,
-              lente: 1,
-              lc: 1,
-              entregadas: 1,
-              asesorId: 1,
-              ticket: 1,
-            },
-          },
-          {
-            $sort: { fechaVenta: -1 },
-          },
-        ]);
-        
-        
     return ventas;
+  }
+
+  async ventaMentaPorAsesor(
+    buscadorRendimientoDiarioDto: BuscadorRendimientoDiarioDto,
+  ) {
+    
+    const filter = filtradorVenta(buscadorRendimientoDiarioDto);
+    let agrupacion = {};
+    if (buscadorRendimientoDiarioDto.flagVenta == FlagVentaE.realizadas) {
+      agrupacion = {
+        aqo: { $year: '$fechaVenta' },
+        mes: { $month: '$fechaVenta' },
+        dia: { $dayOfMonth: '$fechaVenta' },
+      };
+    } else {
+      agrupacion = {
+        aqo: { $year: '$fecha' },
+        mes: { $month: '$fecha' },
+        dia: { $dayOfMonth: '$fecha' },
+      };
+    }
+
+    const dataVenta = await Promise.all(
+      buscadorRendimientoDiarioDto.sucursal.map(async (item) => {
+        const [sucursal, metas, asesor] = await Promise.all([
+          this.sucursalService.buscarSucursalPorId(item),
+          this.metasSucursalService.listarMetasPorSucursal(
+            item,
+            buscadorRendimientoDiarioDto.fechaInicio,
+          ),
+          this.asesorService.listarAsesorPorSucursal(item),
+        ]);
+
+        const ventaAsesor = await Promise.all(
+          asesor.map(async (item) => {
+            const venta = await this.venta.aggregate([
+              {
+                $match: {
+                  asesor: new Types.ObjectId(item._id),
+                  ...filter,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'DetalleVenta',
+                  foreignField: 'venta',
+                  localField: '_id',
+                  as: 'detalleVenta',
+                },
+              },
+
+              {
+                $unwind: {
+                  path: '$detalleVenta',
+                  preserveNullAndEmptyArrays: false,
+                },
+              },
+
+              {
+                $group: {
+                  _id: agrupacion,
+
+                  montoTotal: { $sum: '$montoTotal' },
+                  ticket: { $sum: 1 },
+
+                  dias: { $sum: 1 },
+                },
+              },
+              {
+                $project: {
+                  _id: 0,
+                  fecha: {
+                    $concat: [
+                      { $toString: '$_id.aqo' },
+                      '-',
+                      { $toString: '$_id.mes' },
+                      '-',
+                      { $toString: '$_id.dia' },
+                    ],
+                  },
+
+                  montoTotal: 1,
+
+                  ticket: 1,
+                  dias: 1,
+                },
+              },
+              {
+                $sort: { fechaVenta: -1 },
+              },
+            ]);
+            return {
+              asesor: item.nombre,
+              dias:Math.floor(Math.random() * 26),
+              ventas: venta,
+            };
+          }),
+        );
+
+        const resultado = {
+          metaTicket: metas ? metas.ticket : 0,
+          diasComerciales: metas ? metas.dias : 0,
+          sucursal: sucursal.nombre,
+          ventaAsesor: ventaAsesor,
+        };
+        return resultado;
+      }),
+    );
+
+    return dataVenta;
   }
 }
