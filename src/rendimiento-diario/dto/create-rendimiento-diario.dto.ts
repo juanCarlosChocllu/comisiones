@@ -9,4 +9,8 @@ export class CreateRendimientoDiarioDto {
     @IsNumber()
     @IsNotEmpty()
     segundoPar:number
+
+    @IsNumber()
+    @IsNotEmpty()
+    presupuesto:number
 }

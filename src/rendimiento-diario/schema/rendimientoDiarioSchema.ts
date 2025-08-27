@@ -15,6 +15,9 @@ export class RendimientoDiario {
   @Prop()
   fechaDia: string;
 
+  @Prop()
+  presupuesto: number;
+
   @Prop({
     type: Date,
     default: function () {
