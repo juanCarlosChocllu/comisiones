@@ -16,5 +16,6 @@ import { SucursalModule } from 'src/sucursal/sucursal.module';
    ])],
   controllers: [MetasSucursalController],
   providers: [MetasSucursalService],
+    exports: [MetasSucursalService],
 })
 export class MetasSucursalModule {}

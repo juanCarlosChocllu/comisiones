@@ -17,6 +17,10 @@ export class AsesorService {
     return 'This action adds a new asesor';
   }
 
+   async listarAsesorPorSucursal(sucursal:Types.ObjectId) {
+    const asesor = await this.asesor.find({sucursal:new Types.ObjectId(sucursal)})
+    return asesor;
+  }
   async listar() {
     const asesor: ScursalAsesorI[] = await this.asesor.aggregate([
       
@@ -245,5 +249,31 @@ export class AsesorService {
 
     ])
     return usuario
+  }
+
+ async  listarSucursalesAsesores(usuario:Types.ObjectId){
+    const sucursales = await this.asesor.aggregate([
+      {
+        $match:{
+          usuario:new  Types.ObjectId(usuario)
+        }
+      },
+      {
+        $lookup:{
+          from:'Sucursal',
+          foreignField:'_id',
+          localField:'sucursal',
+          as:'sucursal'
+        }
+      },
+      {
+        $project:{
+          _id:0,
+          asesor:'$_id',
+           nombreSucursal:{$arrayElemAt: [ '$sucursal.nombre', 0 ]}
+        }
+      }
+    ])
+    return sucursales
   }
 }

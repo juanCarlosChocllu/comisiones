@@ -14,10 +14,7 @@ export class MetasSucursalController {
     return this.metasSucursalService.create(createMetasSucursalDto);
   }
 
-  @Get()
-  findAll() {
-    return this.metasSucursalService.findAll();
-  }
+ 
 
   @Get(':id')
   findOne(@Param('id') id: string) {
