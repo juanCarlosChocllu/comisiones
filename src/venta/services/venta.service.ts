@@ -954,7 +954,8 @@ export class VentaService {
             $sort: { fechaVenta: -1 },
           },
         ]);
-
+        console.log(venta);
+        
         const data = await this.ventasFormateada(venta);
 
         return {
@@ -990,7 +991,7 @@ export class VentaService {
           atenciones: atenciones,
           feha: item.fecha,
           presupuestos: presupuestos,
-          vendidos: item.ventasFinalizadas,
+          vendidos: item.ventasRelizadas,
           entregadas: item.ventasFinalizadas,
           //asesore: item.asesores,
         };
