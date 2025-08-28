@@ -159,6 +159,7 @@ export class RendimientoDiarioService {
           sucursal: { $arrayElemAt: ['$sucursal.nombre', 0] },
           atenciones: 1,
           segundoPar: 1,
+          presupuesto:1,
           fecha: 1,
           fechaDia: 1,
         },
