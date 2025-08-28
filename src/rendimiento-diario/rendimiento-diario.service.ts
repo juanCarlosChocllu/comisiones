@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -24,7 +26,7 @@ export class RendimientoDiarioService {
   constructor(
     @InjectModel(RendimientoDiario.name)
     private readonly rendimientoDiario: Model<RendimientoDiario>,
-    private readonly ventasService: VentaService,
+    @Inject(forwardRef(() => VentaService)) private readonly ventasService: VentaService,
   ) {}
   async create(
     createRendimientoDiarioDto: CreateRendimientoDiarioDto,
@@ -270,5 +272,11 @@ export class RendimientoDiarioService {
        throw new BadRequestException("Tua tiempo de edicion expiro")
     }
     throw new NotFoundException();
+  }
+
+  public async listarRedimientoDiarioDia(asesor:Types.ObjectId[], dia:string){
+    const rendimiento = await this.rendimientoDiario.find({flag:flag.nuevo, fechaDia:dia, asesor:{$in: asesor.map((item)=> new Types.ObjectId(item)) }})
+    return rendimiento
+  
   }
 }

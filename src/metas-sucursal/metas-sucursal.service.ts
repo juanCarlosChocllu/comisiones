@@ -34,7 +34,9 @@ export class MetasSucursalService {
   }
 
    async listarMetasPorSucursal(sucursal:Types.ObjectId, fechaInicio:Date){
-      const metas =await this.metasSucursal.findOne({sucursal:new Types.ObjectId(sucursal), flag:flag.nuevo})
+
+    
+      const metas =await this.metasSucursal.findOne({sucursal:new Types.ObjectId(sucursal), fechaInicio:fechaInicio,flag:flag.nuevo})
     return metas
    }
 

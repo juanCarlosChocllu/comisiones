@@ -60,4 +60,11 @@ export class VentaController {
   ) {
     return this.ventaService.ventaMentaPorAsesor(BuscadorRendimientoDiarioDto);
   }
+  @Publico()
+  @Post('avance/local')
+   avanceLocal(
+    @Body() BuscadorRendimientoDiarioDto: BuscadorRendimientoDiarioDto,
+  ) {
+    return this.ventaService.avanceLocal(BuscadorRendimientoDiarioDto);
+  }
 }
