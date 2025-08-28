@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { RendimientoDiarioService } from './rendimiento-diario.service';
 import { RendimientoDiarioController } from './rendimiento-diario.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -8,7 +8,7 @@ import { VentaModule } from 'src/venta/venta.module';
 @Module({
 
   imports:[
-    VentaModule,
+    forwardRef(()=> VentaModule),
     MongooseModule.forFeature([
           {
             name: RendimientoDiario.name,
@@ -18,5 +18,6 @@ import { VentaModule } from 'src/venta/venta.module';
   ],
   controllers: [RendimientoDiarioController],
   providers: [RendimientoDiarioService],
+  exports:[RendimientoDiarioService]
 })
 export class RendimientoDiarioModule {}

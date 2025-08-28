@@ -1,6 +1,8 @@
 import {
   BadRequestException,
+  forwardRef,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -15,6 +17,7 @@ import {
   RegistroVentas,
   resultadRendimientoDiarioI,
   VentaAsesor,
+  ventaAvanceLocalI,
   VentaI,
   VentaRendimientoDiarioI,
 } from '../interface/venta';
@@ -49,6 +52,7 @@ import { filtradorVenta } from '../utils/filtroVenta';
 import { FlagVentaE } from 'src/core/enum/venta';
 import { Request } from 'express';
 import { MetasSucursalService } from 'src/metas-sucursal/metas-sucursal.service';
+import { RendimientoDiarioService } from 'src/rendimiento-diario/rendimiento-diario.service';
 
 @Injectable()
 export class VentaService {
@@ -66,6 +70,8 @@ export class VentaService {
     private readonly comisionServicioService: ComisionServicioService,
     private readonly sucursalService: SucursalService,
     private readonly metasSucursalService: MetasSucursalService,
+    @Inject(forwardRef(() => RendimientoDiarioService))
+    private readonly rendimientoDiarioService: RendimientoDiarioService,
   ) {}
 
   async listasVentasComisiones(buscadorVentaDto: BuscadorVentaDto) {
@@ -782,7 +788,6 @@ export class VentaService {
   async ventaMentaPorAsesor(
     buscadorRendimientoDiarioDto: BuscadorRendimientoDiarioDto,
   ) {
-    
     const filter = filtradorVenta(buscadorRendimientoDiarioDto);
     let agrupacion = {};
     if (buscadorRendimientoDiarioDto.flagVenta == FlagVentaE.realizadas) {
@@ -820,22 +825,6 @@ export class VentaService {
                 },
               },
               {
-                $lookup: {
-                  from: 'DetalleVenta',
-                  foreignField: 'venta',
-                  localField: '_id',
-                  as: 'detalleVenta',
-                },
-              },
-
-              {
-                $unwind: {
-                  path: '$detalleVenta',
-                  preserveNullAndEmptyArrays: false,
-                },
-              },
-
-              {
                 $group: {
                   _id: agrupacion,
 
@@ -870,7 +859,7 @@ export class VentaService {
             ]);
             return {
               asesor: item.nombre,
-              dias:Math.floor(Math.random() * 26),
+              dias: Math.floor(Math.random() * 26),
               ventas: venta,
             };
           }),
@@ -887,5 +876,125 @@ export class VentaService {
     );
 
     return dataVenta;
+  }
+
+  async avanceLocal(
+    buscadorRendimientoDiarioDto: BuscadorRendimientoDiarioDto,
+  ) {
+    const filter = filtradorVenta(buscadorRendimientoDiarioDto);
+    let agrupacion = {};
+    if (buscadorRendimientoDiarioDto.flagVenta == FlagVentaE.realizadas) {
+      agrupacion = {
+        aqo: { $year: '$fechaVenta' },
+        mes: { $month: '$fechaVenta' },
+        dia: { $dayOfMonth: '$fechaVenta' },
+      };
+    } else {
+      agrupacion = {
+        aqo: { $year: '$fecha' },
+        mes: { $month: '$fecha' },
+        dia: { $dayOfMonth: '$fecha' },
+      };
+    }
+
+    const data = await Promise.all(
+      buscadorRendimientoDiarioDto.sucursal.map(async (item) => {
+        const [sucursal, metas] = await Promise.all([
+          this.sucursalService.buscarSucursalPorId(item),
+          this.metasSucursalService.listarMetasPorSucursal(
+            item,
+            buscadorRendimientoDiarioDto.fechaInicio,
+          ),
+        ]);
+        const venta: ventaAvanceLocalI[] = await this.venta.aggregate([
+          {
+            $match: {
+              sucursal: new Types.ObjectId(item),
+              ...filter,
+            },
+          },
+
+          {
+            $group: {
+              _id: agrupacion,
+              ventasRelizadas: { $sum: 1 },
+              dias: { $sum: 1 },
+
+              asesores: { $addToSet: '$asesor' },
+              ventasFinalizadas: {
+                $sum: {
+                  $cond: {
+                    if: { $eq: ['$flag', 'FINALIZADO'] },
+                    then: 1,
+                    else: 0,
+                  },
+                },
+              },
+            },
+          },
+
+          {
+            $project: {
+              _id: 0,
+              ventasFinalizadas: 1,
+              ventasRelizadas: 1,
+              asesores: 1,
+              fecha: {
+                $concat: [
+                  { $toString: '$_id.aqo' },
+                  '-',
+                  { $toString: '$_id.mes' },
+                  '-',
+                  { $toString: '$_id.dia' },
+                ],
+              },
+            },
+          },
+          {
+            $sort: { fechaVenta: -1 },
+          },
+        ]);
+
+        const data = await this.ventasFormateada(venta);
+
+        return {
+          sucursal: sucursal.nombre,
+          metaTicket: metas ? metas.ticket : 0,
+          metaMonto: metas ? metas.monto : 0,
+          diasComerciales :metas ? metas.dias:0,
+          ventas: data,
+        };
+      }),
+    );
+    return data;
+  }
+  private async ventasFormateada(venta: ventaAvanceLocalI[]) {
+    return Promise.all(
+      venta.map(async (item) => {
+        let atenciones: number = 0;
+        let presupuestos: number = 0;
+        const rendimiento =
+          await this.rendimientoDiarioService.listarRedimientoDiarioDia(
+            item.asesores,
+            item.fecha,
+          );
+        for (const re of rendimiento) {
+          if (re.atenciones) {
+            atenciones += re.atenciones;
+          }
+          if (re.presupuesto) {
+            presupuestos += re.presupuesto;
+          }
+        }
+        return {
+          atenciones: atenciones,
+          feha: item.fecha,
+          presupuestos: presupuestos,
+          vendidos: item.ventasFinalizadas,
+          entregadas: item.ventasFinalizadas,
+          //asesore: item.asesores,
+        };
+      }),
+    );
   }
 }

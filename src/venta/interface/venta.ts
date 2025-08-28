@@ -154,3 +154,21 @@ export interface resultadRendimientoDiarioI {
   ventas:VentaRendimientoDiarioI[]
 }
 
+
+export interface avanceLocalI {
+  sucursal:string,
+  metaTicket:string
+  metaMonto:string
+  ventas:ventaAvanceLocalI[]
+
+}
+
+export interface ventaAvanceLocalI 
+
+    {
+      ventasRelizadas:number,
+      ventasFinalizadas:number,
+      fecha:string
+      asesores:Types.ObjectId[]
+    }
+  
