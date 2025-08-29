@@ -150,7 +150,8 @@ export interface Receum {
 export interface resultadRendimientoDiarioI {
   sucursal:string,
     asesor:string,
-
+  idSucursal:Types.ObjectId,
+  metas:any
   ventas:VentaRendimientoDiarioI[]
 }
 
