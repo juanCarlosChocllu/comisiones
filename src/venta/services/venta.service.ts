@@ -559,11 +559,11 @@ export class VentaService {
         dia: { $dayOfMonth: '$fecha' },
       };
     }
-    console.log(agrupacion);
-
+ 
     const dataVenta = await Promise.all(
       asesor.map(async (item) => {
-        const ventas = await this.venta.aggregate([
+        const [ventas, metas]= await Promise.all([
+              this.venta.aggregate([
           {
             $match: {
               asesor: new Types.ObjectId(item._id),
@@ -656,12 +656,16 @@ export class VentaService {
           {
             $sort: { fechaVenta: -1 },
           },
-        ]);
+        ]),
+        this.metasSucursalService.listarMetasPorSucursal(item.idSucursal, buscadorRendimientoDiarioDto.fechaInicio)
+        ])
 
+        
         const resultado: resultadRendimientoDiarioI = {
           asesor: item.nombre,
-
+          idSucursal:item.idSucursal,
           sucursal: item.sucursalNombre,
+          metas:metas,
           ventas: ventas,
         };
         return resultado;

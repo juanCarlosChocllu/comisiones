@@ -64,11 +64,17 @@ export class RendimientoDiarioService {
     const ventas = await this.ventasService.ventasParaRendimientoDiario(
       buscadorRendimientoDiarioDto,
     );
-
+   
+    
     const rendimiento = await Promise.all(
       ventas.map(async (item) => {
+
+
+        
         const resultado = await Promise.all(
           item.ventas.map(async (data) => {
+        
+            
             let antireflejos: number = 0;
             let progresivos: number = 0;
             for (const receta of data.receta) {
@@ -118,11 +124,14 @@ export class RendimientoDiarioService {
         return {
           sucursal: item.sucursal,
           asesor: item.asesor,
+          metas:item.metas,
           ventas: resultado,
         };
       }),
     );
+  
 
+    
     return rendimiento;
   }
 
@@ -251,7 +260,8 @@ export class RendimientoDiarioService {
         return resultado;
       }),
     );
-
+ 
+    
     return data;
   }
   async update(
