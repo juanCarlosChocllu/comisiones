@@ -693,6 +693,8 @@ export class VentaService {
               asesor: item.nombre,
               ventas: ventas,
             };
+            
+            
             return resultado;
           }),
         );
@@ -709,7 +711,7 @@ export class VentaService {
         return resultado;
       }),
     );
-
+    
     return dataVenta;
   }
 
