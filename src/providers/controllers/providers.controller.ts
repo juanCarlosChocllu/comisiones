@@ -39,6 +39,11 @@ export class ProvidersController {
   anularVentas(@Body() descargarProviderDto: DescargarProviderDto) {
     return this.providersService.anularVentas(descargarProviderDto);
   }
+   @Publico()
+  @Post('mia/venta/finalizar')
+  finalizarVentas(@Body() descargarProviderDto: DescargarProviderDto) {
+    return this.providersService.finalizarVentas(descargarProviderDto);
+  }
 
   @Post('mia/venta/actualizar')
   actualizarDescuentos(@Body() descargarProviderDto: DescargarProviderDto) {

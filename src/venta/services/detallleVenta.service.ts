@@ -8,9 +8,8 @@ import { detalleVentaI } from "../interface/detalleVenta";
 @Injectable()
 export class DetalleVentaService {
   constructor(@InjectModel(DetalleVenta.name) private readonly detalleVenta:Model<DetalleVenta>) {}
-
    async guardarDetalleVenta(data:detalleVentaI){
-     const detalle = await this.detalleVenta.findOne(data)
+     const detalle = await this.detalleVenta.findOne({rubro:data.rubro, venta:data.venta})
      if(!detalle) {
       return this.detalleVenta.create(data)
      }

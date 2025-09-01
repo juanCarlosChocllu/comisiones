@@ -49,7 +49,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { DateTime } from 'luxon';
 import { LogDescargaService } from 'src/log-descarga/log-descarga.service';
 import { flag } from 'src/core/enum/flag';
-import { AnularVentaMiaI, VentaApiI } from '../interface/venta';
+import { AnularVentaMiaI, FinalizarVentaMia, VentaApiI } from '../interface/venta';
 import { AnularVentaDto } from 'src/venta/dto/AnularVenta.dto';
 import { StockMia } from '../interface/stockMia';
 import { AxiosResponse } from 'axios';
@@ -148,6 +148,26 @@ export class ProvidersService {
     }
   }
 
+   async ventasFinalizadasMia(createProviderDto: DescargarProviderDto) {
+    try {
+      const data: DescargarProviderDto = {
+        fechaFin: createProviderDto.fechaFin,
+        fechaInicio: createProviderDto.fechaInicio,
+        token: tokenMia,
+      };
+      const ventas = await firstValueFrom(
+        this.httpService.post<FinalizarVentaMia[]>(
+          `${apiMia}/api/ventas/finalizadas2`,
+          data,
+        ),
+      );
+
+      return ventas.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async guardardataVenta(createProviderDto: DescargarProviderDto) {
     try {
       console.log('descargando venta');
@@ -187,7 +207,7 @@ export class ProvidersService {
             flag: data.flag,
             precioTotal: data.precioTotal,
             precio: data.precio, // se veridica en cada venta
-
+            
             fechaVenta: new Date(data.fecha),
             ...(data.fecha_finalizacion && {
               fechaFinalizacion: new Date(data.fecha_finalizacion),
@@ -663,7 +683,7 @@ export class ProvidersService {
     return ruta;
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_4PM)
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
   async handleCron() {
     const date = new Date();
 
@@ -683,6 +703,15 @@ export class ProvidersService {
     this.logger.debug('Iniciando la descarga');
     await this.guardardataVenta(fecha);
   }
+
+  async finalizarVentas(descargarProviderDto: DescargarProviderDto) {
+    const ventas = await this.ventasFinalizadasMia(descargarProviderDto)
+     for (const venta of ventas) {
+        await this.ventaService.finalizarVentasCron(venta)
+     }
+    
+  }
+
 
   async actualizarDescuentos(createProviderDto: DescargarProviderDto) {
     try {
@@ -721,7 +750,7 @@ export class ProvidersService {
       fechaFin: formatearFecha(fechaFinDate),
     };
     this.logger.debug('Iniciando las finalizaciones');
-    await this.actualizarDescuentos(fecha);
+    await this.finalizarVentas(fecha);
   }
 
   async anularVentas(createProviderDto: DescargarProviderDto) {

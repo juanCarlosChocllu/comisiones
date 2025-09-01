@@ -28,6 +28,7 @@ export interface VentaI {
   fechaFinalizacion?: Date;
 
   flag?: string;
+   estado?: string;
 
   tipo?: string;
 
@@ -148,13 +149,17 @@ export interface Receum {
 }
 
 export interface resultadRendimientoDiarioI {
+  metaTicket:number,
+    diasComerciales:number,
   sucursal:string,
-    asesor:string,
-  idSucursal:Types.ObjectId,
-  metas:any
+    metaMonto:number
+  ventaAsesor:ventaAsesorI[]
+
+}
+export interface ventaAsesorI{
+  asesor:string
   ventas:VentaRendimientoDiarioI[]
 }
-
 
 export interface avanceLocalI {
   sucursal:string,
