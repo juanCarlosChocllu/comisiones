@@ -26,7 +26,8 @@ export class RendimientoDiarioService {
   constructor(
     @InjectModel(RendimientoDiario.name)
     private readonly rendimientoDiario: Model<RendimientoDiario>,
-    @Inject(forwardRef(() => VentaService)) private readonly ventasService: VentaService,
+    @Inject(forwardRef(() => VentaService))
+    private readonly ventasService: VentaService,
   ) {}
   async create(
     createRendimientoDiarioDto: CreateRendimientoDiarioDto,
@@ -64,74 +65,70 @@ export class RendimientoDiarioService {
     const ventas = await this.ventasService.ventasParaRendimientoDiario(
       buscadorRendimientoDiarioDto,
     );
-   
-    
     const rendimiento = await Promise.all(
       ventas.map(async (item) => {
-
-
-        
         const resultado = await Promise.all(
-          item.ventas.map(async (data) => {
-        
-            
-            let antireflejos: number = 0;
-            let progresivos: number = 0;
-            for (const receta of data.receta) {
-              const data = receta.descripcion.split('/');
+          item.ventaAsesor.map(async (data) => {
+            return await Promise.all(data.ventas.map(async (item) => {
+              let antireflejos: number = 0;
+              let progresivos: number = 0;
+              for (const receta of item.receta) {
+                const data = receta.descripcion.split('/');
 
-              const tipoLente = data[1];
-              const tratamiento = data[3];
-              if (tipoLente === 'PROGRESIVO') {
-                progresivos += 1;
+                const tipoLente = data[1];
+                const tratamiento = data[3];
+                if (tipoLente === 'PROGRESIVO') {
+                  progresivos += 1;
+                }
+                if (
+                  tratamiento === 'ANTIREFLEJO' ||
+                  tratamiento === 'BLUE SHIELD' ||
+                  tratamiento === 'GREEN SHIELD' ||
+                  tratamiento === 'CLARITY' ||
+                  tratamiento === 'CLARITY PLUS' ||
+                  tratamiento === 'STOP AGE'
+                ) {
+                  antireflejos += 1;
+                }
               }
-              if (
-                tratamiento === 'ANTIREFLEJO' ||
-                tratamiento === 'BLUE SHIELD' ||
-                tratamiento === 'GREEN SHIELD' ||
-                tratamiento === 'CLARITY' ||
-                tratamiento === 'CLARITY PLUS' ||
-                tratamiento === 'STOP AGE'
-              ) {
-                antireflejos += 1;
-              }
-            }
 
-            const rendimientoDia = await this.rendimientoDiario.findOne({
-              fechaDia: data.fecha,
-              asesor: data.asesorId,
-              flag: flag.nuevo,
-            });
+              const rendimientoDia = await this.rendimientoDiario.findOne({
+                fechaDia: item.fecha,
+                asesor: item.asesorId,
+                flag: flag.nuevo,
+              });
 
-            const resultado: rendimientoI = {
-              asesor: data.asesor,
-              antireflejos: antireflejos,
-              atenciones: rendimientoDia ? rendimientoDia.atenciones : 0,
-              cantidadLente: data.lente,
-              entregas: data.entregadas,
-              lc: data.lc,
-              montoTotalVentas: data.montoTotal,
-              progresivos: progresivos,
-              fecha: data.fecha,
-              idAsesor: data.asesorId,
-              segundoPar: rendimientoDia ? rendimientoDia.segundoPar : 0,
-              ticket: data.ticket,
-            };
-            return resultado;
+              const resultado: rendimientoI = {
+                asesor: data.asesor,
+                antireflejos: antireflejos,
+                atenciones: rendimientoDia ? rendimientoDia.atenciones : 0,
+                cantidadLente: item.lente,
+                entregas: item.entregadas,
+                lc: item.lc,
+                montoTotalVentas: item.montoTotal,
+                progresivos: progresivos,
+                fecha: item.fecha,
+                idAsesor: item.asesorId,
+                segundoPar: rendimientoDia ? rendimientoDia.segundoPar : 0,
+                ticket: item.ticket,
+              };
+              return resultado;
+            }))
           }),
         );
 
         return {
           sucursal: item.sucursal,
-          asesor: item.asesor,
-          metas:item.metas,
+          metaTicket: item.metaTicket,
+          diasComerciales: item.diasComerciales,
+          metaMonto: item.metaMonto,
           ventas: resultado,
         };
       }),
     );
-  
 
-    
+    console.log(rendimiento);
+
     return rendimiento;
   }
 
@@ -259,8 +256,7 @@ export class RendimientoDiarioService {
         return resultado;
       }),
     );
- 
-    
+
     return data;
   }
   async update(
@@ -279,14 +275,20 @@ export class RendimientoDiarioService {
           updateRendimientoDiarioDto,
         );
       }
-       throw new BadRequestException("Tua tiempo de edicion expiro")
+      throw new BadRequestException('Tua tiempo de edicion expiro');
     }
     throw new NotFoundException();
   }
 
-  public async listarRedimientoDiarioDia(asesor:Types.ObjectId[], dia:string){
-    const rendimiento = await this.rendimientoDiario.find({flag:flag.nuevo, fechaDia:dia, asesor:{$in: asesor.map((item)=> new Types.ObjectId(item)) }})
-    return rendimiento
-  
+  public async listarRedimientoDiarioDia(
+    asesor: Types.ObjectId[],
+    dia: string,
+  ) {
+    const rendimiento = await this.rendimientoDiario.find({
+      flag: flag.nuevo,
+      fechaDia: dia,
+      asesor: { $in: asesor.map((item) => new Types.ObjectId(item)) },
+    });
+    return rendimiento;
   }
 }

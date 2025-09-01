@@ -54,6 +54,8 @@ export class Venta {
 
   @Prop()
   precio: string;
+  @Prop()
+  estado: string;
 
   @Prop()
   fechaVenta: Date;
