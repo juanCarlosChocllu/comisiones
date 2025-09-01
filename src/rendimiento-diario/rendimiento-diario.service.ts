@@ -69,51 +69,58 @@ export class RendimientoDiarioService {
       ventas.map(async (item) => {
         const resultado = await Promise.all(
           item.ventaAsesor.map(async (data) => {
-            return await Promise.all(data.ventas.map(async (item) => {
-              let antireflejos: number = 0;
-              let progresivos: number = 0;
-              for (const receta of item.receta) {
-                const data = receta.descripcion.split('/');
+            const ventas = await Promise.all(
+              data.ventas.map(async (item) => {
+                let antireflejos: number = 0;
+                let progresivos: number = 0;
+                for (const receta of item.receta) {
+                  const data = receta.descripcion.split('/');
 
-                const tipoLente = data[1];
-                const tratamiento = data[3];
-                if (tipoLente === 'PROGRESIVO') {
-                  progresivos += 1;
+                  const tipoLente = data[1];
+                  const tratamiento = data[3];
+                  if (tipoLente === 'PROGRESIVO') {
+                    progresivos += 1;
+                  }
+                  if (
+                    tratamiento === 'ANTIREFLEJO' ||
+                    tratamiento === 'BLUE SHIELD' ||
+                    tratamiento === 'GREEN SHIELD' ||
+                    tratamiento === 'CLARITY' ||
+                    tratamiento === 'CLARITY PLUS' ||
+                    tratamiento === 'STOP AGE'
+                  ) {
+                    antireflejos += 1;
+                  }
                 }
-                if (
-                  tratamiento === 'ANTIREFLEJO' ||
-                  tratamiento === 'BLUE SHIELD' ||
-                  tratamiento === 'GREEN SHIELD' ||
-                  tratamiento === 'CLARITY' ||
-                  tratamiento === 'CLARITY PLUS' ||
-                  tratamiento === 'STOP AGE'
-                ) {
-                  antireflejos += 1;
-                }
-              }
 
-              const rendimientoDia = await this.rendimientoDiario.findOne({
-                fechaDia: item.fecha,
-                asesor: item.asesorId,
-                flag: flag.nuevo,
-              });
+                const rendimientoDia = await this.rendimientoDiario.findOne({
+                  fechaDia: item.fecha,
+                  asesor: item.asesorId,
+                  flag: flag.nuevo,
+                });
 
-              const resultado: rendimientoI = {
-                asesor: data.asesor,
-                antireflejos: antireflejos,
-                atenciones: rendimientoDia ? rendimientoDia.atenciones : 0,
-                cantidadLente: item.lente,
-                entregas: item.entregadas,
-                lc: item.lc,
-                montoTotalVentas: item.montoTotal,
-                progresivos: progresivos,
-                fecha: item.fecha,
-                idAsesor: item.asesorId,
-                segundoPar: rendimientoDia ? rendimientoDia.segundoPar : 0,
-                ticket: item.ticket,
-              };
-              return resultado;
-            }))
+                const resultado: rendimientoI = {
+                  asesor: data.asesor,
+                  antireflejos: antireflejos,
+                  atenciones: rendimientoDia ? rendimientoDia.atenciones : 0,
+                  cantidadLente: item.lente,
+                  entregas: item.entregadas,
+                  lc: item.lc,
+                  montoTotalVentas: item.montoTotal,
+                  progresivos: progresivos,
+                  fecha: item.fecha,
+                  idAsesor: item.asesorId,
+                  segundoPar: rendimientoDia ? rendimientoDia.segundoPar : 0,
+                  ticket: item.ticket,
+                };
+
+                return resultado;
+              }),
+            );
+            return {
+              asesor: data.asesor,
+              ventaAsesor: ventas,
+            };
           }),
         );
 
