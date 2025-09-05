@@ -1,8 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Res,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+} from '@nestjs/common';
 import { AutenticacionService } from './autenticacion.service';
 import { AutenticacionDto } from './dto/create-autenticacion.dto';
 import { Publico } from './decorators/publico';
-
 
 @Controller('autenticacion')
 export class AutenticacionController {
@@ -13,6 +21,4 @@ export class AutenticacionController {
   create(@Body() AutenticacionDto: AutenticacionDto) {
     return this.autenticacionService.autenticacion(AutenticacionDto);
   }
-
-
 }

@@ -28,6 +28,7 @@ export interface VentaI {
   fechaFinalizacion?: Date;
 
   flag?: string;
+   estado?: string;
 
   tipo?: string;
 
@@ -130,7 +131,56 @@ export interface FinalizarVentaI {
   precioTotal:number
 }
 
+
 export interface CodigoMiaProductoI{
 producto:Types.ObjectId,
 codigoMia:string
 }
+
+export interface VentaRendimientoDiarioI {
+  lente: number
+  lc: number
+  entregadas: number
+  receta: Receum[]
+  montoTotal: number
+  asesorId: Types.ObjectId
+  asesor: string
+  fecha: string
+  ticket:number
+}
+
+export interface Receum {
+  descripcion: string
+}
+
+export interface resultadRendimientoDiarioI {
+  metaTicket:number,
+    diasComerciales:number,
+  sucursal:string,
+    metaMonto:number
+  ventaAsesor:ventaAsesorI[]
+
+}
+export interface ventaAsesorI{
+  asesor:string
+  ventas:VentaRendimientoDiarioI[]
+}
+
+export interface avanceLocalI {
+  sucursal:string,
+  metaTicket:string
+  metaMonto:string
+  ventas:ventaAvanceLocalI[]
+
+}
+
+export interface ventaAvanceLocalI 
+
+    {
+      ventasRelizadas:number,
+      ventasFinalizadas:number,
+      fecha:string
+      asesores:Types.ObjectId[]
+    }
+  
+

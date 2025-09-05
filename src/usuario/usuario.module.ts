@@ -3,6 +3,7 @@ import { UsuarioService } from './usuario.service';
 import { UsuarioController } from './usuario.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Usuario, usuariosSchema } from './schema/usuario.schema';
+import { AsesorModule } from 'src/asesor/asesor.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { Usuario, usuariosSchema } from './schema/usuario.schema';
         },
       ]
     ),
+    AsesorModule
   ],
   controllers: [UsuarioController],
   providers: [UsuarioService],

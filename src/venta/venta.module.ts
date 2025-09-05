@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { VentaService } from './services/venta.service';
 import { VentaController } from './venta.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -13,6 +13,9 @@ import { ComisionProductoModule } from 'src/comision-producto/comision-producto.
 import { MetasProductoVipModule } from 'src/metas-producto-vip/metas-producto-vip.module';
 import { PreciosModule } from 'src/precios/precios.module';
 import { ComisionServicioModule } from 'src/comision-servicio/comision-servicio.module';
+import { SucursalModule } from 'src/sucursal/sucursal.module';
+import { MetasSucursalModule } from 'src/metas-sucursal/metas-sucursal.module';
+import { RendimientoDiarioModule } from 'src/rendimiento-diario/rendimiento-diario.module';
 
 @Module({
     imports:[
@@ -31,7 +34,10 @@ import { ComisionServicioModule } from 'src/comision-servicio/comision-servicio.
       ComisionProductoModule,
       MetasProductoVipModule,
       PreciosModule,
-      ComisionServicioModule
+      ComisionServicioModule,
+      SucursalModule,
+      MetasSucursalModule,
+      forwardRef(()=> RendimientoDiarioModule)
     ],
   controllers: [VentaController],
   providers: [VentaService, DetalleVentaService],
