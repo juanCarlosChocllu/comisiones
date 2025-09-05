@@ -773,4 +773,7 @@ export class ProductoService {
     return this.producto.findOne({_id:new Types.ObjectId(id)})
   }
 
+  async buscarProductoCodigoMia(codigoMia:string){
+    return this.producto.findOne({codigoMia:codigoMia})
+  }
 }

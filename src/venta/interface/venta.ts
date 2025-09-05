@@ -132,6 +132,11 @@ export interface FinalizarVentaI {
 }
 
 
+export interface CodigoMiaProductoI{
+producto:Types.ObjectId,
+codigoMia:string
+}
+
 export interface VentaRendimientoDiarioI {
   lente: number
   lc: number
@@ -178,3 +183,4 @@ export interface ventaAvanceLocalI
       asesores:Types.ObjectId[]
     }
   
+

@@ -91,7 +91,7 @@ export class ProvidersController {
     }
   }
 
-  @Publico()
+/*  @Publico() // se usa para buscar el sctok por producro
   @Post('stock')
  async  stockProducto(@Body('producto', ValidateIdPipe) producto :string ){
     try {
@@ -99,5 +99,11 @@ export class ProvidersController {
     } catch (error) {
        throw error
     }
+  }*/
+ 
+  @Publico()// se usa  para buscar el stock por un rango de fecha
+  @Post('stock/Mia')
+  descargarStockProductos(@Body() descargarProviderDto: DescargarProviderDto) {
+    return this.providersService.descargarStockProductos(descargarProviderDto);
   }
 }

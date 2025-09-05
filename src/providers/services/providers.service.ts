@@ -91,7 +91,7 @@ export class ProvidersService {
         fechaInicio: createProviderDto.fechaInicio,
         token: tokenMia,
       };
-      const ventas= await firstValueFrom(
+      const ventas = await firstValueFrom(
         this.httpService.post<VentaApiI[]>(`${apiMia}/api/ventas`, data),
       );
       await this.logDescargaService.registrarLogDescarga(
@@ -104,26 +104,20 @@ export class ProvidersService {
     }
   }
 
-  async descargarStockMia(producto:string):Promise<StockMia[]>{
-     try {
-      const data ={
-        producto:producto,
-        token:tokenMia
-      }      
-     const stock:AxiosResponse<StockMia[]>= await firstValueFrom(this.httpService.post(`${apiMia}/api/stock`, data))
-      return stock.data
+  async descargarStockMia(producto: string[]): Promise<StockMia[]> {
+    try {
+      const data = {
+        producto: producto,
+        token: tokenMia,
+      };
+      const stock: AxiosResponse<StockMia[]> = await firstValueFrom(
+        this.httpService.post(`${apiMia}/api/stock`, data),
+      );
+      return stock.data;
     } catch (error) {
       throw error;
     }
   }
-
-
-
-   public async guardarStockMia(id:string){
-    const stock = await this.descargarStockMia(id)
-    await this.stockService.guardarStockMia(stock)
-    
-   }
 
   async anularVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -197,7 +191,7 @@ export class ProvidersService {
             montoTotal: data.monto_total,
             sucursal: sucursal._id,
             tipoVenta: tipoVenta._id,
-            estadoTracking:data.estadoTracking,
+            estadoTracking: data.estadoTracking,
             descuentoPromosion: data.descuentoPromosion,
             descuentoPromosion2: data.descuentoPromosion2,
             nombrePromosion: data.nombrePromosion,
@@ -225,7 +219,7 @@ export class ProvidersService {
           } else if (data.rubro == productoE.servicio) {
             await this.guardarServicio(data, venta._id);
           } else {
-            await this.guadarOtroProducto(data, venta._id);
+            await this.guardarOtroProducto(data, venta._id);
           }
         } else {
           console.log('sin sucursal');
@@ -238,7 +232,7 @@ export class ProvidersService {
     }
   }
 
-  private async guadarOtroProducto(data: VentaApiI, venta: Types.ObjectId) {
+  private async guardarOtroProducto(data: VentaApiI, venta: Types.ObjectId) {
     const detalle: detalleVentaI = {
       cantidad: 1,
       importe: data.importe,
@@ -822,8 +816,17 @@ export class ProvidersService {
             }
           }
         }
-       
       }
     }
+  }
+
+  async descargarStockProductos(descargarProviderDto: DescargarProviderDto) {
+    const ventas =
+      await this.ventaService.buscarProductoDeVenta(descargarProviderDto);
+  
+      const stock = await this.descargarStockMia(ventas.map((item)=> item.codigoMia));
+    
+      await this.stockService.guardarStockMia(stock, ventas);
+
   }
 }

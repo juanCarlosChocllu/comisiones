@@ -4,6 +4,8 @@ import { StockController } from './stock.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Stock, stockSchema } from './schema/StockSchema';
 import { SucursalModule } from 'src/sucursal/sucursal.module';
+import { AlmacenModule } from 'src/almacen/almacen.module';
+import { ProductoModule } from 'src/producto/producto.module';
 
 @Module({
   imports: [
@@ -13,7 +15,9 @@ import { SucursalModule } from 'src/sucursal/sucursal.module';
         schema: stockSchema,
       },
     ]),
-    SucursalModule
+    SucursalModule,
+    AlmacenModule,
+    ProductoModule
   ],
   controllers: [StockController],
   providers: [StockService],

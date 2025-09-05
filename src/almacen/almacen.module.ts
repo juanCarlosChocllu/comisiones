@@ -14,5 +14,6 @@ import { Almacen, almacenSchema } from './schema/AlmacenSchema';
       ],
   controllers: [AlmacenController],
   providers: [AlmacenService],
+  exports:[AlmacenService]
 })
 export class AlmacenModule {}
