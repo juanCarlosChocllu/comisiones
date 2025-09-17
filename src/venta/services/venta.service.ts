@@ -50,7 +50,7 @@ import { FinalizarVentaMia, VentaApiI } from 'src/providers/interface/venta';
 import { RangoFecha } from '../dto/RangoFecha.dto';
 
 import { DescargarProviderDto } from 'src/providers/dto/create-provider.dto';
-import { Log } from 'src/log/schema/log.Schema';
+
 
 import { BuscadorRendimientoDiarioDto } from 'src/rendimiento-diario/dto/BuscardorRendimientoDiario';
 import { SucursalService } from 'src/sucursal/sucursal.service';
@@ -59,7 +59,6 @@ import { FlagVentaE } from 'src/core/enum/venta';
 import { Request } from 'express';
 import { MetasSucursalService } from 'src/metas-sucursal/metas-sucursal.service';
 import { RendimientoDiarioService } from 'src/rendimiento-diario/rendimiento-diario.service';
-
 
 @Injectable()
 export class VentaService {
@@ -387,22 +386,23 @@ export class VentaService {
     }
   }
 
-  async finalizarVentasCron( FinalizarVentaMia:FinalizarVentaMia){
-      const venta = await this.venta.findOne({id_venta:FinalizarVentaMia.id_venta})
-      if(venta){
-        await this.venta.updateOne(
-          { id_venta: FinalizarVentaMia.id_venta.toUpperCase().trim() },
-          {
-            fechaFinalizacion: horaUtc(FinalizarVentaMia.fecha_finalizacion),
-            estadoTracking:FinalizarVentaMia.estadoTracking,
-            flag: FinalizarVentaMia.flaVenta,
-            estado:FinalizarVentaMia.estado,
-          },
-        );
-      }else {
-        console.log('Ventas no encontradas',FinalizarVentaMia.id_venta);
-      }
-
+  async finalizarVentasCron(FinalizarVentaMia: FinalizarVentaMia) {
+    const venta = await this.venta.findOne({
+      id_venta: FinalizarVentaMia.id_venta,
+    });
+    if (venta) {
+      await this.venta.updateOne(
+        { id_venta: FinalizarVentaMia.id_venta.toUpperCase().trim() },
+        {
+          fechaFinalizacion: horaUtc(FinalizarVentaMia.fecha_finalizacion),
+          estadoTracking: FinalizarVentaMia.estadoTracking,
+          flag: FinalizarVentaMia.flaVenta,
+          estado: FinalizarVentaMia.estado,
+        },
+      );
+    } else {
+      console.log('Ventas no encontradas', FinalizarVentaMia.id_venta);
+    }
   }
 
   async finalizarVentas(finalizarVentaDto: FinalizarVentaDto) {
@@ -499,7 +499,7 @@ export class VentaService {
         {
           fechaAnulacion: horaUtc(anularVentaDto.fechaAnulacion),
           estadoTracking: anularVentaDto.estadoTracking,
-          estado:anularVentaDto.estado
+          estado: anularVentaDto.estado,
         },
       );
       return { status: HttpStatus.OK };
@@ -699,8 +699,7 @@ export class VentaService {
               asesor: item.nombre,
               ventas: ventas,
             };
-            
-            
+
             return resultado;
           }),
         );
@@ -717,7 +716,7 @@ export class VentaService {
         return resultado;
       }),
     );
-    
+
     return dataVenta;
   }
 
@@ -1049,54 +1048,113 @@ export class VentaService {
     );
   }
 
-  public async buscarProductoDeVenta(descargarProviderDto: DescargarProviderDto):Promise<CodigoMiaProductoI[]>{
-   const {f1,f2}=formaterFechaHora(descargarProviderDto.fechaInicio, descargarProviderDto.fechaFin)
-   console.log(f1,f2);
-    
-   const venta:CodigoMiaProductoI[] = await this.venta.aggregate([
+  public async buscarProductoDeVenta(
+    descargarProviderDto: DescargarProviderDto,
+  ): Promise<CodigoMiaProductoI[]> {
+    const { f1, f2 } = formaterFechaHora(
+      descargarProviderDto.fechaInicio,
+      descargarProviderDto.fechaFin,
+    );
+    const venta: CodigoMiaProductoI[] = await this.venta.aggregate([
       {
-        $match:{
-          fechaVenta:{
-            $gte:f1,
-            $lte:f2
+        $match: {
+          fechaVenta: {
+            $gte: f1,
+            $lte: f2,
           },
-          estadoTracking:{$ne:'ANULADO'}
-        }
+          estadoTracking: { $ne: 'ANULADO' },
+        },
       },
       {
-        $lookup:{
-          from:'DetalleVenta',
-          foreignField:'venta',
-          localField:'_id',
-          as:'DetalleVenta'
-        }
+        $lookup: {
+          from: 'DetalleVenta',
+          foreignField: 'venta',
+          localField: '_id',
+          as: 'DetalleVenta',
+        },
       },
       {
-        $unwind:{path:'$DetalleVenta', preserveNullAndEmptyArrays:false}
+        $unwind: { path: '$DetalleVenta', preserveNullAndEmptyArrays: false },
       },
       {
-        $match:{
-          'DetalleVenta.rubro':{$in:['MONTURA','GAFA','LENTE DE CONTACTO']}
-        }
+        $match: {
+          'DetalleVenta.rubro': {
+            $in: ['MONTURA', 'GAFA', 'LENTE DE CONTACTO'],
+          },
+        },
       },
       {
-        $lookup:{
-          from:'Producto',
-          localField:'DetalleVenta.producto',
-          foreignField:'_id',
-          as:'producto'
-        }
+        $lookup: {
+          from: 'Producto',
+          localField: 'DetalleVenta.producto',
+          foreignField: '_id',
+          as: 'producto',
+        },
       },
       {
-        $project:{
-          _id:0,
-          producto:{$arrayElemAt: [ '$producto._id', 0 ] },
-          codigoMia:{$arrayElemAt: [ '$producto.codigoMia', 0 ] }
-        }
-      }
-    ])
-    return venta
+        $project: {
+          _id: 0,
+          producto: { $arrayElemAt: ['$producto._id', 0] },
+          codigoMia: { $arrayElemAt: ['$producto.codigoMia', 0] },
+        },
+      },
+    ]);
+    return venta;
   }
 
-  
+ async  reporteProdctos() {
+    await this.listarProductoPorCategoria([], 'MONTURA');
+  }
+
+  private async listarProductoPorCategoria(
+    sucursal: string[],
+    producto: string,
+  ) {
+    console.log("hola");
+    
+    const detalleVenta = await this.detalleVenta.aggregate([
+      {
+        $match: {
+          rubro: producto,
+        },
+      },
+      {
+        $lookup: {
+          from: 'Producto',
+          foreignField: '_id',
+          localField: 'producto',
+          as: 'producto',
+        },
+      },
+      { $unwind: { path: '$producto', preserveNullAndEmptyArrays: false } },
+      {
+        $lookup: {
+          from: 'Stock',
+          foreignField: 'producto',
+          localField: 'producto._id',
+          as: 'stock',
+        },
+      },
+      { $unwind: { path: '$stock', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'Marca',
+          foreignField: '_id',
+          localField: 'producto.marca',
+          as: 'marca',
+        },
+      },
+      { $unwind: { path: '$marca', preserveNullAndEmptyArrays: false } },
+      {
+        $group:{
+          _id:{
+             categoria:'$producto.categoria',
+              stock:'$stock.tipo'
+          },
+          cantidadVentas:{$sum:1}
+        }
+      },
+    ]);
+    console.table(detalleVenta)
+  }
 }

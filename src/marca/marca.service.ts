@@ -1,4 +1,4 @@
-import { Injectable, Type } from '@nestjs/common';
+import { Injectable, NotAcceptableException, Type } from '@nestjs/common';
 import { CreateMarcaDto } from './dto/create-marca.dto';
 import { UpdateMarcaDto } from './dto/update-marca.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,14 +7,12 @@ import { Model, Types } from 'mongoose';
 import { BuscadorMarcaDto } from './dto/BuscadorMarca.dto';
 import { calcularPaginas, skip } from 'src/core/utils/paginador';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
+import { AsignarCategoriaDto } from './dto/asignarCategoriaDto';
 
 @Injectable()
 export class MarcaService {
   constructor(@InjectModel(Marca.name) private readonly marca: Model<Marca>) {}
-  create(createMarcaDto: CreateMarcaDto) {
-    return 'This action adds a new marca';
-  }
-
+ 
   async listar(buscadorMarcaDto: BuscadorMarcaDto) {
     const filtro = buscadorMarcaDto.nombre
       ? { nombre: new RegExp(buscadorMarcaDto.nombre, 'i') }
@@ -31,6 +29,10 @@ export class MarcaService {
     return {data:marca, pagina:paginas};
   }
 
+
+  async  listarMarcas(){
+    return this.marca.find()
+  }
   findOne(id: number) {
     return `This action returns a #${id} marca`;
   }
@@ -57,5 +59,14 @@ export class MarcaService {
       return await this.marca.create({ nombre: nombre });
     }
     return marca;
+  }
+
+  async asignarCategoriaMarca(asignarCategoriaDto:AsignarCategoriaDto){
+      const marca = await this.marca.findOne({_id:new Types.ObjectId(asignarCategoriaDto.marca)})
+      if(!marca){
+          throw new NotAcceptableException()
+      }
+      return this.marca.updateOne({_id:new Types.ObjectId(asignarCategoriaDto.marca)}, {categoria:asignarCategoriaDto.categoria})
+       
   }
 }

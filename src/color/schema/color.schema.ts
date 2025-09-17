@@ -8,5 +8,4 @@ export class Color {
     
 }
 
-
 export const colorSchema = SchemaFactory.createForClass(Color)

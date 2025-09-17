@@ -25,3 +25,4 @@ export class Stock extends BaseSchema {
 }
 
 export const stockSchema = SchemaFactory.createForClass(Stock);
+stockSchema.index({producto:1})

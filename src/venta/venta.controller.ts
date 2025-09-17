@@ -28,6 +28,8 @@ export class VentaController {
     return this.ventaService.listasVentasComisiones(buscadorVentaDto);
   }
 
+  
+
   /* @Get('detalle/:asesor/:fechaInicio/:fechaFin')
   findOne(
     @Param('asesor', ValidateIdPipe) asesor:Types.ObjectId,
@@ -67,4 +69,10 @@ export class VentaController {
   ) {
     return this.ventaService.avanceLocal(BuscadorRendimientoDiarioDto);
   }
+
+  @Publico()
+  @Post('productos/actual')
+  reporteProdctos (){
+    return this.ventaService.reporteProdctos()
+   }
 }
