@@ -31,22 +31,12 @@ export class AsesorController {
     @Param('id', ValidateIdPipe) id: Types.ObjectId,
     @Body('gestor', ParseBoolPipe) gestor: boolean,
   ) {
-    return this.asesorService.asesorService(gestor, id);
+    return this.asesorService.asignarGestor(gestor, id);
   }
 
-  @Get('sucursal')
-  listarSucursalesAsesor(@Req() request: Request) {
-    return this.asesorService.listarSucursalesAsesor(request);
-  }
-
-   @Get('sucursal/:usuario')
-  listarSucursalesAsesores(@Param('usuario', ValidateIdPipe) usuario: Types.ObjectId) {
-    return this.asesorService.listarSucursalesAsesores(usuario);
-  }
   
 
-  @Get('sin/usuario')
-  listarAsesorSinUsario() {
-    return this.asesorService.listarAsesorSinUsario();
-  }
+  
+  
+
 }

@@ -13,7 +13,8 @@ export class AsesorService {
   constructor(
     @InjectModel(Asesor.name) private readonly asesor: Model<Asesor>,
   ) {}
-  
+ 
+
    async listarAsesorPorSucursal(sucursal:Types.ObjectId) {
     const asesor = await this.asesor.find({sucursal:new Types.ObjectId(sucursal)})
     return asesor;
@@ -131,7 +132,7 @@ export class AsesorService {
     return empresa[0];
   }
 
-  async asesorService(gestor:boolean, id:Types.ObjectId){
+  async asignarGestor(gestor:boolean, id:Types.ObjectId){
     try {
       const asesor = await this.asesor.findOne({_id:new Types.ObjectId(id)})
       if(!asesor){
@@ -144,134 +145,16 @@ export class AsesorService {
     }
   }
 
-  public async  asignarUsuarioAsesor(id:Types.ObjectId, usuario:Types.ObjectId){
-    const asesor= await this.asesor.findOne({_id:id})
-    if(asesor){
-      await this.asesor.updateOne({_id:new Types.ObjectId(id)},{usuario:usuario})
-    }
-  }
-
- public async  eliminarUsuarioAsesor(usuario:Types.ObjectId){
-    const asesor= await this.asesor.find({usuario:new Types.ObjectId(usuario)})
-    if(asesor.length > 0) {
-
-      for (const a of asesor) {
-          await this.asesor.updateOne({_id:a._id}, {$unset:{usuario:1}})
-      }
-      
-    }
-  }
+ 
 
 
-  async listarSucursalesAsesor(request:Request){
-    const sucursales = await this.asesor.aggregate([
-      {
-        $match:{
-          usuario:new  Types.ObjectId(request.usuario.idUsuario)
-        }
-      },
-      {
-        $lookup:{
-          from:'Sucursal',
-          foreignField:'_id',
-          localField:'sucursal',
-          as:'sucursal'
-        }
-      },
-      {
-        $project:{
-          _id:0,
-          asesor:'$_id',
-           nombreSucursal:{$arrayElemAt: [ '$sucursal.nombre', 0 ]}
-        }
-      }
-    ])
-    return sucursales
-  }
 
+ 
   verificarAsesor(id:Types.ObjectId, usuario:Types.ObjectId){
     return this.asesor.findOne({_id:new Types.ObjectId(id), usuario:new Types.ObjectId(usuario)})
   }
 
-   async listarAsesoresPorSucursal(sucursal: Types.ObjectId[]) {
-    const asesor: ScursalAsesorI[] = await this.asesor.aggregate([
-      {
-        $match: {
-          sucursal: { $in: sucursal.map((id) => new Types.ObjectId(id)) },
-        },
-      },
-
-      {
-        $lookup: {
-          from: 'Sucursal',
-          foreignField: '_id',
-          localField: 'sucursal',
-          as: 'sucursal',
-        },
-      },
-
-    
-
-      {
-        $project: {
-          _id:1,
-          nombre: 1,
-          sucursalNombre: { $arrayElemAt: ['$sucursal.nombre', 0] },
-          idSucursal: { $arrayElemAt: ['$sucursal._id', 0] },
-        },
-      },
-    ]);
-    return asesor;
-  }
+ 
 
 
- async  listarAsesorSinUsario(){
-    const usuario = await this.asesor.aggregate([
-     
-      {
-        $lookup: {
-          from: 'Sucursal',
-          foreignField: '_id',
-          localField: 'sucursal',
-          as: 'sucursal',
-        },
-      },
-        {
-        $project: {
-          id:'$_id',
-          nombre: 1,
-          sucursal: { $arrayElemAt: ['$sucursal.nombre', 0] },
-         
-        },
-      },
-
-    ])
-    return usuario
-  }
-
- async  listarSucursalesAsesores(usuario:Types.ObjectId){
-    const sucursales = await this.asesor.aggregate([
-      {
-        $match:{
-          usuario:new  Types.ObjectId(usuario)
-        }
-      },
-      {
-        $lookup:{
-          from:'Sucursal',
-          foreignField:'_id',
-          localField:'sucursal',
-          as:'sucursal'
-        }
-      },
-      {
-        $project:{
-          _id:0,
-          asesor:'$_id',
-           nombreSucursal:{$arrayElemAt: [ '$sucursal.nombre', 0 ]}
-        }
-      }
-    ])
-    return sucursales
-  }
 }

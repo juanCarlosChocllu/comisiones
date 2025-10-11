@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import {Module } from '@nestjs/common';
 import { CombinacionRecetaService } from './combinacion-receta.service';
 import { CombinacionRecetaController } from './combinacion-receta.controller';
 import { MongooseModule } from '@nestjs/mongoose';
