@@ -13,10 +13,7 @@ export class AsesorService {
   constructor(
     @InjectModel(Asesor.name) private readonly asesor: Model<Asesor>,
   ) {}
-  create(createAsesorDto: CreateAsesorDto) {
-    return 'This action adds a new asesor';
-  }
-
+  
    async listarAsesorPorSucursal(sucursal:Types.ObjectId) {
     const asesor = await this.asesor.find({sucursal:new Types.ObjectId(sucursal)})
     return asesor;
@@ -32,6 +29,7 @@ export class AsesorService {
           as: 'sucursal',
         },
       },
+      
 
       {
         $project: {

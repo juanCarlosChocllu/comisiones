@@ -17,7 +17,6 @@ import { Publico } from 'src/autenticacion/decorators/publico';
 import { FinalizarVentaDto } from './dto/FinalizarVentaDto';
 import { AnularVentaDto } from './dto/AnularVenta.dto';
 import { RangoFecha } from './dto/RangoFecha.dto';
-import { BuscadorRendimientoDiarioDto } from 'src/rendimiento-diario/dto/BuscardorRendimientoDiario';
 
 @Controller('venta')
 export class VentaController {
@@ -56,23 +55,7 @@ export class VentaController {
     return this.ventaService.anularVenta(anularVentaDto);
   }
 
-  @Post('metas/porAsesor')
-  async ventaMentaPorAsesor(
-    @Body() BuscadorRendimientoDiarioDto: BuscadorRendimientoDiarioDto,
-  ) {
-    return this.ventaService.ventaMentaPorAsesor(BuscadorRendimientoDiarioDto);
-  }
-  @Publico()
-  @Post('avance/local')
-   avanceLocal(
-    @Body() BuscadorRendimientoDiarioDto: BuscadorRendimientoDiarioDto,
-  ) {
-    return this.ventaService.avanceLocal(BuscadorRendimientoDiarioDto);
-  }
 
-  @Publico()
-  @Post('productos/actual')
-  reporteProdctos (){
-    return this.ventaService.reporteProdctos()
-   }
+
+  
 }

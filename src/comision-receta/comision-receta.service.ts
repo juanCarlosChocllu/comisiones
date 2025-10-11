@@ -19,9 +19,7 @@ import { GuardarComisionRecetaI } from 'src/combinacion-receta/interface/combina
 export class ComisionRecetaService {
   constructor(
     @InjectModel(ComisionReceta.name)
-    private readonly comisionReceta: Model<ComisionReceta>,
-    @Inject(forwardRef(() => CombinacionRecetaService))
-    private readonly combinacionRecetaService: CombinacionRecetaService,
+    private readonly comisionReceta: Model<ComisionReceta>
   ) {}
   async create(createComisionRecetaDto: CreateComisionRecetaDto) {
     

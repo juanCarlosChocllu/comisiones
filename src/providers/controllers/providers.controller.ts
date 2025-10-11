@@ -101,9 +101,5 @@ export class ProvidersController {
     }
   }*/
  
-  @Publico()// se usa  para buscar el stock por un rango de fecha
-  @Post('stock/Mia')
-  descargarStockProductos(@Body() descargarProviderDto: DescargarProviderDto) {
-    return this.providersService.descargarStockProductos(descargarProviderDto);
-  }
+
 }

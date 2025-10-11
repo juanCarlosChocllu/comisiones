@@ -14,8 +14,6 @@ import { MetasProductoVipModule } from 'src/metas-producto-vip/metas-producto-vi
 import { PreciosModule } from 'src/precios/precios.module';
 import { ComisionServicioModule } from 'src/comision-servicio/comision-servicio.module';
 import { SucursalModule } from 'src/sucursal/sucursal.module';
-import { MetasSucursalModule } from 'src/metas-sucursal/metas-sucursal.module';
-import { RendimientoDiarioModule } from 'src/rendimiento-diario/rendimiento-diario.module';
 
 @Module({
     imports:[
@@ -28,16 +26,13 @@ import { RendimientoDiarioModule } from 'src/rendimiento-diario/rendimiento-diar
         }
       ]),
       AsesorModule,
-      CombinacionRecetaModule,
       ComisionRecetaModule,
       ProductoModule,
       ComisionProductoModule,
       MetasProductoVipModule,
       PreciosModule,
       ComisionServicioModule,
-      SucursalModule,
-      MetasSucursalModule,
-      forwardRef(()=> RendimientoDiarioModule)
+      SucursalModule
     ],
   controllers: [VentaController],
   providers: [VentaService, DetalleVentaService],

@@ -1,22 +1,20 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { DescargarProviderDto } from '../dto/create-provider.dto';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom, iif } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { MaterialService } from 'src/material/material.service';
 import { ColorLenteService } from 'src/color-lente/color-lente.service';
-import { MarcaLenteModule } from 'src/marca-lente/marca-lente.module';
 import { MarcaLenteService } from 'src/marca-lente/marca-lente.service';
-import { RangoModule } from 'src/rango/rango.module';
+
 import { RangoService } from 'src/rango/rango.service';
 
 import { TipoColorLenteService } from 'src/tipo-color-lente/tipo-color-lente.service';
-import { TipoColorLente } from 'src/tipo-color-lente/schema/tipoColorLente.schema';
+
 import { TipoLenteService } from 'src/tipo-lente/tipo-lente.service';
 import { productoE } from '../enum/productos';
 import { AsesorService } from 'src/asesor/asesor.service';
 import {
-  combinacionReceta,
   comisionesI,
   GuardarComisionRecetaI,
 } from 'src/combinacion-receta/interface/combinacionReceta';
@@ -35,25 +33,21 @@ import { ProductoService } from 'src/producto/producto.service';
 import { TipoVentaService } from 'src/tipo-venta/tipo-venta.service';
 import * as ExcelJS from 'exceljs';
 import {
-  DataProductoI,
   productosExcelI,
 } from 'src/producto/interface/dataProducto';
 import { ComisionRecetaService } from 'src/comision-receta/comision-receta.service';
-import { ComisionProducto } from 'src/comision-producto/schema/comision-producto.schema';
 import { ComisionProductoService } from 'src/comision-producto/comision-producto.service';
 import { exceldataServicioI } from 'src/servicio/interface/servicio.interface';
 import { ServicioService } from 'src/servicio/servicio.service';
 import * as path from 'path';
 import { apiMia, tokenMia } from 'src/core/config/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { DateTime } from 'luxon';
 import { LogDescargaService } from 'src/log-descarga/log-descarga.service';
-import { flag } from 'src/core/enum/flag';
+
 import { AnularVentaMiaI, FinalizarVentaMia, VentaApiI } from '../interface/venta';
 import { AnularVentaDto } from 'src/venta/dto/AnularVenta.dto';
-import { StockMia } from '../interface/stockMia';
-import { AxiosResponse } from 'axios';
-import { StockService } from 'src/stock/stock.service';
+
+
 
 @Injectable()
 export class ProvidersService {
@@ -81,8 +75,7 @@ export class ProvidersService {
     private readonly comisionRecetaService: ComisionRecetaService,
     private readonly comisionProductoService: ComisionProductoService,
     private readonly servicioService: ServicioService,
-    private readonly logDescargaService: LogDescargaService,
-    private readonly stockService: StockService,
+    private readonly logDescargaService: LogDescargaService
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -104,21 +97,7 @@ export class ProvidersService {
     }
   }
 
-  async descargarStockMia(producto: string[]): Promise<StockMia[]> {
-    try {
-      const data = {
-        producto: producto,
-        token: tokenMia,
-      };
-      const stock: AxiosResponse<StockMia[]> = await firstValueFrom(
-        this.httpService.post(`${apiMia}/api/stock`, data),
-      );
-      return stock.data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
+ 
   async anularVentasMia(createProviderDto: DescargarProviderDto) {
     try {
       const data: DescargarProviderDto = {
@@ -820,13 +799,5 @@ export class ProvidersService {
     }
   }
 
-  async descargarStockProductos(descargarProviderDto: DescargarProviderDto) {
-    const ventas =
-      await this.ventaService.buscarProductoDeVenta(descargarProviderDto);
-  
-      const stock = await this.descargarStockMia(ventas.map((item)=> item.codigoMia));
-    
-      await this.stockService.guardarStockMia(stock, ventas);
 
-  }
 }

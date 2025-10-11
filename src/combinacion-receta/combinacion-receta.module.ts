@@ -14,10 +14,7 @@ import { TipoLenteModule } from 'src/tipo-lente/tipo-lente.module';
 import { MaterialModule } from 'src/material/material.module';
 import { ColorLenteModule } from 'src/color-lente/color-lente.module';
 import { PreciosModule } from 'src/precios/precios.module';
-import { ComisionProductoModule } from 'src/comision-producto/comision-producto.module';
 import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module';
-import { Precio, PrecioSchema } from 'src/precios/schema/precio.schema';
-
 
 @Module({
   imports: [
@@ -25,10 +22,6 @@ import { Precio, PrecioSchema } from 'src/precios/schema/precio.schema';
       {
         name: CombinacionReceta.name,
         schema: combinacionRecetaSchema,
-      },
-       {
-        name: Precio.name,
-        schema: PrecioSchema,
       },
     ]),
     TratamientoModule,
@@ -39,7 +32,7 @@ import { Precio, PrecioSchema } from 'src/precios/schema/precio.schema';
     MaterialModule,
     ColorLenteModule,
     PreciosModule,
-    forwardRef(()=> ComisionRecetaModule)
+    ComisionRecetaModule,
   ],
   controllers: [CombinacionRecetaController],
   providers: [CombinacionRecetaService],

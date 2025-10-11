@@ -35,8 +35,6 @@ export class CombinacionRecetaService {
   constructor(
     @InjectModel(CombinacionReceta.name)
     private readonly combinacionReceta: Model<CombinacionReceta>,
-    @InjectModel(Precio.name)
-    private readonly precio: Model<Precio>,
     private readonly tratamientoService: TratamientoService,
     private readonly materialService: MaterialService,
     private readonly colorLenteService: ColorLenteService,

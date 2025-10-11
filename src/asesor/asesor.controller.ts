@@ -34,11 +34,6 @@ export class AsesorController {
     return this.asesorService.asesorService(gestor, id);
   }
 
-  @Post()
-  create(@Body() createAsesorDto: CreateAsesorDto) {
-    return this.asesorService.create(createAsesorDto);
-  }
-
   @Get('sucursal')
   listarSucursalesAsesor(@Req() request: Request) {
     return this.asesorService.listarSucursalesAsesor(request);
