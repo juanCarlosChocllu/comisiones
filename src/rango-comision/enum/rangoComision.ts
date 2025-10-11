@@ -1,0 +1,4 @@
+enum TipoRangoComisionE {
+    producto ="PRODUCTO"
+    
+}

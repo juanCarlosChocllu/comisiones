@@ -35,6 +35,7 @@ import { LogDescargaModule } from './log-descarga/log-descarga.module';
 import { BackupModule } from './backup/backup.module';
 import { LogModule } from './log/log.module';
 import { AlmacenModule } from './almacen/almacen.module';
+import { RangoComisionModule } from './rango-comision/rango-comision.module';
 
 
 @Module({
@@ -71,7 +72,8 @@ import { AlmacenModule } from './almacen/almacen.module';
     LogDescargaModule,
     BackupModule,
     LogModule,
-    AlmacenModule
+    AlmacenModule,
+    RangoComisionModule
   ],
   controllers: [],
   providers: [
