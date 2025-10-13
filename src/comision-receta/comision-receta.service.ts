@@ -9,7 +9,7 @@ import { CreateComisionRecetaDto } from './dto/create-comision-receta.dto';
 import { UpdateComisionRecetaDto } from './dto/update-comision-receta.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { ComisionReceta } from './schema/comision-receta.schema';
-import { Model, Types } from 'mongoose';
+import { DeleteResult, Model, Types } from 'mongoose';
 import { CombinacionRecetaService } from 'src/combinacion-receta/combinacion-receta.service';
 import { ActualizarComisionReceta } from './dto/actulizarComisionReceta';
 import { flag } from 'src/core/enum/flag';
@@ -113,7 +113,7 @@ export class ComisionRecetaService {
   async eliminarComisionRegistrado(
     combinacion: Types.ObjectId,
     precio: string,
-  ) {
+  ): Promise<DeleteResult> {
     return await this.comisionReceta.deleteMany({
       combinacionReceta: new Types.ObjectId(combinacion),
       precio: precio,

@@ -236,5 +236,9 @@ export class PreciosService {
     ]);
     return detalle;
   }
- 
+  
+
+  buscarPrecioPorId(id:Types.ObjectId){
+    return this.precio.findById(id)
+  }
 }

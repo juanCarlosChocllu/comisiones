@@ -3,7 +3,7 @@ import { CreateComisionServicioDto } from './dto/create-comision-servicio.dto';
 import { UpdateComisionServicioDto } from './dto/update-comision-servicio.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { ComisionServicio } from './schema/comision-servicio.schema';
-import { Model, Types } from 'mongoose';
+import { DeleteResult, Model, Types } from 'mongoose';
 import { ServicioService } from 'src/servicio/servicio.service';
 import { flag } from 'src/core/enum/flag';
 
@@ -68,8 +68,8 @@ export class ComisionServicioService {
   async eliminarComisionRegistrado(
     servicio: Types.ObjectId,
     precio: string,
-  ) {
-    return await this.comisionServicio.deleteMany({
+  ) : Promise<DeleteResult>{
+    return  this.comisionServicio.deleteMany({
       servicio: new Types.ObjectId(servicio),
       precio: precio,
     });
