@@ -13,7 +13,7 @@ import { UpdateVentaDto } from './dto/update-venta.dto';
 import { BuscadorVentaDto } from './dto/buscadorVenta.dto,';
 import { Types } from 'mongoose';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
-import { Publico } from 'src/autenticacion/decorators/publico';
+import { Publico } from 'src/core/decorators/publico';
 import { FinalizarVentaDto } from './dto/FinalizarVentaDto';
 import { AnularVentaDto } from './dto/AnularVenta.dto';
 import { RangoFecha } from './dto/RangoFecha.dto';

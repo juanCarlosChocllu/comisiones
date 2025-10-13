@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { SucursalService } from './sucursal.service';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 import { Types } from 'mongoose';
-import { Publico } from 'src/autenticacion/decorators/publico';
+import { Publico } from 'src/core/decorators/publico';
 
 @Controller('sucursal')
 export class SucursalController {

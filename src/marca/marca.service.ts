@@ -49,7 +49,7 @@ export class MarcaService {
     const marca= await this.marca.findOne({_id:new Types.ObjectId(id)})
     if(marca){
     const data= await this.marca.updateOne({_id:new Types.ObjectId(id)}, {nombre:nombre})
-     console.log(data);
+
      
     }
   }

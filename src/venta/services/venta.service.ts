@@ -38,6 +38,8 @@ import { AnularVentaDto } from '../dto/AnularVenta.dto';
 import { horaUtc } from 'src/core/utils/horaUtc';
 import { FinalizarVentaMia, VentaApiI } from 'src/providers/interface/venta';
 import { RangoFecha } from '../dto/RangoFecha.dto';
+import { RangoComisionProducto } from 'src/rango-comision-producto/schema/rangoComisionProducto.schema';
+import { RangoComisionProductoService } from 'src/rango-comision-producto/rango-comision-producto.service';
 
 
 
@@ -51,6 +53,7 @@ export class VentaService {
     private readonly comisionProductoService: ComisionProductoService,
     private readonly metasProductoVipService: MetasProductoVipService,
     private readonly comisionServicioService: ComisionServicioService,
+        private readonly rangoComisionProductoService: RangoComisionProductoService,
     
   ) {}
 
@@ -126,12 +129,15 @@ export class VentaService {
                   detalle.rubro === productoE.lenteDeContacto ||
                   detalle.rubro === productoE.gafa
                 ) {
-                  const comisiones =
+                 /* const comisiones =
                     await this.comisionProductoService.listarComosionPorProducto(
                       detalle.producto,
                       venta.precio,
-                    );
-
+                    );*/
+                    const comisiones =
+                  await this.rangoComisionProductoService.buscarComisionProductoPorRango(venta.precio, detalle.importe);
+               
+                  
                   return {
                     producto: {
                       id: detalle.producto,
@@ -481,8 +487,6 @@ export class VentaService {
   }
 
   async buscarVenta(id_venta: string): Promise<detalleVentaI[]> {
-    console.log(id_venta);
-
     const venta = await this.venta.findOne({ id_venta: id_venta });
     if (venta) {
       return this.detalleVenta.find({ venta: venta._id });

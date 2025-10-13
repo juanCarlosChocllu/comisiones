@@ -30,7 +30,7 @@ import { ServicioModule } from './servicio/servicio.module';
 import { ComisionServicioModule } from './comision-servicio/comision-servicio.module';
 import { databaseConeccion } from './core/config/config';
 import { APP_GUARD } from '@nestjs/core';
-import { TokenGuard } from './autenticacion/guards/token/token.guard';
+import { TokenGuard } from './core/guards/token/token.guard';
 import { LogDescargaModule } from './log-descarga/log-descarga.module';
 import { BackupModule } from './backup/backup.module';
 import { LogModule } from './log/log.module';

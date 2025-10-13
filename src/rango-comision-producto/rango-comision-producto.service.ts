@@ -1,5 +1,5 @@
 import {
-    BadRequestException,
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -20,9 +20,13 @@ export class RangoComisionProductoService {
   async crearComision(
     createRangoComisionProductoDto: CreateRangoComisionProductoDto,
   ) {
-
-    if(createRangoComisionProductoDto.precioMinimo   > createRangoComisionProductoDto.precioMaximo ){
-        throw new ConflictException("El precio Maximo deve ser mayor que el minimo");
+    if (
+      createRangoComisionProductoDto.precioMinimo >
+      createRangoComisionProductoDto.precioMaximo
+    ) {
+      throw new ConflictException(
+        'El precio Maximo deve ser mayor que el minimo',
+      );
     }
 
     const precio = await this.precioService.buscarPrecioPorId(
@@ -45,7 +49,6 @@ export class RangoComisionProductoService {
     if (rango) {
       throw new ConflictException('Ya existe un rango que se cruza con este.');
     }
-
     return this.rangoComisionProducto.create({
       nombrePrecio: precio.nombre,
       precio: precio._id,
@@ -57,6 +60,29 @@ export class RangoComisionProductoService {
   }
 
   listarComision() {
-    return this.rangoComisionProducto.find({ flag: flag.nuevo}).sort({fecha:-1});
+    return this.rangoComisionProducto
+      .find({ flag: flag.nuevo })
+      .sort({ fecha: -1 });
+  }
+
+  async buscarComisionProductoPorRango(precio: string, importe: number) {
+    const comision = await this.rangoComisionProducto.aggregate([
+      {
+        $match: {
+          nombrePrecio: precio,
+          precioMinimo: { $lte: importe },
+          precioMaximo: { $gte: importe },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          precio: '$nombrePrecio',
+          monto: '$comision',
+        },
+      },
+    ]);
+
+    return comision;
   }
 }

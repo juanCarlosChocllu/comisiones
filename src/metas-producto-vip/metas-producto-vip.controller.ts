@@ -4,7 +4,7 @@ import { CreateMetasProductoVipDto } from './dto/create-metas-producto-vip.dto';
 import { UpdateMetasProductoVipDto } from './dto/update-metas-producto-vip.dto';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 import { Types } from 'mongoose';
-import { Publico } from 'src/autenticacion/decorators/publico';
+import { Publico } from 'src/core/decorators/publico';
 
 @Controller('metas/producto/vip')
 export class MetasProductoVipController {

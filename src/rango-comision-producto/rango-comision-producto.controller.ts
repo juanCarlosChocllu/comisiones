@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
 import { RangoComisionProductoService } from './rango-comision-producto.service';
 import { CreateRangoComisionProductoDto } from './dto/create-rango-comision-producto.dto';
-import { Publico } from 'src/autenticacion/decorators/publico';
+import { Publico } from 'src/core/decorators/publico';
 
 @Controller('rango/comision/producto')
 export class RangoComisionProductoController {

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ServicioService } from './servicio.service';
 import { PaginadorDto } from 'src/core/dto/paginadorDto';
-import { Publico } from 'src/autenticacion/decorators/publico';
+import { Publico } from 'src/core/decorators/publico';
 import {Response} from 'express'
 @Controller('servicio')
 export class ServicioController {

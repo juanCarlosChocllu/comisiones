@@ -6,7 +6,7 @@ declare global {
     interface Request {
       usuario:{
         idUsuario:Types.ObjectId,
-        asesor:Types.ObjectId
+
       }
       
     }

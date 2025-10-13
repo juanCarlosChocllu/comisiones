@@ -25,3 +25,4 @@ export class RangoComisionProducto extends BaseSchema {
 export const rangoComisionProductoSchema = SchemaFactory.createForClass(
   RangoComisionProducto,
 );
+rangoComisionProductoSchema.index({nombrePrecio:1, precioMinimo:1,precioMaximo:1})

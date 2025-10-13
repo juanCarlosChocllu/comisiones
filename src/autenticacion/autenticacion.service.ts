@@ -21,7 +21,6 @@ export class AutenticacionService {
        id: usuario.id,
       })
       return {
-       status:HttpStatus.OK,
        token
       }
      }

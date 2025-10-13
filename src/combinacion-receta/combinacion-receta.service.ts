@@ -835,8 +835,7 @@ export class CombinacionRecetaService {
     const combinaciones = await this.combinacionReceta.aggregate(pipeline, {
       allowDiskUse: true,
     });
-    console.log(total);
-
+    
     return { data: combinaciones, total };
   }
 

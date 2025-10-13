@@ -16,5 +16,6 @@ import { PreciosModule } from 'src/precios/precios.module';
       ],
   controllers: [RangoComisionProductoController],
   providers: [RangoComisionProductoService],
+  exports: [RangoComisionProductoService],
 })
 export class RangoComisionProductoModule {}

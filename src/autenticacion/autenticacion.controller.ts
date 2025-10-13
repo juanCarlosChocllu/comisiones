@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AutenticacionService } from './autenticacion.service';
 import { AutenticacionDto } from './dto/create-autenticacion.dto';
-import { Publico } from './decorators/publico';
+import { Publico } from '../core/decorators/publico';
+import type { Response } from 'express';
 
 @Controller('autenticacion')
 export class AutenticacionController {
@@ -18,7 +20,28 @@ export class AutenticacionController {
 
   @Post()
   @Publico()
-  create(@Body() AutenticacionDto: AutenticacionDto) {
-    return this.autenticacionService.autenticacion(AutenticacionDto);
+  async Login(
+    @Body() AutenticacionDto: AutenticacionDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const { token } =
+        await this.autenticacionService.autenticacion(AutenticacionDto);
+
+      if (token) {
+        res.cookie('ctx', token, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 1000 * 60 * 60 * 4,
+          sameSite: 'strict',
+          path: '/',
+        });
+        return res.json({ status: HttpStatus.OK });
+      }
+      throw new UnauthorizedException();
+      // return this.autenticacionService.autenticacion(AutenticacionDto)
+    } catch (error) {
+      throw error;
+    }
   }
 }

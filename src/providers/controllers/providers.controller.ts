@@ -15,7 +15,7 @@ import { ProvidersService } from '../services/providers.service';
 import { DescargarProviderDto } from '../dto/create-provider.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../utils/multerConfig';
-import { Publico } from 'src/autenticacion/decorators/publico';
+import { Publico } from 'src/core/decorators/publico';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
 
 @Controller('provider')

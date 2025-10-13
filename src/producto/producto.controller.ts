@@ -16,7 +16,7 @@ import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import { productoE } from 'src/providers/enum/productos';
 import { BuscadorProductoDto } from './dto/BuscadorProducto.dto';
 import { CrearProductoDto } from './dto/crearProduto.dto';
-import { Publico } from 'src/autenticacion/decorators/publico';
+import { Publico } from 'src/core/decorators/publico';
 import { Response } from 'express';
 @Controller('producto')
 export class ProductoController {

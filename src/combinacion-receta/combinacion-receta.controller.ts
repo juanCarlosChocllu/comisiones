@@ -6,7 +6,7 @@ import { PaginadorDto } from 'src/core/dto/paginadorDto';
 import {Response} from 'express'
 import { BuscadorCombinacionDto } from './dto/buscadorCombinacionReceta.dto';
 import { CrearCombinacionDto } from './dto/CrearCombinacion.dto';
-import { Publico } from 'src/autenticacion/decorators/publico';
+import { Publico } from 'src/core/decorators/publico';
 @Controller('combinacion/receta')
 export class CombinacionRecetaController {
   constructor(private readonly combinacionRecetaService: CombinacionRecetaService) {}
