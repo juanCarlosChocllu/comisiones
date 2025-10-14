@@ -77,7 +77,6 @@ export class LoggerInterceptor implements NestInterceptor {
           accion: AccionSistemaE.Crear,
           descripcion:
             'Se registró un nuevo rango de comisión para el producto',
-          body: JSON.stringify(request.body),
           schema: 'RangoComisionProducto',
         },
         {
@@ -85,7 +84,6 @@ export class LoggerInterceptor implements NestInterceptor {
           accion: AccionSistemaE.Crear,
           descripcion:
             'Se configuró una nueva meta de comisión para productos VIP',
-          body: JSON.stringify(request.body),
           schema: 'MetasProductoVip',
         },
 
@@ -93,15 +91,14 @@ export class LoggerInterceptor implements NestInterceptor {
           path: '/api/usuario',
           accion: AccionSistemaE.Crear,
           descripcion: 'Se registró un nuevo usuario en el sistema',
-          body: JSON.stringify(this.quitarContrasena(request.body)),
           schema: 'Usuario',
         },
 
         {
           path: '/api/comision/receta',
           accion: AccionSistemaE.Crear,
-          descripcion: 'Se registró un nueva comision para receta',
-          body: JSON.stringify(this.quitarContrasena(request.body)),
+          descripcion: 'Se registró un nueva comision para una combinacion',
+
           schema: 'ComisionReceta',
         },
 
@@ -110,14 +107,14 @@ export class LoggerInterceptor implements NestInterceptor {
           accion: AccionSistemaE.Crear,
           descripcion:
             'Se realizó una carga masiva de comisiones para las combinaciones',
-          body: JSON.stringify(this.quitarContrasena(request.body)),
+
           schema: 'ComisionReceta',
         },
         {
           path: '/api/comision/producto',
           accion: AccionSistemaE.Crear,
           descripcion: 'Se registró un nueva comision para producto',
-          body: JSON.stringify(this.quitarContrasena(request.body)),
+
           schema: 'ComisionProducto',
         },
 
@@ -126,12 +123,24 @@ export class LoggerInterceptor implements NestInterceptor {
           accion: AccionSistemaE.Crear,
           descripcion:
             'Se realizó una carga masiva de comisiones para los productos',
-          body: JSON.stringify(this.quitarContrasena(request.body)),
+
+          schema: 'ComisionProducto',
+        },
+
+        {
+          path: '/api/metas/producto/vip',
+          accion: AccionSistemaE.Crear,
+          descripcion: 'Se elimino una llave',
           schema: 'ComisionProducto',
         },
       ];
+      
       for (const data of actividad) {
-        if (path === data.path) {
+        if (path.startsWith(data.path)) {
+          const bodySanitizado =
+            data.path === '/api/usuario'
+              ? this.quitarContrasena(request.body)
+              : request.body;
           const dataLog: LogActividadI = {
             accion: data.accion,
             descripcion: data.descripcion,
@@ -141,7 +150,7 @@ export class LoggerInterceptor implements NestInterceptor {
             path: path,
             schema: data.schema,
             usuario: request.usuario.idUsuario,
-            body: data.body,
+            body: JSON.stringify(bodySanitizado),
           };
 
           await this.logService.registrarActividad(dataLog);
