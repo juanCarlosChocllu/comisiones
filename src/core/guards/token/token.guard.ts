@@ -33,10 +33,10 @@ export class TokenGuard implements CanActivate {
       const usuario = await this.usuariosService.buscarUsuarioPorId(
         tokenVerificada.id,
       );
-
       request.usuario = {
         idUsuario: usuario._id,
       };
+
       return true;
     } catch (error) {
       throw new UnauthorizedException();

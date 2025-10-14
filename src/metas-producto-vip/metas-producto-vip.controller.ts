@@ -9,12 +9,12 @@ import { Publico } from 'src/core/decorators/publico';
 @Controller('metas/producto/vip')
 export class MetasProductoVipController {
   constructor(private readonly metasProductoVipService: MetasProductoVipService) {}
-  @Publico()
+
   @Post()
   create(@Body() createMetasProductoVipDto: CreateMetasProductoVipDto) {
     return this.metasProductoVipService.create(createMetasProductoVipDto);
   }
-  @Publico()
+
   @Get()
   listar() {
     return this.metasProductoVipService.listar();

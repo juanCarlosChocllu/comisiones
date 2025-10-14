@@ -1,25 +1,23 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
+import { BaseSchema } from 'src/core/schema/BaseSchema';
 
 @Schema({ collection: 'Log' })
-export class Log {
-    @Prop({ Types: Types.ObjectId, ref: 'Usuario' })
-    usuario: Types.ObjectId;
+export class Log  extends BaseSchema {
+  @Prop({ Types: Types.ObjectId, ref: 'Usuario' })
+  usuario: Types.ObjectId;
 
+  @Prop()
+  descripcion: string;
 
-    @Prop()
-    descripcion: string;
+  @Prop()
+  method: string;
 
-    @Prop()
-    method: string;
+  @Prop()
+  path: string;
 
-    @Prop()
-    path: string
+  @Prop()
+  schema: string;
 
-    @Prop()
-    schema:string
-
-    @Prop({ Types: Date, default: () => Date.now() })
-    fecha: Date;
 }
-export const logSchema= SchemaFactory.createForClass(Log)
+export const logSchema = SchemaFactory.createForClass(Log);

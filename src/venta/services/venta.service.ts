@@ -12,7 +12,7 @@ import {
   FiltroI,
   FinalizarVentaI,
   RegistroVentas,
-  VentaI
+  VentaI,
 } from '../interface/venta';
 import { AsesorService } from 'src/asesor/asesor.service';
 
@@ -41,20 +41,18 @@ import { RangoFecha } from '../dto/RangoFecha.dto';
 import { RangoComisionProducto } from 'src/rango-comision-producto/schema/rangoComisionProducto.schema';
 import { RangoComisionProductoService } from 'src/rango-comision-producto/rango-comision-producto.service';
 
-
-
 @Injectable()
 export class VentaService {
   constructor(
     @InjectModel(Venta.name) private readonly venta: Model<Venta>,
-    @InjectModel(DetalleVenta.name) private readonly detalleVenta: Model<DetalleVenta>,
+    @InjectModel(DetalleVenta.name)
+    private readonly detalleVenta: Model<DetalleVenta>,
     private readonly asesorService: AsesorService,
     private readonly comisionRecetaService: ComisionRecetaService,
     private readonly comisionProductoService: ComisionProductoService,
     private readonly metasProductoVipService: MetasProductoVipService,
     private readonly comisionServicioService: ComisionServicioService,
-        private readonly rangoComisionProductoService: RangoComisionProductoService,
-    
+    private readonly rangoComisionProductoService: RangoComisionProductoService,
   ) {}
 
   async listasVentasComisiones(buscadorVentaDto: BuscadorVentaDto) {
@@ -129,15 +127,14 @@ export class VentaService {
                   detalle.rubro === productoE.lenteDeContacto ||
                   detalle.rubro === productoE.gafa
                 ) {
-                 /* const comisiones =
+                  const comisiones =
                     await this.comisionProductoService.listarComosionPorProducto(
                       detalle.producto,
                       venta.precio,
-                    );*/
-                    const comisiones =
-                  await this.rangoComisionProductoService.buscarComisionProductoPorRango(venta.precio, detalle.importe);
-               
-                  
+                    );
+                  /*    const comisiones =
+                  await this.rangoComisionProductoService.buscarComisionProductoPorRango(venta.precio, detalle.importe);*/
+
                   return {
                     producto: {
                       id: detalle.producto,
@@ -540,10 +537,4 @@ export class VentaService {
 
     return ventas;
   }
-
-
-
- 
-
-
 }

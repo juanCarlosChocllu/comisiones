@@ -1,4 +1,3 @@
-import { Request } from 'express';
 import { Types } from 'mongoose';
 
 declare global {

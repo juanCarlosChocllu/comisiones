@@ -27,5 +27,9 @@ export class LogActividad extends BaseSchema {
 
   @Prop()
   schema: string;
+
+  @Prop()
+  body: string;
+
 }
 export const LogActividadSchema = SchemaFactory.createForClass(LogActividad);

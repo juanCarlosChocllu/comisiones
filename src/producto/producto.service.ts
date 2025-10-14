@@ -21,6 +21,7 @@ import { BuscadorVentaDto } from 'src/venta/dto/buscadorVenta.dto,';
 import { BuscadorProductoDto } from './dto/BuscadorProducto.dto';
 import { CrearProductoDto } from './dto/crearProduto.dto';
 import * as ExcelJs from 'exceljs';
+import { LogService } from 'src/log/log.service';
 
 @Injectable()
 export class ProductoService {
@@ -30,10 +31,9 @@ export class ProductoService {
     private readonly marcaService: MarcaService,
     private readonly tipoMonturaService: TipoMonturaService,
     private readonly precioService: PreciosService,
-
     private readonly preciosService: PreciosService,
     @Inject(forwardRef(() => ComisionProductoService))
-    private readonly comisionProductoService: ComisionProductoService,
+    private readonly comisionProductoService: ComisionProductoService
   ) {}
   async create(createProductoDto: CreateProductoDto) {
     for (const data of createProductoDto.data) {

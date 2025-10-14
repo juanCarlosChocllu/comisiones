@@ -8,22 +8,26 @@ import { Observable, tap } from 'rxjs';
 import { Request } from 'express';
 import { AxiosError, HttpStatusCode } from 'axios';
 import { LogService } from 'src/log/log.service';
-import { LogI } from 'src/log/interface/log';
+import { LogActividadI, LogI } from 'src/log/interface/log';
 import { Types } from 'mongoose';
+import path from 'path';
+import { AccionSistemaE } from '../enum/coreEnum';
 
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
   constructor(private readonly logService: LogService) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request: Request = context.switchToHttp().getRequest();
+
     const method = request.method;
-    const path = request.originalUrl;  
+    const path = request.originalUrl;
     return next.handle().pipe(
       tap({
         next: async () => {
           if (path === '/api/autenticacion') {
             await this.succesLogin(method, path, request.body.username);
           }
+          await this.registrarActividad(path, method, request);
         },
         error: async (err) => {
           const e = err as AxiosError;
@@ -55,5 +59,94 @@ export class LoggerInterceptor implements NestInterceptor {
     await this.logService.registrarLog(data);
   }
 
- 
+  private quitarContrasena(body: any) {
+    const { password, ...bodySinContrasena } = body;
+    return bodySinContrasena;
+  }
+  private async registrarActividad(
+    path: string,
+    method: string,
+    request: Request,
+  ) {
+    const methods: string[] = ['POST', 'DELETE', 'PATCH'];
+
+    if (methods.includes(method)) {
+      const actividad = [
+        {
+          path: '/api/rango/comision/producto',
+          accion: AccionSistemaE.Crear,
+          descripcion:
+            'Se registró un nuevo rango de comisión para el producto',
+          body: JSON.stringify(request.body),
+          schema: 'RangoComisionProducto',
+        },
+        {
+          path: '/api/metas/producto/vip',
+          accion: AccionSistemaE.Crear,
+          descripcion:
+            'Se configuró una nueva meta de comisión para productos VIP',
+          body: JSON.stringify(request.body),
+          schema: 'MetasProductoVip',
+        },
+
+        {
+          path: '/api/usuario',
+          accion: AccionSistemaE.Crear,
+          descripcion: 'Se registró un nuevo usuario en el sistema',
+          body: JSON.stringify(this.quitarContrasena(request.body)),
+          schema: 'Usuario',
+        },
+
+        {
+          path: '/api/comision/receta',
+          accion: AccionSistemaE.Crear,
+          descripcion: 'Se registró un nueva comision para receta',
+          body: JSON.stringify(this.quitarContrasena(request.body)),
+          schema: 'ComisionReceta',
+        },
+
+        {
+          path: '/api/provider/excel/combinaciones/comisiones',
+          accion: AccionSistemaE.Crear,
+          descripcion:
+            'Se realizó una carga masiva de comisiones para las combinaciones',
+          body: JSON.stringify(this.quitarContrasena(request.body)),
+          schema: 'ComisionReceta',
+        },
+        {
+          path: '/api/comision/producto',
+          accion: AccionSistemaE.Crear,
+          descripcion: 'Se registró un nueva comision para producto',
+          body: JSON.stringify(this.quitarContrasena(request.body)),
+          schema: 'ComisionProducto',
+        },
+
+        {
+          path: '/api/provider/excel/producto/comisiones',
+          accion: AccionSistemaE.Crear,
+          descripcion:
+            'Se realizó una carga masiva de comisiones para los productos',
+          body: JSON.stringify(this.quitarContrasena(request.body)),
+          schema: 'ComisionProducto',
+        },
+      ];
+      for (const data of actividad) {
+        if (path === data.path) {
+          const dataLog: LogActividadI = {
+            accion: data.accion,
+            descripcion: data.descripcion,
+            ip: request.ip,
+            method: method,
+            navegador: request.headers['user-agent'],
+            path: path,
+            schema: data.schema,
+            usuario: request.usuario.idUsuario,
+            body: data.body,
+          };
+
+          await this.logService.registrarActividad(dataLog);
+        }
+      }
+    }
+  }
 }

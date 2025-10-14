@@ -11,3 +11,26 @@ export interface LogI {
 
   schema:string
 }
+
+
+export interface LogActividadI {
+
+  usuario: Types.ObjectId;
+
+ 
+  accion: string;
+
+
+  descripcion: string;
+
+  ip: string;
+
+  navegador: string;
+
+  method: string;
+
+  path: string;
+
+  schema: string;
+  body?:string
+}
