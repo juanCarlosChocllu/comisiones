@@ -66,6 +66,7 @@ export class LoggerInterceptor implements NestInterceptor {
       ip: ip,
       navegador: navegador,
       estado: 'UNAUTHORIZED',
+      usuario:usuario
     };
     await this.logService.registrarLog(data);
   }
@@ -79,6 +80,7 @@ export class LoggerInterceptor implements NestInterceptor {
   ) {
     const data: LogI = {
       descripcion: `Inicio de sesión exitoso para el usuario: ${usuario}`,
+      usuario:usuario,
       method: method,
       path: path,
       schema: 'Usuario',

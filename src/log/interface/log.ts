@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 export interface LogI {
-  usuario?: Types.ObjectId;
+  usuario: string;
 
   descripcion?: string;
 

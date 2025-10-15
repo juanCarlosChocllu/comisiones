@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Delete, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Delete,
+  Param,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { RangoComisionProductoService } from './rango-comision-producto.service';
 import { CreateRangoComisionProductoDto } from './dto/create-rango-comision-producto.dto';
 import { ValidateIdPipe } from 'src/core/utils/validate-id.pipe';
@@ -22,9 +31,9 @@ export class RangoComisionProductoController {
     return this.rangoComisionProductoService.listarComision();
   }
 
-   @Delete(":id")
-   @HttpCode(HttpStatus.OK)
-  eliminarComision(@Param("id", ValidateIdPipe) id:Types.ObjectId) {
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  eliminarComision(@Param('id', ValidateIdPipe) id: Types.ObjectId) {
     return this.rangoComisionProductoService.eliminarComision(id);
   }
 }

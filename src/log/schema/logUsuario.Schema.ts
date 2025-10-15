@@ -10,10 +10,11 @@ export class LogUsuario extends BaseSchema {
   @Prop()
   method: string;
 
-
-   @Prop()
+  @Prop()
   estado: string;
 
+   @Prop()
+  usuario: string;
 
   @Prop()
   path: string;
@@ -26,7 +27,5 @@ export class LogUsuario extends BaseSchema {
 
   @Prop()
   navegador: string;
-
-
 }
 export const logUsuarioSchema = SchemaFactory.createForClass(LogUsuario);
