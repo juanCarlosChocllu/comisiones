@@ -65,7 +65,7 @@ export class LoggerInterceptor implements NestInterceptor {
       schema: 'Usuario',
       ip: ip,
       navegador: navegador,
-      estado:"UNAUTHORIZED"
+      estado: 'UNAUTHORIZED',
     };
     await this.logService.registrarLog(data);
   }
@@ -84,7 +84,7 @@ export class LoggerInterceptor implements NestInterceptor {
       schema: 'Usuario',
       ip: ip,
       navegador: navegador,
-      estado:"OK"
+      estado: 'OK',
     };
     await this.logService.registrarLog(data);
   }
@@ -161,6 +161,13 @@ export class LoggerInterceptor implements NestInterceptor {
           accion: AccionSistemaE.Eliminar,
           descripcion: 'Se elimino una llave',
           schema: 'MetasProductoVip',
+        },
+
+          {
+          path: '/api/rango/comision/producto',
+          accion: AccionSistemaE.Eliminar,
+          descripcion: 'Se elimino un rango de comision',
+          schema: 'RangoComisionProducto',
         },
       ];
 

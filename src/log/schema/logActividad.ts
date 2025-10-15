@@ -31,19 +31,17 @@ export class LogActividad {
   body: string;
 
   @Prop({
-      type: Date,
-      default: function () {
-        const date = new Date();
-        date.setHours(date.getHours() - 4);
-        return date;
-      },
-    })
-    fecha: Date;
-  
-    @Prop({ type: String, enum: flag, default: flag.nuevo })
-    flag: string;
-  
+    type: Date,
+    default: function () {
+      const date = new Date();
+      date.setHours(date.getHours() - 4);
+      return date;
+    },
+  })
+  fecha: Date;
+
+  @Prop({ type: String, enum: flag, default: flag.nuevo })
+  flag: string;
 }
 export const LogActividadSchema = SchemaFactory.createForClass(LogActividad);
-LogActividadSchema.index({fecha:1})
-
+LogActividadSchema.index({ fecha: 1 });

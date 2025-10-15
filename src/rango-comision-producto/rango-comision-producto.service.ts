@@ -7,7 +7,7 @@ import {
 import { CreateRangoComisionProductoDto } from './dto/create-rango-comision-producto.dto';
 import { PreciosService } from 'src/precios/service/precios.service';
 import { RangoComisionProducto } from './schema/rangoComisionProducto.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { flag } from 'src/core/enum/flag';
 @Injectable()
@@ -38,14 +38,17 @@ export class RangoComisionProductoService {
 
     const rango = await this.rangoComisionProducto.findOne({
       precio: precio._id,
+      flag:flag.nuevo,
       nombre: createRangoComisionProductoDto.nombre,
       $or: [
         {
-          precioMinimo: { $lte: createRangoComisionProductoDto.precioMaximo },
+          precioMinimo: { $lt: createRangoComisionProductoDto.precioMaximo },
           precioMaximo: { $gt: createRangoComisionProductoDto.precioMinimo },
         },
       ],
     });
+   
+    
     if (rango) {
       throw new ConflictException('Ya existe un rango que se cruza con este.');
     }
@@ -84,5 +87,16 @@ export class RangoComisionProductoService {
     ]);
 
     return comision;
+  }
+
+  async eliminarComision(id: Types.ObjectId) {
+    const rango = await this.rangoComisionProducto.findById(id);
+    if (!rango) {
+      throw new NotFoundException();
+    }
+    return this.rangoComisionProducto.updateOne(
+      { _id: new Types.ObjectId(id) },
+      { flag: flag.eliminado },
+    );
   }
 }
