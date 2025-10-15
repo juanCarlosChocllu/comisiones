@@ -25,36 +25,64 @@ export class LoggerInterceptor implements NestInterceptor {
       tap({
         next: async () => {
           if (path === '/api/autenticacion') {
-            await this.succesLogin(method, path, request.body.username);
+            await this.succesLogin(
+              method,
+              path,
+              request.body.username,
+              request.ip,
+              request.headers['user-agent'],
+            );
           }
           await this.registrarActividad(path, method, request);
         },
         error: async (err) => {
           const e = err as AxiosError;
           if (e && e.status === HttpStatusCode.Forbidden) {
-            await this.errorLogin(method, path, request.body.username);
+            await this.errorLogin(
+              method,
+              path,
+              request.body.username,
+              request.ip,
+              request.headers['user-agent'],
+            );
           }
         },
       }),
     );
   }
 
-  private async errorLogin(method: string, path: string, usuario: string) {
+  private async errorLogin(
+    method: string,
+    path: string,
+    usuario: string,
+    ip: string,
+    navegador: string,
+  ) {
     const data: LogI = {
       descripcion: `Inicio de sesión fallido para el usuario: ${usuario}`,
       method: method,
       path: path,
       schema: 'Usuario',
+      ip: ip,
+      navegador: navegador,
     };
     await this.logService.registrarLog(data);
   }
 
-  private async succesLogin(method: string, path: string, usuario: string) {
+  private async succesLogin(
+    method: string,
+    path: string,
+    usuario: string,
+    ip: string,
+    navegador: string,
+  ) {
     const data: LogI = {
       descripcion: `Inicio de sesión exitoso para el usuario: ${usuario}`,
       method: method,
       path: path,
       schema: 'Usuario',
+      ip: ip,
+      navegador: navegador,
     };
     await this.logService.registrarLog(data);
   }
@@ -82,8 +110,7 @@ export class LoggerInterceptor implements NestInterceptor {
         {
           path: '/api/metas/producto/vip',
           accion: AccionSistemaE.Crear,
-          descripcion:
-            'Se configuró una nueva meta de comisión para productos VIP',
+          descripcion: 'Se registro una nueva meta para una sucursal',
           schema: 'MetasProductoVip',
         },
 
@@ -129,12 +156,12 @@ export class LoggerInterceptor implements NestInterceptor {
 
         {
           path: '/api/metas/producto/vip',
-          accion: AccionSistemaE.Crear,
+          accion: AccionSistemaE.Eliminar,
           descripcion: 'Se elimino una llave',
-          schema: 'ComisionProducto',
+          schema: 'MetasProductoVip',
         },
       ];
-      
+
       for (const data of actividad) {
         if (path.startsWith(data.path)) {
           const bodySanitizado =

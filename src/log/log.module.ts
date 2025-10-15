@@ -2,15 +2,15 @@ import { Global, Module } from '@nestjs/common';
 import { LogService } from './log.service';
 import { LogController } from './log.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Log, logSchema } from './schema/log.Schema';
+import { logUsuarioSchema, LogUsuario } from './schema/logUsuario.Schema';
 import { LogActividad, LogActividadSchema } from './schema/logActividad';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       {
-        name: Log.name,
-        schema: logSchema,
+        name: LogUsuario.name,
+        schema: logUsuarioSchema,
       },
       {
         name: LogActividad.name,

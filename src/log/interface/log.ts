@@ -10,6 +10,10 @@ export interface LogI {
   path: string;
 
   schema:string
+
+  navegador:string
+  
+  ip:string
 }
 
 
