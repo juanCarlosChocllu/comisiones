@@ -12,7 +12,9 @@ export interface LogI {
   schema:string
 
   navegador:string
-  
+
+  estado:string
+
   ip:string
 }
 

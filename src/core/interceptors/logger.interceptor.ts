@@ -65,6 +65,7 @@ export class LoggerInterceptor implements NestInterceptor {
       schema: 'Usuario',
       ip: ip,
       navegador: navegador,
+      estado:"UNAUTHORIZED"
     };
     await this.logService.registrarLog(data);
   }
@@ -83,6 +84,7 @@ export class LoggerInterceptor implements NestInterceptor {
       schema: 'Usuario',
       ip: ip,
       navegador: navegador,
+      estado:"OK"
     };
     await this.logService.registrarLog(data);
   }
