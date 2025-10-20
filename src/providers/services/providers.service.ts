@@ -671,8 +671,6 @@ export class ProvidersService {
       fechaInicio: `${año}-${mes}-${dia}`,
       fechaFin: `${año}-${mes}-${dia}`,
     };
-    // console.log(fecha);
-
     this.logger.debug('Iniciando la descarga');
     await this.guardardataVenta(fecha);
   }
@@ -709,7 +707,7 @@ export class ProvidersService {
     fechaFinDate.setDate(hoy.getDate() - 1);
 
     const fechaInicioDate = new Date(hoy);
-    fechaInicioDate.setDate(hoy.getDate() - 2);
+    fechaInicioDate.setDate(hoy.getDate() - 3);
 
     const formatearFecha = (fecha: Date): string => {
       const año = fecha.getFullYear();
@@ -765,7 +763,7 @@ export class ProvidersService {
 
       this.logger.debug('Iniciando la anulaciones');
       const response = await this.anularVentas(fecha);
-      console.log(fecha);
+
     } catch (error) {
       console.log(error);
     }
@@ -775,8 +773,6 @@ export class ProvidersService {
     const ventas = await this.descargarVentasMia(descargarProviderDto);
     for (const venta of ventas) {
       if (venta.rubro == 'MONTURA') {
-        console.log(venta.rubro, venta.atributo1);
-
         const ventaEncontrada = await this.ventaService.buscarVenta(
           venta.idVenta,
         );

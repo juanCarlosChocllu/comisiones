@@ -16,9 +16,15 @@ export class SucursalService {
     @InjectModel(Empresa.name) private readonly empresa: Model<Empresa>,
     private readonly empresaService: EmpresaService,
   ) {}
- 
+
   async buscarSucursalPorNombre(nombre: string) {
-    return this.sucursal.findOne({ nombre: nombre.toUpperCase() });
+    const sucursal = await this.sucursal.findOne({
+      nombre: nombre.toUpperCase(),
+    });
+    if (!sucursal) {
+      return this.sucursal.create({ nombre: nombre.toUpperCase() });
+    }
+    return sucursal;
   }
 
   async asignarZonaSucursal(sucursal: Types.ObjectId, zona: Types.ObjectId) {
@@ -33,8 +39,6 @@ export class SucursalService {
       );
     }
   }
- 
-
 
   public async guardarEmpresaYsusSucursales() {
     const data = dataEmpresa();
@@ -100,19 +104,15 @@ export class SucursalService {
     return { status: HttpStatus.CREATED };
   }
 
-
-
-   public async vericarSucursalStock(sucursal:string){
-    const su = await this.sucursal.findOne({nombre:sucursal})
-    return su
-    
-   }
-
-  listarSucursalPorNombre(nombre:string[]){
-    return this.sucursal.find({nombre:{$in:nombre}})
-  }
-  buscarSucursalPorId(id:Types.ObjectId){
-    return this.sucursal.findOne({_id:new Types.ObjectId(id)})
+  public async vericarSucursalStock(sucursal: string) {
+    const su = await this.sucursal.findOne({ nombre: sucursal });
+    return su;
   }
 
+  listarSucursalPorNombre(nombre: string[]) {
+    return this.sucursal.find({ nombre: { $in: nombre } });
+  }
+  buscarSucursalPorId(id: Types.ObjectId) {
+    return this.sucursal.findOne({ _id: new Types.ObjectId(id) });
+  }
 }
