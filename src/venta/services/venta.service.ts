@@ -127,13 +127,13 @@ export class VentaService {
                   detalle.rubro === productoE.lenteDeContacto ||
                   detalle.rubro === productoE.gafa
                 ) {
-                  const comisiones =
+                /*  const comisiones =
                     await this.comisionProductoService.listarComosionPorProducto(
                       detalle.producto,
                       venta.precio,
-                    );
-                  /*    const comisiones =
-                  await this.rangoComisionProductoService.buscarComisionProductoPorRango(venta.precio, detalle.importe);*/
+                    );*/
+                     const comisiones =
+                  await this.rangoComisionProductoService.buscarComisionProductoPorRango(venta.precio, detalle.importe)
 
                   return {
                     producto: {
