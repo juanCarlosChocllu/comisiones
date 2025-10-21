@@ -8,6 +8,7 @@ import { DetallePrecio } from '../schema/detallePrecio.schema';
 import { tipoProductoPrecio } from '../enum/tipoProductoPrecio';
 import { preciosI } from '../interface/precios';
 import { flag } from 'src/core/enum/flag';
+import { DetallePrecioSucursal } from '../schema/DetallePrecioSucursalSchema';
 
 @Injectable()
 export class PreciosService {
@@ -15,14 +16,34 @@ export class PreciosService {
     @InjectModel(Precio.name) private readonly precio: Model<Precio>,
     @InjectModel(DetallePrecio.name)
     private readonly detallePrecio: Model<DetallePrecio>,
+
+    @InjectModel(DetallePrecioSucursal.name)
+    private readonly detallePrecioSucursal: Model<DetallePrecioSucursal>,
   ) {}
 
-  async guardarPrecioReceta(nombre: string) {
+  async guardarPrecio(nombre: string) {
     const precio = await this.precio.findOne({ nombre: nombre.toUpperCase() });
     if (!precio) {
       return await this.precio.create({ nombre: nombre.toUpperCase() });
     }
     return precio;
+  }
+
+  async guardarDetallePrecioSucursal(
+    precio: Types.ObjectId,
+    sucursal: Types.ObjectId,
+  ) {
+    const detalle = await this.detallePrecioSucursal.findOne({
+      precio: new Types.ObjectId(precio),
+      sucursal: new Types.ObjectId(sucursal),
+      flag: flag.nuevo,
+    });
+    if (!detalle) {
+      await this.detallePrecioSucursal.create({
+        precio: new Types.ObjectId(precio),
+        sucursal: new Types.ObjectId(sucursal),
+      });
+    }
   }
 
   async guardarDetallePrecio(
@@ -54,8 +75,7 @@ export class PreciosService {
         tipo: tipoProductoPrecio.servicio,
         //monto: monto,
       });
-  
-      
+
       if (!detalle) {
         await this.detallePrecio.create({
           servicio: new Types.ObjectId(producto),
@@ -76,7 +96,7 @@ export class PreciosService {
           producto: new Types.ObjectId(producto),
           precio: new Types.ObjectId(precio),
           tipo: tipoProductoPrecio.producto,
-          monto: monto|0,
+          monto: monto | 0,
         });
       }
     }
@@ -134,8 +154,6 @@ export class PreciosService {
   }
 
   async buscarPrecioPorNombre(nombre: string) {
-
-    
     const precio = await this.precio.findOne({ nombre: nombre.toUpperCase() });
     if (!precio) {
       return await this.precio.create({ nombre: nombre.toUpperCase() });
@@ -145,7 +163,7 @@ export class PreciosService {
   }
 
   async listar() {
-    const precio = await this.precio.find({flag:flag.nuevo});
+    const precio = await this.precio.find({ flag: flag.nuevo });
     return precio;
   }
 
@@ -207,8 +225,7 @@ export class PreciosService {
     return detalle;
   }
 
-
-  async precioServicio(id:Types.ObjectId) {
+  async precioServicio(id: Types.ObjectId) {
     const detalle = await this.detallePrecio.aggregate([
       {
         $match: { servicio: new Types.ObjectId(id) },
@@ -236,9 +253,8 @@ export class PreciosService {
     ]);
     return detalle;
   }
-  
 
-  buscarPrecioPorId(id:Types.ObjectId){
-    return this.precio.findById(id)
+  buscarPrecioPorId(id: Types.ObjectId) {
+    return this.precio.findById(id);
   }
 }

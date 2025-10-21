@@ -58,7 +58,7 @@ export class ProductoService {
       }
       const producto = await this.producto.create(dataProducto);
       for (const p of data.precios) {
-        const precio = await this.preciosService.guardarPrecioReceta(
+        const precio = await this.preciosService.guardarPrecio(
           p.tipoPrecio,
         );
         await this.preciosService.guardarDetallePrecio(
@@ -427,7 +427,7 @@ export class ProductoService {
       }
 
       const producto = await this.producto.create(dataProducto);
-      const precio = await this.preciosService.guardarPrecioReceta(data.precio);
+      const precio = await this.preciosService.guardarPrecio(data.precio);
 
       await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.producto,
@@ -456,7 +456,7 @@ export class ProductoService {
         }
       }
     } else {
-      const precio = await this.preciosService.guardarPrecioReceta(data.precio);
+      const precio = await this.preciosService.guardarPrecio(data.precio);
       await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.producto,
         producto._id,
@@ -517,14 +517,14 @@ export class ProductoService {
     const producto = await this.producto.exists({ codigoMia: data.codigoMia });
     if (!producto) {
       const productoRegistrado = await this.producto.create(dataProducto);
-      const precio = await this.preciosService.guardarPrecioReceta(data.precio);
+      const precio = await this.preciosService.guardarPrecio(data.precio);
       await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.producto,
         productoRegistrado._id,
         precio._id,
       );
     } else {
-      const precio = await this.preciosService.guardarPrecioReceta(data.precio);
+      const precio = await this.preciosService.guardarPrecio(data.precio);
       await this.preciosService.guardarDetallePrecio(
         tipoProductoPrecio.producto,
         producto._id,

@@ -4,6 +4,7 @@ import { PreciosController } from './precios.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Precio, PrecioSchema } from './schema/precio.schema';
 import { DetallePrecio, DetallePrecioSchema } from './schema/detallePrecio.schema';
+import { DetallePrecioSucursal, DetallePrecioSucursalSchema } from './schema/DetallePrecioSucursalSchema';
 
 
 @Module({
@@ -14,6 +15,9 @@ import { DetallePrecio, DetallePrecioSchema } from './schema/detallePrecio.schem
         },
         {
           name:DetallePrecio.name, schema:DetallePrecioSchema
+        },
+        {
+          name:DetallePrecioSucursal.name, schema:DetallePrecioSucursalSchema
         }
       ])
     ],

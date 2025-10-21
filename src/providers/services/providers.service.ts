@@ -46,6 +46,7 @@ import { LogDescargaService } from 'src/log-descarga/log-descarga.service';
 
 import { AnularVentaMiaI, FinalizarVentaMia, VentaApiI } from '../interface/venta';
 import { AnularVentaDto } from 'src/venta/dto/AnularVenta.dto';
+import { PreciosService } from 'src/precios/service/precios.service';
 
 
 
@@ -75,7 +76,8 @@ export class ProvidersService {
     private readonly comisionRecetaService: ComisionRecetaService,
     private readonly comisionProductoService: ComisionProductoService,
     private readonly servicioService: ServicioService,
-    private readonly logDescargaService: LogDescargaService
+    private readonly logDescargaService: LogDescargaService,
+        private readonly preciosService: PreciosService
   ) {}
   async descargarVentasMia(createProviderDto: DescargarProviderDto) {
     try {
@@ -154,14 +156,16 @@ export class ProvidersService {
         );
 
         if (sucursal) {
-          const [asesor, tipoVenta] = await Promise.all([
+          const [asesor, tipoVenta, precio] = await Promise.all([
             this.asesorService.guardarAsesor(
               data.nombre_vendedor,
               sucursal._id,
             ),
             this.tipoVentaService.guardarTipoVenta(data.tipoVenta),
+            this.preciosService.guardarPrecio(data.precio)
           ]);
-
+          
+          await this.preciosService.guardarDetallePrecioSucursal(precio._id, sucursal._id)
           ventaGuardar = {
             asesor: asesor._id,
             comisiona: data.comisiona,

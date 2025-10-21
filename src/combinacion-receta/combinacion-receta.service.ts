@@ -96,7 +96,7 @@ export class CombinacionRecetaService {
       .lean();
 
     if (combinacionL) {
-      const precios = await this.preciosService.guardarPrecioReceta(
+      const precios = await this.preciosService.guardarPrecio(
         crearCombinacionDto.tipoPrecio,
       );
       if (precios) {
@@ -127,7 +127,7 @@ export class CombinacionRecetaService {
         ...combinacion,
         comision: true,
       });
-      const precios = await this.preciosService.guardarPrecioReceta(
+      const precios = await this.preciosService.guardarPrecio(
         crearCombinacionDto.tipoPrecio,
       );
       if (precios) {
@@ -194,7 +194,7 @@ export class CombinacionRecetaService {
       };
       const combinacionL = await this.combinacionReceta.findOne(combinacion);
       if (combinacionL) {
-        const precios = await this.preciosService.guardarPrecioReceta(
+        const precios = await this.preciosService.guardarPrecio(
           data.tipoPrecio,
         );
         if (precios) {
@@ -208,7 +208,7 @@ export class CombinacionRecetaService {
       } else {
         const combinacionLente =
           await this.combinacionReceta.create(combinacion);
-        const precios = await this.preciosService.guardarPrecioReceta(
+        const precios = await this.preciosService.guardarPrecio(
           data.tipoPrecio,
         );
         if (precios) {
@@ -1127,7 +1127,7 @@ export class CombinacionRecetaService {
       .findOne(combinacion)
       .lean();
     if (combinacionL) {
-      const precio = await this.preciosService.guardarPrecioReceta(data.precio);
+      const precio = await this.preciosService.guardarPrecio(data.precio);
       if (precio) {
         await this.preciosService.guardarDetallePrecio(
           tipoProductoPrecio.lente,
@@ -1163,7 +1163,7 @@ export class CombinacionRecetaService {
         ...combinacion,
         comision: true,
       });
-      const precio = await this.preciosService.guardarPrecioReceta(data.precio);
+      const precio = await this.preciosService.guardarPrecio(data.precio);
 
       if (precio) {
         await this.preciosService.guardarDetallePrecio(

@@ -24,6 +24,7 @@ import { ComisionRecetaModule } from 'src/comision-receta/comision-receta.module
 import { ServicioModule } from 'src/servicio/servicio.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LogDescargaModule } from 'src/log-descarga/log-descarga.module';
+import { PreciosModule } from 'src/precios/precios.module';
 
 @Module({
   imports: [
@@ -48,7 +49,8 @@ import { LogDescargaModule } from 'src/log-descarga/log-descarga.module';
     ComisionProductoModule,
     ComisionRecetaModule,
     ServicioModule,
-    LogDescargaModule
+    LogDescargaModule,
+    PreciosModule
   ],
   controllers: [ProvidersController],
   providers: [ProvidersService],

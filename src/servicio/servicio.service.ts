@@ -96,7 +96,7 @@ export class ServicioService {
     const servicioExiste = await this.servicio.exists({
       codigoMia: data.codigoMia,
     });
-    const precio = await this.preciosService.guardarPrecioReceta(
+    const precio = await this.preciosService.guardarPrecio(
       data.tipoPrecio,
     );
     const { comisiones, tipoPrecio, ...data2 } = data;
