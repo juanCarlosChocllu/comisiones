@@ -99,12 +99,10 @@ export class RangoComisionProductoService {
           $count: 'total',
         },
       ]);
-      console.log(rango);
-      
       if (rango.length > 0 && rango[0].total >= 2) {
         const precio = await this.precioService.buscarPrecioPorId(item.precio);
         throw new ConflictException(
-       `Máximo 2 comisiones por tipo de precio ${precio.nombre} en rangos superpuestos (ya hay ${rango[0].total}).`,
+          `Máximo 2 comisiones por tipo de precio ${precio.nombre} en rangos superpuestos (ya hay ${rango[0].total}).`,
         );
       }
     }
@@ -239,15 +237,18 @@ export class RangoComisionProductoService {
           preserveNullAndEmptyArrays: false,
         },
       },
-      ...(buscadorRangoComisionProductoDto.precio ? [
-        {
-          $match:{
-          'detalleRangoComisonProducto.nombrePrecio':new RegExp(buscadorRangoComisionProductoDto.precio, 'i')
-          }
-        }
-      ]:[
-
-      ]),
+      ...(buscadorRangoComisionProductoDto.precio
+        ? [
+            {
+              $match: {
+                'detalleRangoComisonProducto.nombrePrecio': new RegExp(
+                  buscadorRangoComisionProductoDto.precio,
+                  'i',
+                ),
+              },
+            },
+          ]
+        : []),
       {
         $group: {
           _id: '$detalleRangoComisonProducto.precio',
