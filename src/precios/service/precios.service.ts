@@ -9,6 +9,7 @@ import { tipoProductoPrecio } from '../enum/tipoProductoPrecio';
 import { preciosI } from '../interface/precios';
 import { flag } from 'src/core/enum/flag';
 import { DetallePrecioSucursal } from '../schema/DetallePrecioSucursalSchema';
+import { ListarPrecioSucursalDto } from '../dto/listarPrecioSucursal';
 
 @Injectable()
 export class PreciosService {
@@ -257,4 +258,35 @@ export class PreciosService {
   buscarPrecioPorId(id: Types.ObjectId) {
     return this.precio.findById(id);
   }
+
+   async  listarPreciosPorSucursal(listarPrecioSucursalDto:ListarPrecioSucursalDto){ 
+      const precios = await this.detallePrecioSucursal.aggregate([
+        {
+          $match:{
+           flag:flag.nuevo,
+           sucursal:{$in:listarPrecioSucursalDto.sucursal.map((item)=> new Types.ObjectId(item))}
+          }
+        },
+        {
+          $lookup:{
+            from:"Precio",
+            foreignField:"_id",
+            localField:"precio",
+            as:'precio'
+          }
+        },
+        {$unwind:{path:'$precio', preserveNullAndEmptyArrays:false}},
+        {
+         $group:{
+          _id:'$precio._id',
+          nombre:{$first:'$precio.nombre'}
+         }
+        },
+       
+      ])
+      
+      return precios
+      
+    }
+
 }

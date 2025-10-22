@@ -66,7 +66,7 @@ export class LoggerInterceptor implements NestInterceptor {
       ip: ip,
       navegador: navegador,
       estado: 'UNAUTHORIZED',
-      usuario:usuario
+      usuario: usuario,
     };
     await this.logService.registrarLog(data);
   }
@@ -80,7 +80,7 @@ export class LoggerInterceptor implements NestInterceptor {
   ) {
     const data: LogI = {
       descripcion: `Inicio de sesión exitoso para el usuario: ${usuario}`,
-      usuario:usuario,
+      usuario: usuario,
       method: method,
       path: path,
       schema: 'Usuario',
@@ -110,12 +110,14 @@ export class LoggerInterceptor implements NestInterceptor {
           descripcion:
             'Se registró un nuevo rango de comisión para el producto',
           schema: 'RangoComisionProducto',
+          method: 'POST',
         },
         {
           path: '/api/metas/producto/vip',
           accion: AccionSistemaE.Crear,
           descripcion: 'Se registro una nueva meta para una sucursal',
           schema: 'MetasProductoVip',
+          method: 'POST',
         },
 
         {
@@ -123,6 +125,7 @@ export class LoggerInterceptor implements NestInterceptor {
           accion: AccionSistemaE.Crear,
           descripcion: 'Se registró un nuevo usuario en el sistema',
           schema: 'Usuario',
+          method: 'POST',
         },
 
         {
@@ -131,6 +134,7 @@ export class LoggerInterceptor implements NestInterceptor {
           descripcion: 'Se registró un nueva comision para una combinacion',
 
           schema: 'ComisionReceta',
+          method: 'POST',
         },
 
         {
@@ -147,6 +151,7 @@ export class LoggerInterceptor implements NestInterceptor {
           descripcion: 'Se registró un nueva comision para producto',
 
           schema: 'ComisionProducto',
+          method: 'POST',
         },
 
         {
@@ -156,6 +161,7 @@ export class LoggerInterceptor implements NestInterceptor {
             'Se realizó una carga masiva de comisiones para los productos',
 
           schema: 'ComisionProducto',
+          method: 'POST',
         },
 
         {
@@ -163,18 +169,20 @@ export class LoggerInterceptor implements NestInterceptor {
           accion: AccionSistemaE.Eliminar,
           descripcion: 'Se elimino una llave',
           schema: 'MetasProductoVip',
+          method: 'DELETE',
         },
 
-          {
+        {
           path: '/api/rango/comision/producto',
           accion: AccionSistemaE.Eliminar,
           descripcion: 'Se elimino un rango de comision',
           schema: 'RangoComisionProducto',
+          method: 'DELETE',
         },
       ];
 
       for (const data of actividad) {
-        if (path.startsWith(data.path)) {
+        if (path.startsWith(data.path) && method === data.method) {
           const bodySanitizado =
             data.path === '/api/usuario'
               ? this.quitarContrasena(request.body)

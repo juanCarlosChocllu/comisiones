@@ -38,13 +38,13 @@ async function bootstrap() {
           const constraints = error.constraints
             ? Object.values(error.constraints)
             : [];
-
+        
           return {
             propiedad: error.property,
-            errors: constraints,
+            errors: constraints.length > 0 ?constraints.length :error.children,
           };
         });
-
+        
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: 'Errores de validación',

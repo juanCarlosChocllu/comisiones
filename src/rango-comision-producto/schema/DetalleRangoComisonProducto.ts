@@ -2,14 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { BaseSchema } from 'src/core/schema/BaseSchema';
 
-@Schema({ collection: 'DetalleRangoComisonProducto' })
-export class DetalleRangoComisonProducto extends BaseSchema {
-  @Prop({ type: Number, default: 0 })
-  precioMinimo: number;
-
-  @Prop({ type: Number, default: 0 })
-  precioMaximo: number;
-
+@Schema({ collection: 'DetalleRangoComisionProducto' })
+export class DetalleRangoComisionProducto extends BaseSchema {
   @Prop({ type: Number, default: 0 })
   comision: number;
 
@@ -18,11 +12,17 @@ export class DetalleRangoComisonProducto extends BaseSchema {
 
   @Prop({ type: Types.ObjectId })
   precio: Types.ObjectId;
-
-  @Prop()
-  nombre: String;
+  @Prop({ type: Types.ObjectId, ref: 'RangoComisionProducto' })
+  rangoComisionProducto: Types.ObjectId;
 }
-export const DetalleRangoComisonProductoSchema = SchemaFactory.createForClass(
-  DetalleRangoComisonProducto,
+export const DetalleRangoComisionProductoSchema = SchemaFactory.createForClass(
+  DetalleRangoComisionProducto,
 );
-DetalleRangoComisonProductoSchema.index({nombrePrecio:1, precioMinimo:1,precioMaximo:1})
+DetalleRangoComisionProductoSchema.index({
+  rangoComisionProducto: 1,
+});
+
+DetalleRangoComisionProductoSchema.index({
+  nombrePrecio: 1,
+  flag:1    
+});
