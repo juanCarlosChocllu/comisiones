@@ -76,7 +76,7 @@ export class RangoComisionProductoService {
         },
         {
           $lookup: {
-            from: 'DetalleRangoComisonProducto',
+            from: 'DetalleRangoComisionProducto',
             foreignField: 'rangoComisionProducto',
             localField: '_id',
             as: 'detalleRangoComisonProducto',
@@ -99,11 +99,12 @@ export class RangoComisionProductoService {
           $count: 'total',
         },
       ]);
-
+      console.log(rango);
+      
       if (rango.length > 0 && rango[0].total >= 2) {
         const precio = await this.precioService.buscarPrecioPorId(item.precio);
         throw new ConflictException(
-          `Ya existen ${rango[0].total} comisiones registradas para el tipo de precio "${precio.nombre}" en rangos que se cruzan con el especificado. Solo se permiten como máximo 2 comisiones por tipo de precio en rangos.`,
+       `Máximo 2 comisiones por tipo de precio ${precio.nombre} en rangos superpuestos (ya hay ${rango[0].total}).`,
         );
       }
     }
@@ -265,12 +266,12 @@ export class RangoComisionProductoService {
     const workbook = new ExcelJs.Workbook();
     const worksheet = workbook.addWorksheet('hoja 1');
     worksheet.columns = [
-      { header: 'nombre', key: 'nombre', width: 30 },
-      { header: 'precioMinimo', key: 'precioMinimo', width: 30 },
-      { header: 'precioMaximo', key: 'precioMaximo', width: 30 },
-      { header: 'precio', key: 'precio', width: 30 },
-      { header: 'comision1', key: 'comision1', width: 60 },
-      { header: 'comision2', key: 'comision2', width: 30 },
+      { header: 'nombre', key: 'nombre', width: 20 },
+      { header: 'precioMinimo', key: 'precioMinimo', width: 10 },
+      { header: 'precioMaximo', key: 'precioMaximo', width: 10 },
+      { header: 'precio', key: 'precio', width: 10 },
+      { header: 'comision1', key: 'comision1', width: 10 },
+      { header: 'comision2', key: 'comision2', width: 10 },
     ];
 
     for (const item of data) {
